@@ -132,7 +132,6 @@ export default {
   methods: {
     //Changing between the components 'pages'
     changeComponent(link) {
-      console.log(link);
       this.route = link;
     },
     //Logging in

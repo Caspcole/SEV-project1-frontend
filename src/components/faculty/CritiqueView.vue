@@ -42,43 +42,56 @@
     </v-row>
     <v-row>
       <v-col cols="9">
-        <v-data-table
+        <TestEx></TestEx>
+        <!-- <v-data-table
           :headers="pg1stuHeaders"
           :items="pg1critiques"
           class="elevation-1"
         >
-          <template v-slot:top>
+          <template #item.actions="{ item }">
+            {{ console.log("item.actions slot called for:", item) }}
+          </template>
+        </v-data-table> -->
+      </v-col>
+    </v-row>
+    <!-- <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title>My CRUD</v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
-              <v-dialog v-model="dialog" max-width="500px">
-                <v-card v-for="faculty in pg1critiques">
-                  <v-card-title>
-                    <span class="text-h5">{{ faculty.critiquerName }}</span>
-                  </v-card-title>
+            </v-toolbar>
+          </template> -->
+    <!-- <template v-slot:no-data>
+            <v-btn color="primary" @click="initialize"> Reset </v-btn>
+          </template> -->
 
-                  <v-card-text>
-                    <v-container>
-                      <v-text-field
-                        v-model="editedItem.name"
-                        label="Dessert name"
-                      ></v-text-field>
-                    </v-container>
-                  </v-card-text>
+    <!-- <v-dialog v-model="dialog" max-width="500px">
+      <v-card v-for="faculty in pg1critiques">
+        <v-card-title>
+          <span class="text-h5">{{ faculty.critiquerName }}</span>
+        </v-card-title>
 
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue-darken-1" variant="text" @click="close">
-                      Cancel
-                    </v-btn>
-                    <v-btn color="blue-darken-1" variant="text" @click="save">
-                      Save
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-              <v-dialog v-model="dialogDelete" max-width="500px">
+        <v-card-text>
+          <v-container>
+            <v-text-field
+              v-model="editedItem.name"
+              label="Dessert name"
+            ></v-text-field>
+          </v-container>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue-darken-1" variant="text" @click="close">
+            Cancel
+          </v-btn>
+          <v-btn color="blue-darken-1" variant="text" @click="save">
+            Save
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog> 
+                  <v-dialog v-model="dialogDelete" max-width="500px">
                 <v-card>
                   <v-card-title class="text-h5"
                     >Are you sure you want to delete this item?</v-card-title
@@ -101,28 +114,14 @@
                   </v-card-actions>
                 </v-card>
               </v-dialog>
-            </v-toolbar>
-          </template>
-          <template v-slot:item.actions="{ item }">
-            <v-icon size="small" class="me-2" @click="editItem(item.raw)">
-              mdi-pencil
-            </v-icon>
-            <v-icon size="small" @click="deleteItem(item.raw)">
-              mdi-delete
-            </v-icon>
-          </template>
-          <template v-slot:no-data>
-            <v-btn color="primary" @click="initialize"> Reset </v-btn>
-          </template>
-        </v-data-table>
-      </v-col>
-    </v-row>
+  -->
   </v-container>
   <v-container v-else-if="searchByIndex == 'Student Name'">test 2</v-container>
 </template>
 <script>
 import SemesterDataService from "../../services/SemesterDataService";
 import EventDataService from "../../services/EventDataService";
+import TestEx from "./test.vue";
 export default {
   name: "facultyCritiqueView",
   data: () => ({
@@ -174,7 +173,7 @@ export default {
         this.filteredEvents = this.pg1events;
       } else {
         if (this.pg1selectedSemester.id !== undefined) {
-          this.filteredEvents = this.pg1events.filter(
+          this.pg1filteredEvents = this.pg1events.filter(
             (obj) => obj.semesterId === this.pg1selectedSemester.id
           );
         }
@@ -190,7 +189,7 @@ export default {
         if (this.pg1selectedEvent.id !== undefined) {
           await EventDataService.getCritiques(this.pg1selectedEvent.id)
             .then((response) => {
-              this.critiques = response.data;
+              this.pg1critiques = response.data;
             })
             .catch((e) => {
               console.log(e);
@@ -206,8 +205,10 @@ export default {
       (obj) => (obj.title = obj.year + " - " + obj.code)
     );
     this.pg1events.forEach((obj) => (obj.title = obj.type + " - " + obj.date));
-    this.filteredEvents = this.pg1events;
+    this.pg1filteredEvents = this.pg1events;
   },
-  components: {},
+  components: {
+    TestEx,
+  },
 };
 </script>
