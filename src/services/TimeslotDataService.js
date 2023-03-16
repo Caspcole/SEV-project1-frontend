@@ -20,9 +20,6 @@ class TimeslotDataService {
   deleteAll() {
     return http.delete(`/schedule-t2/event`);
   }
-  getStudentTimeslotsForDate(date) {
-    return http.get(`/schedule-t2/event/critiqueTimeslots/${date}`);
-  }
 }
 
 export default new TimeslotDataService();

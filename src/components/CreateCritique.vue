@@ -143,7 +143,7 @@
 <script>
 // HAS CAUSED ME BUGS
 // import { start } from "repl";
-import TimeslotDataService from "../services/TimeslotDataService";
+import EventDataService from "../services/EventDataService";
 
 export default {
   name: "CreateCritique",
@@ -166,10 +166,11 @@ export default {
     ],
   }),
   methods: {
-    async retrieveTodaysTimeslots() {
-      await TimeslotDataService.getAll()
+    async retrieveTodaysTimeslots(date) {
+      await EventDataService.getStudentTimeslotsForDate(date)
         .then((response) => {
-          this.eventTimeslots = response.data;
+          // this.eventTimeslots = response.data;
+          console.log(response.data);
         })
         .catch((e) => {
           console.log(e);
@@ -191,6 +192,9 @@ export default {
       const year = today.getFullYear();
       return `${year}-${month}-${day}`;
     },
+  },
+  async mounted() {
+    this.retrieveTodaysTimeslots("2017-04-24");
   },
 };
 </script>
