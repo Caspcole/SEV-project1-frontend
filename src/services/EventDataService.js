@@ -8,8 +8,8 @@ class EventDataService {
   getGTEDate(date) {
     return http.get(this.baseUrl + `date/${date}`);
   }
-  getCritiques(eventId) {
-    return http.get(this.baseUrl + eventId + "/critiques");
+  getSemesterCritiques(semesterId) {
+    return http.get(this.baseUrl + "semesterCritiques/" + semesterId);
   }
 }
 export default new EventDataService();

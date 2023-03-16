@@ -1,15 +1,46 @@
 <template>
-  <v-row>
-    <v-col cols="3">
-      <v-select
-        v-model="selectedSemester"
-        label="Semester"
-        :items="semesters"
-        item-value="id"
-        item-title="title"
-      ></v-select>
-    </v-col>
-  </v-row>
+  <v-container>
+    <v-row>
+      <v-col cols="3">
+        <v-select
+          v-model="selectedSemester"
+          label="Semester"
+          :items="semesters"
+          item-value="id"
+          item-title="title"
+        ></v-select>
+      </v-col>
+    </v-row>
+  </v-container>
+  <v-container>
+    <v-row>
+      <v-col>
+        <v-data-table
+          :headers="headers"
+          :items="filteredCritiques"
+          class="elevation-1"
+        >
+          <template #item="{ item }">
+            <tr>
+              <td v-for="(header, index) in pg1stuHeaders" :key="index">
+                <div v-if="header.title != ' '">
+                  {{ item.columns[header.key] }}
+                </div>
+                <div v-else>
+                  <v-btn
+                    small
+                    color="primary"
+                    @click="displayStudentCritiques(item.raw)"
+                    >View Critiques</v-btn
+                  >
+                </div>
+              </td>
+            </tr>
+          </template>
+        </v-data-table>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 <script>
 import SemesterDataService from "../../services/SemesterDataService";
@@ -19,6 +50,14 @@ export default {
   data: () => ({
     semesters: [],
     selectedSemester: null,
+    filteredCritiques: [],
+    headers: [
+      { title: "Event Date", key: "1" },
+      { title: "First Name", key: "2" },
+      { title: "Last Name", key: "3" },
+      { title: "Event Type", key: "4" },
+      { title: " " },
+    ],
   }),
   methods: {
     async retrieveAllSemesters() {
