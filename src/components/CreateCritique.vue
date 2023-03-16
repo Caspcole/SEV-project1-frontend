@@ -152,16 +152,16 @@ export default {
     itemsPerPage: 10,
     headers: [
       {
-        title: "Start Time",
+        title: "Student",
         align: "start",
         sortable: false,
-        key: "startTime",
+        key: "student",
       },
       {
-        title: "End Time",
+        title: "Instrument",
         align: "start",
         sortable: false,
-        key: "endTime",
+        key: "instrument",
       },
     ],
   }),
