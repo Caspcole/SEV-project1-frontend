@@ -32,7 +32,7 @@
         <v-combobox
           clearable
           v-model="pg1selectedEvent"
-          label="Events"
+          label="Date"
           :items="pg1filteredEvents"
           item-value="id"
           item-title="title"
@@ -42,18 +42,36 @@
     </v-row>
     <v-row>
       <v-col cols="9">
-        <TestEx></TestEx>
-        <!-- <v-data-table
+        <!-- <TestEx></TestEx> -->
+        <v-data-table
           :headers="pg1stuHeaders"
           :items="pg1critiques"
           class="elevation-1"
         >
-          <template #item.actions="{ item }">
-            {{ console.log("item.actions slot called for:", item) }}
+          <template #item="{ item }">
+            <tr>
+              <td v-for="(header, index) in pg1stuHeaders" :key="index">
+                <div v-if="header.title != ' '">
+                  {{ item.columns[header.key] }}
+                </div>
+                <div v-else>
+                  <v-btn
+                    small
+                    color="primary"
+                    @click="displayStudentCritiques(item.raw)"
+                    >View Critiques</v-btn
+                  >
+                </div>
+              </td>
+            </tr>
           </template>
-        </v-data-table> -->
+        </v-data-table>
       </v-col>
     </v-row>
+
+    <!-- <template #item.actions="{ item }">
+            {{ console.log("item.actions slot called for:", item) }}
+          </template> -->
     <!-- <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title>My CRUD</v-toolbar-title>
@@ -121,7 +139,6 @@
 <script>
 import SemesterDataService from "../../services/SemesterDataService";
 import EventDataService from "../../services/EventDataService";
-import TestEx from "./test.vue";
 export default {
   name: "facultyCritiqueView",
   data: () => ({
@@ -134,15 +151,9 @@ export default {
     pg1selectedEvent: null,
     pg1critiques: [],
     pg1stuHeaders: [
-      { title: "First Name", align: "start", key: "studentFName" },
-      { title: "Last Name", align: "start", key: "studentLName" },
-      { title: "", align: "start", sortable: false },
-      { title: "", align: "start", sortable: false },
-      {
-        title: "Action",
-        align: "end",
-        sortable: false,
-      },
+      { title: "First Name", key: "studentFName" },
+      { title: "Last Name", key: "studentLName" },
+      { title: " " },
     ],
   }),
   methods: {
@@ -170,7 +181,7 @@ export default {
         this.pg1selectedSemester === null ||
         this.pg1selectedSemester === undefined
       ) {
-        this.filteredEvents = this.pg1events;
+        this.pg1filteredEvents = this.pg1events;
       } else {
         if (this.pg1selectedSemester.id !== undefined) {
           this.pg1filteredEvents = this.pg1events.filter(
@@ -197,6 +208,9 @@ export default {
         }
       }
     },
+    displayStudentCritiques(student) {
+      this.console.log(student);
+    },
   },
   async mounted() {
     await this.retrieveAllSemesters();
@@ -204,11 +218,11 @@ export default {
     this.pg1semesters.forEach(
       (obj) => (obj.title = obj.year + " - " + obj.code)
     );
-    this.pg1events.forEach((obj) => (obj.title = obj.type + " - " + obj.date));
+    this.pg1events.forEach((obj) => (obj.title = obj.date + " - " + obj.type));
     this.pg1filteredEvents = this.pg1events;
   },
-  components: {
-    TestEx,
+  computed: {
+    console: () => console,
   },
 };
 </script>
