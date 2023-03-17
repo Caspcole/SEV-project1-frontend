@@ -77,17 +77,36 @@
     ><v-card>
       <v-card-title>
         <span class="headline">{{
-          selectedStudent.studentFName + " " + selectedStudent.studentLName
+          selectedStudent.studentFName +
+          " " +
+          selectedStudent.studentLName +
+          "'s critiques"
         }}</span>
       </v-card-title>
       <v-card-text
-        ><v-card v-for="critiquer in selectedStudent.critiquers">
+        ><v-card
+          v-for="critiquer in selectedStudent.critiquers"
+          class="elevation-2"
+        >
           <v-card-title>
-            <span class="headline">{{ critiquer.fName }}</span>
+            <span class="headline"
+              >{{ critiquer.critiquerName + "'s comments" }}
+              <v-divider></v-divider
+            ></span>
           </v-card-title>
-          <v-card-text> Dialog Content </v-card-text>
-          <v-card-actions> </v-card-actions> </v-card
-      ></v-card-text>
+          <v-card-text v-for="comment in critiquer.comments">
+            <p>
+              <b>{{ comment.critiqueTitle + ":" }}</b>
+            </p>
+            <p>
+              <b v-if="comment.critiqueGrade != 'null'">{{
+                "Grade: (" + comment.critiqueGrade + ")"
+              }}</b>
+            </p>
+            <p>{{ comment.critiqueComment }}</p>
+          </v-card-text></v-card
+        ></v-card-text
+      >
       <v-card-actions>
         <v-btn color="primary" @click="showDialog = false">Close</v-btn>
       </v-card-actions>
@@ -168,7 +187,7 @@ export default {
       let set = new Set();
       this.studentFilter = undefined;
       this.semesterCritiques.forEach((obj) => set.add(obj.stuName));
-      this.studentFilterArray = Array.from(set);
+      this.studentFilterArray = Array.from(set).sort();
 
       set = new Set();
       this.typeFilter = undefined;
@@ -205,11 +224,7 @@ export default {
     this.semesters.forEach((obj) => (obj.title = obj.year + " - " + obj.code));
 
     await this.getCurrentSemester();
-    this.selectedSemester = this.semesters.find((obj) => obj.id == 15);
     await this.semesterSearchUpdate(this.selectedSemester.id);
-  },
-  computed: {
-    console: () => console,
   },
 };
 </script>
