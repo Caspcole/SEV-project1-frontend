@@ -73,6 +73,26 @@
       </v-col>
     </v-row>
   </v-container>
+  <v-dialog v-model="showDialog"
+    ><v-card>
+      <v-card-title>
+        <span class="headline">{{
+          selectedStudent.studentFName + " " + selectedStudent.studentLName
+        }}</span>
+      </v-card-title>
+      <v-card-text
+        ><v-card v-for="critiquer in selectedStudent.critiquers">
+          <v-card-title>
+            <span class="headline">{{ critiquer.fName }}</span>
+          </v-card-title>
+          <v-card-text> Dialog Content </v-card-text>
+          <v-card-actions> </v-card-actions> </v-card
+      ></v-card-text>
+      <v-card-actions>
+        <v-btn color="primary" @click="showDialog = false">Close</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 <script>
 import SemesterDataService from "../../services/SemesterDataService";
@@ -90,6 +110,8 @@ export default {
     typeFilter: null,
     monthFilterArray: [],
     monthFilter: null,
+    showDialog: false,
+    selectedStudent: null,
     headers: [
       { title: "Event Date", key: "eventDate" },
       { title: "First Name", key: "studentFName" },
@@ -126,7 +148,10 @@ export default {
         .then((response) => {
           this.semesterCritiques = response.data;
           this.semesterCritiques.forEach(
-            (obj) => (obj.stuName = obj.studentFName + " " + obj.studentLName)
+            (obj) => (
+              (obj.stuName = obj.studentFName + " " + obj.studentLName),
+              (obj.month = obj.eventDate.split(" ")[0])
+            )
           );
           this.filteredCritiques = this.semesterCritiques;
           this.fillFilters();
@@ -136,7 +161,8 @@ export default {
         });
     },
     displayStudentCritiques(student) {
-      this.console.log(student);
+      this.selectedStudent = student;
+      this.showDialog = true;
     },
     fillFilters() {
       let set = new Set();
@@ -148,6 +174,11 @@ export default {
       this.typeFilter = undefined;
       this.semesterCritiques.forEach((obj) => set.add(obj.eventType));
       this.typeFilterArray = Array.from(set);
+
+      set = new Set();
+      this.monthFilter = undefined;
+      this.semesterCritiques.forEach((obj) => set.add(obj.month));
+      this.monthFilterArray = Array.from(set);
     },
     filterCritiques() {
       this.filteredCritiques = this.semesterCritiques;
@@ -159,6 +190,12 @@ export default {
       if (this.typeFilter != undefined) {
         this.filteredCritiques = this.filteredCritiques.filter(
           (obj) => obj.eventType == this.typeFilter
+        );
+      }
+
+      if (this.monthFilter != undefined) {
+        this.filteredCritiques = this.filteredCritiques.filter(
+          (obj) => obj.month == this.monthFilter
         );
       }
     },
