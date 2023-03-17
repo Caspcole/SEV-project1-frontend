@@ -80,9 +80,9 @@ import AuthServices from "../services/authServices.js";
 import Settings from "../components/Settings.vue";
 // Import all components and insert into homepage
 import MainNav from "../components/MainNav.vue";
-import StudentHome from "../components/StudentHome.vue";
+import StudentHome from "../components/student/StudentHome.vue";
 import TestEx from "../components/TestEx.vue";
-import StudentEventList from "../components/StudentEventList.vue";
+import StudentEventList from "../components/student/StudentEventList.vue";
 import FacultyCritiqueView from "../components/faculty/CritiqueView.vue";
 export default {
   name: "Base",
