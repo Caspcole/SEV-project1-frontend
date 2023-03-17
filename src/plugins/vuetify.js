@@ -6,6 +6,8 @@ const myCustomTheme = {
   dark: false,
   colors: {
     primary: "#80162B",
+    cream: "#DADADA",
+    secondary: "262626",
   },
 };
 
