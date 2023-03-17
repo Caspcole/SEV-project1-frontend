@@ -27,18 +27,24 @@
       <v-container>
         <v-row>
           <v-col>
-            <v-combobox
-              clearable
+            <v-autocomplete
               v-model="selectedComposers[song.id]"
               label="Composer"
               :items="composers"
               item-value="id"
               item-title="fName"
+              autocomplete="off"
+              return-object
               @update:modelValue="
                 updateAvaliableSongs(song.id, selectedComposers[song.id].id)
               "
             >
-            </v-combobox>
+              <template v-slot:append-item>
+                <div v-intersect="onIntersect" class="pa-4 teal--text">
+                  Loading more items ...
+                </div>
+              </template>
+            </v-autocomplete>
             <p>{{ studentSongs }}</p>
           </v-col>
           <v-col>
@@ -65,7 +71,9 @@
       <!-- <input v-model="translation.text" /> -->
     </v-card>
     <!-- make button work -->
-    <v-btn @click="addStudentSong">Add Song</v-btn>
+    <v-btn @click="">Add Song From Repertoir</v-btn>
+    <br />
+    <v-btn @click="addStudentSong">Add New Song</v-btn>
   </div>
 </template>
 
@@ -92,14 +100,16 @@ export default {
       songs: [],
       selectedSongs: [],
       composers: [],
+      displayedComposers: [],
+      composersPage: 1,
       selectedComposers: [],
       dialog: false,
       studentId: "0",
       student: { instructor: "Tim", instrument: "Voice" },
     };
   },
-  created() {
-    this.getComposers();
+  async created() {
+    await this.getComposers();
     this.addStudentSong();
   },
   methods: {
@@ -132,21 +142,31 @@ export default {
       await ComposersDataService.getAll()
         .then((response) => {
           this.composers = response.data;
+          this.displayedComposers(this.composersPage);
         })
         .catch((e) => {
           console.log(e);
         });
+      console.log(this.composers);
     },
+    displayedComposers(cutoffNum) {},
+
     async updateAvaliableSongs(studentSongId, composerId) {
       await SongsDataService.getByComposerId(composerId)
         .then((response) => {
+          // this.songs.eval("composerId" + composerId + "= response.data;");
           this.songs[composerId] = response.data;
         })
         .catch((e) => {
           console.log(e);
         });
-      console.log(this.songs[composerId]);
+      console.log(this.songs[composerId][0]);
       this.studentSongs[studentSongId].composer = composerId.toString();
+    },
+    onIntersect() {
+      console.log("load more...");
+      this.composersPage += 1;
+      // this.getBeers();
     },
     // async retrieveStudentData() {
     //   await StudentDataService.get(parseInt(this.studentId))
