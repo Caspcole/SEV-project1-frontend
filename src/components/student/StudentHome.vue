@@ -4,9 +4,6 @@
         <v-card-form class="bg-red"></v-card-form> -->
     <v-row align="start">
       <v-col>
-        <!-- <v-toolbar>
-          <v-toolbar-title>Upcoming Events:</v-toolbar-title>
-        </v-toolbar> -->
         <v-card>
           <v-card-title> Upcoming Events: </v-card-title>
         </v-card>
