@@ -4,12 +4,27 @@
   </v-card>
 </template>
 <script>
-import SemesterDataService from "../../services/SemesterDataService";
 import EventDataService from "../../services/EventDataService";
 export default {
   name: "createAvailability",
-  data: () => ({}),
-  methods: {},
-  async mounted() {},
+  data: () => ({
+    events: [],
+  }),
+  methods: {
+    async retrieveEventsDateAndAfter(date) {
+      await EventDataService.getGTEDate(date)
+        .then((response) => {
+          this.events = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+  },
+  async mounted() {
+    this.currentDate = new Date();
+    let dateString = this.currentDate.toISOString().substring(0, 10);
+    await this.retrieveEventsDateAndAfter(dateString);
+  },
 };
 </script>
