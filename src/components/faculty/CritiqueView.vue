@@ -1,4 +1,7 @@
 <template>
+  <v-card>
+    <v-card-title> Event Critiques: </v-card-title>
+  </v-card>
   <v-container>
     <v-row>
       <v-col cols="3">
