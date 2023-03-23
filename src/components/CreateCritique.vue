@@ -169,7 +169,6 @@ export default {
     async retrieveTodaysTimeslots(date) {
       await EventDataService.getStudentTimeslotsForDate(date)
         .then((response) => {
-          // this.eventTimeslots = response.data;
           console.log(response.data);
         })
         .catch((e) => {
