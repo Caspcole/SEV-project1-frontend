@@ -54,8 +54,8 @@
 </template>
 
 <script>
-import EventDataService from "../services/EventDataService";
-import EventTimeDataService from "../services/EventTimeDataService";
+import EventDataService from "../../services/EventDataService";
+import EventTimeDataService from "../../services/EventTimeDataService";
 // change the name of EventTimeDataService to EventTimeslotDataService
 export default {
   name: "student-event-list",

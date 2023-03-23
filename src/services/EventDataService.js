@@ -12,5 +12,8 @@ class EventDataService {
   getStudentTimeslotsForDate(date) {
     return http.get(this.baseUrl + "critiqueTimeslots/" + date);
   }
+  getSemesterCritiques(semesterId) {
+    return http.get(this.baseUrl + "semesterCritiques/" + semesterId);
+  }
 }
 export default new EventDataService();
