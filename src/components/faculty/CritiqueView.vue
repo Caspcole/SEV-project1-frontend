@@ -80,33 +80,38 @@
     ><v-card>
       <v-card-title>
         <span class="headline">{{
-          selectedStudent.studentFName +
+          selectedStudent.studentInstrument.student.user.fName +
           " " +
-          selectedStudent.studentLName +
+          selectedStudent.studentInstrument.student.user.lName +
           "'s critiques"
         }}</span>
       </v-card-title>
       <v-card-text
         ><v-card
-          v-for="critiquer in selectedStudent.critiquers"
+          v-for="juror in selectedStudent.eventTimeslot.jurorTimeslots"
           class="elevation-2"
         >
           <v-card-title>
             <span class="headline"
-              >{{ critiquer.critiquerName + "'s comments" }}
+              >{{
+                juror.userRole.user.fName +
+                " " +
+                juror.userRole.user.lName +
+                "'s comments"
+              }}
               <v-divider></v-divider
             ></span>
           </v-card-title>
-          <v-card-text v-for="comment in critiquer.comments">
+          <v-card-text v-for="comment in juror.critiques">
             <p>
-              <b>{{ comment.critiqueTitle + ":" }}</b>
+              <b>{{ comment.type + ":" }}</b>
             </p>
             <p>
-              <b v-if="comment.critiqueGrade != 'null'">{{
-                "Grade: (" + comment.critiqueGrade + ")"
+              <b v-if="comment.grade != null">{{
+                "Grade: (" + comment.grade + ")"
               }}</b>
             </p>
-            <p>{{ comment.critiqueComment }}</p>
+            <p>{{ comment.comment }}</p>
           </v-card-text></v-card
         ></v-card-text
       >
@@ -135,10 +140,10 @@ export default {
     showDialog: false,
     selectedStudent: null,
     headers: [
-      { title: "Event Date", key: "eventDate" },
-      { title: "First Name", key: "studentFName" },
-      { title: "Last Name", key: "studentLName" },
-      { title: "Event Type", key: "eventType" },
+      { title: "Event Date", key: "eventTimeslot.event.date" },
+      { title: "First Name", key: "studentInstrument.student.user.fName" },
+      { title: "Last Name", key: "studentInstrument.student.user.lName" },
+      { title: "Event Type", key: "eventTimeslot.event.type" },
       { title: " " },
     ],
   }),
@@ -169,12 +174,12 @@ export default {
       await EventDataService.getSemesterCritiques(semester)
         .then((response) => {
           this.semesterCritiques = response.data;
-          this.semesterCritiques.forEach(
-            (obj) => (
-              (obj.stuName = obj.studentFName + " " + obj.studentLName),
-              (obj.month = obj.eventDate.split(" ")[0])
-            )
-          );
+          // this.semesterCritiques.forEach(
+          //   (obj) => (
+          //     (obj.stuName = obj.studentFName + " " + obj.studentLName),
+          //     (obj.month = obj.eventDate.split(" ")[0])
+          //   )
+          // );
           this.filteredCritiques = this.semesterCritiques;
           this.fillFilters();
         })
