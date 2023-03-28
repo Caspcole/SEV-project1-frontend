@@ -58,7 +58,10 @@
           <template #item="{ item }">
             <tr>
               <td v-for="(header, index) in headers" :key="index">
-                <div v-if="header.title != ' '">
+                <div v-if="header.title == 'Event Date'">
+                  {{ this.formatDate(item.columns[header.key]) }}
+                </div>
+                <div v-else-if="header.title != ' '">
                   {{ item.columns[header.key] }}
                 </div>
                 <div v-else>
@@ -89,7 +92,7 @@
       <v-card-text
         ><v-card
           v-for="juror in selectedStudent.eventTimeslot.jurorTimeslots"
-          class="elevation-2"
+          class="elevation-2 pa-1 ma-1"
         >
           <v-card-title>
             <span class="headline"
@@ -174,18 +177,24 @@ export default {
       await EventDataService.getSemesterCritiques(semester)
         .then((response) => {
           this.semesterCritiques = response.data;
-          // this.semesterCritiques.forEach(
-          //   (obj) => (
-          //     (obj.stuName = obj.studentFName + " " + obj.studentLName),
-          //     (obj.month = obj.eventDate.split(" ")[0])
-          //   )
-          // );
+          this.semesterCritiques.forEach(this.editEntryVariable);
           this.filteredCritiques = this.semesterCritiques;
           this.fillFilters();
         })
         .catch((e) => {
           console.log(e);
         });
+    },
+    editEntryVariable(entry) {
+      entry.stuName =
+        entry.studentInstrument.student.user.fName +
+        " " +
+        entry.studentInstrument.student.user.lName;
+
+      entry.month = new Date(entry.eventTimeslot.event.date).toLocaleDateString(
+        "us-EN",
+        { month: "long" }
+      );
     },
     displayStudentCritiques(student) {
       this.selectedStudent = student;
@@ -199,7 +208,9 @@ export default {
 
       set = new Set();
       this.typeFilter = undefined;
-      this.semesterCritiques.forEach((obj) => set.add(obj.eventType));
+      this.semesterCritiques.forEach((obj) =>
+        set.add(obj.eventTimeslot.event.type)
+      );
       this.typeFilterArray = Array.from(set);
 
       set = new Set();
@@ -216,7 +227,7 @@ export default {
       }
       if (this.typeFilter != undefined) {
         this.filteredCritiques = this.filteredCritiques.filter(
-          (obj) => obj.eventType == this.typeFilter
+          (obj) => obj.eventTimeslot.event.type == this.typeFilter
         );
       }
 
@@ -225,6 +236,12 @@ export default {
           (obj) => obj.month == this.monthFilter
         );
       }
+    },
+    formatDate(date) {
+      return new Date(date).toLocaleDateString("us-EN", {
+        month: "long",
+        day: "numeric",
+      });
     },
   },
   async mounted() {
