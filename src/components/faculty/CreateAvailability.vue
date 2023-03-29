@@ -101,35 +101,48 @@
               </div>
             </v-toolbar>
           </template>
-          <template v-slot:item.actions="{ item }">
-            <v-icon size="small" class="me-2" @click="editItem(item.raw)">
-              mdi-pencil
-            </v-icon>
-            <v-icon size="small" @click="deleteItem(item.raw)">
-              mdi-delete
-            </v-icon>
+          <template #item="{ item }">
+            <tr>
+              <td v-for="(header, index) in availabilityHeader" :key="index">
+                <div
+                  v-if="
+                    header.title == 'Start Time' || header.title == 'End Time'
+                  "
+                >
+                  {{ this.formatTime(item.columns[header.key]) }}
+                </div>
+                <div v-else>
+                  <v-icon size="small" class="me-2" @click="editItem(item.raw)">
+                    mdi-pencil
+                  </v-icon>
+                  <v-icon size="small" @click="deleteItem(item.raw)">
+                    mdi-delete
+                  </v-icon>
+                </div>
+              </td>
+            </tr>
           </template>
-          <v-dialog v-model="dialogDelete" max-width="500px">
-            <v-card>
-              <v-card-title class="text-h5"
-                >Are you sure you want to delete this item?</v-card-title
-              >
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue-darken-1" variant="text" @click="closeDelete"
-                  >Cancel</v-btn
-                >
-                <v-btn
-                  color="blue-darken-1"
-                  variant="text"
-                  @click="deleteItemConfirm"
-                  >OK</v-btn
-                >
-                <v-spacer></v-spacer>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
         </v-data-table>
+        <v-dialog v-model="dialogDelete" max-width="500px">
+          <v-card>
+            <v-card-title class="text-h5"
+              >Are you sure you want to delete this item?</v-card-title
+            >
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue-darken-1" variant="text" @click="closeDelete"
+                >Cancel</v-btn
+              >
+              <v-btn
+                color="blue-darken-1"
+                variant="text"
+                @click="deleteItemConfirm"
+                >OK</v-btn
+              >
+              <v-spacer></v-spacer>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-card-text>
     </v-card>
   </v-dialog>
@@ -152,6 +165,7 @@ export default {
     selectedEvent: null,
     user: {},
     showDialog: false,
+    userAvailability: [],
     availabilitySlots: [],
     availabilityStart: null,
     availabilityStartArray: [],
@@ -161,7 +175,7 @@ export default {
     availabilityHeader: [
       { title: "Start Time", key: "startTime", sortable: false },
       { title: "End Time", key: "endTime", sortable: false },
-      { title: "actions", sortable: false, allign: "end" },
+      { title: "Actions", sortable: false, allign: "end" },
     ],
     dialogDelete: false,
     editedAvail: null,
@@ -177,9 +191,21 @@ export default {
           console.log(e);
         });
     },
+    async getAvailabilityForUser() {
+      await AvailabilityDataService.getByUser(this.user.userId)
+        .then((response) => {
+          this.userAvailability = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
     displayEventAvailability(event) {
       this.selectedEvent = event;
       this.fillAvailabilityArrays();
+      this.currentAvailability = this.userAvailability.filter(
+        (obj) => obj.eventId == event.id
+      );
       this.showDialog = true;
     },
     formatTime(time) {
@@ -193,8 +219,9 @@ export default {
       let tempTime = this.selectedEvent.startTime;
 
       while (tempTime <= this.selectedEvent.endTime) {
-        this.availabilitySlots.push(this.formatTime(tempTime));
-        this.availabilityStartArray.push(this.formatTime(tempTime));
+        const obj = { title: this.formatTime(tempTime), value: tempTime };
+        this.availabilitySlots.push(obj);
+        this.availabilityStartArray.push(obj);
         tempTime = this.addDurationMinutes(tempTime);
       }
 
@@ -227,21 +254,24 @@ export default {
       this.availabilityEndArray = [];
       this.availabilityEnd = null;
       this.availabilityEndArray = this.availabilitySlots.filter(
-        (obj) => obj >= this.availabilityStart
+        (obj) => obj.value >= this.availabilityStart
       );
       this.availabilityEndArray.shift(); //removes the first timeslot from the end array
     },
     createAvailability() {
-      var data = {
+      const data = {
         date: this.selectedEvent.date,
-        startTime: this.availabilityStart,
+        startTime:
+          this.availabilityStart.value == undefined
+            ? this.availabilityStart
+            : this.availabilityStart.value,
         endTime: this.availabilityEnd,
         userId: this.user.userId,
         eventId: this.selectedEvent.id,
       };
       AvailabilityDataService.create(data)
         .then((response) => {
-          console.log(response);
+          this.currentAvailability.push(response.data);
         })
         .catch((e) => {
           console.log(e);
@@ -264,6 +294,7 @@ export default {
     this.currentDate = new Date();
     let dateString = this.currentDate.toISOString().substring(0, 10);
     await this.retrieveEventsDateAndAfter(dateString);
+    await this.getAvailabilityForUser();
   },
 };
 </script>
