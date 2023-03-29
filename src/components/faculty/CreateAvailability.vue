@@ -21,7 +21,7 @@
                 >
                   {{ this.formatTime(item.columns[header.key]) }}
                 </div>
-                <div v-else-if="header.title != ' '">
+                <div v-else-if="header.title != 'Actions'">
                   {{ item.columns[header.key] }}
                 </div>
                 <div v-else>
@@ -39,7 +39,7 @@
       </v-col>
     </v-row>
   </v-container>
-  <v-dialog v-model="showDialog">
+  <v-dialog v-model="showDialog" :style="{ width: '875px' }" class="mx-auto">
     <v-card>
       <v-card-title>
         <v-row>
@@ -64,27 +64,72 @@
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
-        <v-row class="mt-4">
+        <v-row class="mt-4 ml-5">
           <v-select
-            class="mx-15"
             v-model="availabilityStart"
             label="Start Time"
             :items="availabilityStartArray"
+            :style="{ width: '40px' }"
             @update:modelValue="startTimeUpdated()"
           ></v-select>
           <v-select
-            class="mx-15"
+            class="ml-15"
             v-model="availabilityEnd"
             label="End Time"
             :items="availabilityEndArray"
-            @update:modelValue="endTimeUpdated()"
+            :style="{ width: '40px' }"
           ></v-select>
+          <v-spacer></v-spacer>
+        </v-row>
+        <v-row class="ml-5">
+          <v-btn color="primary" @click="createAvailability()"
+            >Create Availability</v-btn
+          >
+          <v-spacer></v-spacer>
         </v-row>
         <v-data-table
-          class="mt-4 elevation-1"
+          class="mt-15 elevation-1"
           :items="currentAvailability"
           :headers="availabilityHeader"
-        ></v-data-table>
+        >
+          <template #top>
+            <v-toolbar flat>
+              <v-toolbar-title> AVAILABILITY </v-toolbar-title>
+              <div v-if="currentAvailability.length == 0" class="mr-4">
+                <v-spacer></v-spacer>
+                You currently have no availability for this event.
+              </div>
+            </v-toolbar>
+          </template>
+          <template v-slot:item.actions="{ item }">
+            <v-icon size="small" class="me-2" @click="editItem(item.raw)">
+              mdi-pencil
+            </v-icon>
+            <v-icon size="small" @click="deleteItem(item.raw)">
+              mdi-delete
+            </v-icon>
+          </template>
+          <v-dialog v-model="dialogDelete" max-width="500px">
+            <v-card>
+              <v-card-title class="text-h5"
+                >Are you sure you want to delete this item?</v-card-title
+              >
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue-darken-1" variant="text" @click="closeDelete"
+                  >Cancel</v-btn
+                >
+                <v-btn
+                  color="blue-darken-1"
+                  variant="text"
+                  @click="deleteItemConfirm"
+                  >OK</v-btn
+                >
+                <v-spacer></v-spacer>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </v-data-table>
       </v-card-text>
     </v-card>
   </v-dialog>
@@ -92,6 +137,7 @@
 <script>
 import EventDataService from "../../services/EventDataService";
 import Utils from "../../config/utils.js";
+import AvailabilityDataService from "../../services/AvailabilityDataService";
 export default {
   name: "createAvailability",
   data: () => ({
@@ -100,12 +146,13 @@ export default {
       { title: "Event Date", key: "date" },
       { title: "Start Time", key: "startTime" },
       { title: "End Time", key: "endTime" },
-      { title: " " },
+      { title: "Actions", key: "actions", sortable: false },
     ],
     events: [],
     selectedEvent: null,
     user: {},
     showDialog: false,
+    availabilitySlots: [],
     availabilityStart: null,
     availabilityStartArray: [],
     availabilityEnd: null,
@@ -116,6 +163,9 @@ export default {
       { title: "End Time", key: "endTime", sortable: false },
       { title: "actions", sortable: false, allign: "end" },
     ],
+    dialogDelete: false,
+    editedAvail: null,
+    editedIndex: 0,
   }),
   methods: {
     async retrieveEventsDateAndAfter(date) {
@@ -129,49 +179,85 @@ export default {
     },
     displayEventAvailability(event) {
       this.selectedEvent = event;
+      this.fillAvailabilityArrays();
       this.showDialog = true;
     },
     formatTime(time) {
-      if (time == undefined) {
-        return;
-      }
-      var h1 = Number(time[0] - "0");
-      var h2 = Number(time[1] - "0");
-      var result = "";
-
-      var hh = h1 * 10 + h2;
-
-      // Finding out the Meridien of time
-      // ie. AM or PM
-      var meridien;
-
-      if (hh < 12) {
-        meridien = "AM";
-      } else meridien = "PM";
-
-      hh %= 12;
-
-      // Handle 00 and 12 case separately
-      if (hh == 0) {
-        result += "12";
-
-        // Printing minutes and seconds
-        for (var i = 2; i < 8; ++i) {
-          result += time[i];
-        }
-      } else {
-        result += hh;
-        // Printing minutes and seconds
-        for (var i = 2; i < 8; ++i) {
-          result += time[i];
-        }
-      }
-
-      result += " " + meridien;
-      return result;
+      return new Date("January 1, 2000 " + time).toLocaleTimeString("us-EN", {
+        hour: "numeric",
+        minute: "numeric",
+      });
     },
-    startTimeUpdated() {},
-    endTimeUpdated() {},
+    fillAvailabilityArrays() {
+      this.availabilitySlots = [];
+      let tempTime = this.selectedEvent.startTime;
+
+      while (tempTime <= this.selectedEvent.endTime) {
+        this.availabilitySlots.push(this.formatTime(tempTime));
+        this.availabilityStartArray.push(this.formatTime(tempTime));
+        tempTime = this.addDurationMinutes(tempTime);
+      }
+
+      this.availabilityEndArray = this.availabilitySlots;
+
+      this.availabilityEndArray.shift(); //removes the first timeslot from the end array
+      this.availabilityStartArray.pop(); //removes the last timeslot from the start array
+
+      this.availabilityStart = this.availabilityStartArray[0];
+    },
+    addDurationMinutes(time) {
+      let timeSplit = time.split(":");
+      let hour = Number(timeSplit[0]);
+      let minute =
+        Number(timeSplit[1]) + Number(this.selectedEvent.slotDuration);
+
+      if (minute >= "60") {
+        hour++;
+        minute -= 60;
+      }
+
+      return (
+        hour.toString().padStart(2, "0") +
+        ":" +
+        minute.toString().padStart(2, "0") +
+        ":00"
+      );
+    },
+    startTimeUpdated() {
+      this.availabilityEndArray = [];
+      this.availabilityEnd = null;
+      this.availabilityEndArray = this.availabilitySlots.filter(
+        (obj) => obj >= this.availabilityStart
+      );
+      this.availabilityEndArray.shift(); //removes the first timeslot from the end array
+    },
+    createAvailability() {
+      var data = {
+        date: this.selectedEvent.date,
+        startTime: this.availabilityStart,
+        endTime: this.availabilityEnd,
+        userId: this.user.userId,
+        eventId: this.selectedEvent.id,
+      };
+      AvailabilityDataService.create(data)
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+    deleteItemConfirm() {
+      this.currentAvailability.splice(this.editedIndex, 1);
+      this.closeDelete();
+    },
+    closeDelete() {
+      this.dialogDelete = false;
+      this.$nextTick(() => {
+        this.editedItem = null;
+        this.editedIndex = -1;
+      });
+    },
   },
   async mounted() {
     this.user = Utils.getStore("user");
