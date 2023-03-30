@@ -64,12 +64,16 @@
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
+        <v-row class="ml-5">
+          <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
+        </v-row>
         <v-row class="mt-4 ml-5">
           <v-select
             v-model="availabilityStart"
             label="Start Time"
             :items="availabilityStartArray"
             :style="{ width: '40px' }"
+            return-object
             @update:modelValue="startTimeUpdated()"
           ></v-select>
           <v-select
@@ -78,6 +82,7 @@
             label="End Time"
             :items="availabilityEndArray"
             :style="{ width: '40px' }"
+            return-object
           ></v-select>
           <v-spacer></v-spacer>
         </v-row>
@@ -181,6 +186,7 @@ export default {
     dialogDelete: false,
     editedAvail: null,
     editedIndex: 0,
+    errorMessage: "",
   }),
   methods: {
     async retrieveEventsDateAndAfter(date) {
@@ -253,30 +259,58 @@ export default {
     },
     startTimeUpdated() {
       this.availabilityEndArray = [];
-      this.availabilityEnd = null;
       this.availabilityEndArray = this.availabilitySlots.filter(
-        (obj) => obj.value >= this.availabilityStart
+        (obj) => obj.value >= this.availabilityStart.value
       );
+
       this.availabilityEndArray.shift(); //removes the first timeslot from the end array
+
+      if (!this.availabilityEndArray.includes(this.availabilityEnd)) {
+        this.availabilityEnd = null;
+      }
     },
     createAvailability() {
+      if (this.availabilityEnd == undefined) {
+        this.errorMessage = "Please select an End Time";
+        return;
+      }
       const data = {
         date: this.selectedEvent.date,
-        startTime:
-          this.availabilityStart.value == undefined
-            ? this.availabilityStart
-            : this.availabilityStart.value,
-        endTime: this.availabilityEnd,
+        startTime: this.availabilityStart.value,
+        endTime: this.availabilityEnd.value,
         userId: this.user.userId,
         eventId: this.selectedEvent.id,
       };
-      AvailabilityDataService.create(data)
-        .then((response) => {
-          this.currentAvailability.push(response.data);
-        })
-        .catch((e) => {
-          console.log(e);
+      if (!this.checkForOverlap(data)) {
+        AvailabilityDataService.create(data)
+          .then((response) => {
+            this.errorMessage = "";
+            this.currentAvailability.push(response.data);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      } else {
+        this.errorMessage =
+          "That time would overlap with an existing time. Please try again";
+      }
+    },
+    checkForOverlap(entry) {
+      var result = false;
+      if (entry.id == undefined) {
+        this.currentAvailability.forEach((obj) => {
+          if (!result) {
+            if (
+              (entry.startTime <= obj.startTime &&
+                entry.endTime > obj.startTime) ||
+              (entry.startTime > obj.startTime && entry.startTime < obj.endTime)
+            ) {
+              result = true;
+            }
+          }
         });
+      }
+      return result;
     },
     deleteItem(item) {
       this.editedIndex = this.currentAvailability.indexOf(item);
