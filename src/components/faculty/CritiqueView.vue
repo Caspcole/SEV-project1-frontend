@@ -177,24 +177,22 @@ export default {
       await EventDataService.getSemesterCritiques(semester)
         .then((response) => {
           this.semesterCritiques = response.data;
-          this.semesterCritiques.forEach(this.editEntryVariable);
+          this.semesterCritiques.forEach((obj) => {
+            entry.stuName =
+              entry.studentInstrument.student.user.fName +
+              " " +
+              entry.studentInstrument.student.user.lName;
+
+            entry.month = new Date(
+              entry.eventTimeslot.event.date
+            ).toLocaleDateString("us-EN", { month: "long" });
+          });
           this.filteredCritiques = this.semesterCritiques;
           this.fillFilters();
         })
         .catch((e) => {
           console.log(e);
         });
-    },
-    editEntryVariable(entry) {
-      entry.stuName =
-        entry.studentInstrument.student.user.fName +
-        " " +
-        entry.studentInstrument.student.user.lName;
-
-      entry.month = new Date(entry.eventTimeslot.event.date).toLocaleDateString(
-        "us-EN",
-        { month: "long" }
-      );
     },
     displayStudentCritiques(student) {
       this.selectedStudent = student;
@@ -219,22 +217,28 @@ export default {
       this.monthFilterArray = Array.from(set);
     },
     filterCritiques() {
-      this.filteredCritiques = this.semesterCritiques;
-      if (this.studentFilter != undefined) {
-        this.filteredCritiques = this.filteredCritiques.filter(
-          (obj) => obj.stuName == this.studentFilter
-        );
-      }
-      if (this.typeFilter != undefined) {
-        this.filteredCritiques = this.filteredCritiques.filter(
-          (obj) => obj.eventTimeslot.event.type == this.typeFilter
-        );
-      }
+      if (
+        this.studentFilter != undefined ||
+        this.typeFilter != undefined ||
+        this.monthFilter != undefined
+      ) {
+        this.filteredCritiques = this.semesterCritiques.filter((obj) => {
+          var isValid = true;
 
-      if (this.monthFilter != undefined) {
-        this.filteredCritiques = this.filteredCritiques.filter(
-          (obj) => obj.month == this.monthFilter
-        );
+          if (this.studentFilter != undefined) {
+            isValid = obj.stuName == this.studentFilter;
+          }
+          if (isValid && this.typeFilter != undefined) {
+            isValid = obj.eventTimeslot.event.type == this.typeFilter;
+          }
+          if (isValid && this.monthFilter != undefined) {
+            isValid = obj.month == this.monthFilter;
+          }
+
+          return isValid;
+        });
+      } else {
+        this.filteredCritiques = this.semesterCritiques;
       }
     },
     formatDate(date) {

@@ -88,9 +88,10 @@
           <v-spacer></v-spacer>
         </v-row>
         <v-data-table
-          class="mt-15 elevation-1"
+          class="mt-15 mb-5 elevation-1"
           :items="currentAvailability"
           :headers="availabilityHeader"
+          :sort-by="[{ key: 'startTime', order: 'dsc' }]"
         >
           <template #top>
             <v-toolbar flat>
@@ -277,7 +278,19 @@ export default {
           console.log(e);
         });
     },
+    deleteItem(item) {
+      this.editedIndex = this.currentAvailability.indexOf(item);
+      this.editedAvail = Object.assign({}, item);
+      this.dialogDelete = true;
+    },
     deleteItemConfirm() {
+      AvailabilityDataService.remove(this.editedAvail.id)
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
       this.currentAvailability.splice(this.editedIndex, 1);
       this.closeDelete();
     },

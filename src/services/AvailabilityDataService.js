@@ -9,5 +9,9 @@ class AvailabilityDataService {
   getByUser(userId) {
     return http.get(this.baseUrl + "userId/" + userId);
   }
+
+  remove(id) {
+    return http.delete(this.baseUrl + id);
+  }
 }
 export default new AvailabilityDataService();
