@@ -1,167 +1,334 @@
 <template>
-  <v-container fluid class="bg-cream">
+  <v-container v-if="!showingCritiqueForm" fluid class="bg-white">
     <h3 class="center">Select Timeslot for Critique</h3>
     <br />
     <h3 class="center">{{ getCurrentDate() }}</h3>
-    <v-data-table
-      v-model:itemsPerPage="TimeslotsPerPage"
-      :headers="headers"
-      :items="timeslots"
-      item-value="name"
-      class="elevation-8"
-    >
+    <v-data-table :headers="headers" :items="timeslots" class="elevation-8">
+      <template v-slot:item.actions="{ item }">
+        <v-icon size="small" class="me-2" @click="handleClick(item)">
+          mdi-pencil
+        </v-icon>
+      </template>
     </v-data-table>
   </v-container>
 
-  <!-- <v-container fluid class="bg-cream"> -->
-  <!-- This was lazy but it works, center later with a .css file -->
-  <!-- <h2><center>Create Event Critique</center></h2> -->
-  <!-- Probably better to have a grid here too -->
-  <!-- <br /><br />
-    <v-grid>
-      <v-btn variant="outlined">Jury</v-btn>
-      <v-btn variant="outlined">Recital</v-btn>
-      <v-btn variant="outlined">Capstone</v-btn>
-      <v-btn variant="outlined">Scholarship</v-btn>
-    </v-grid>
-  </v-container> -->
+  <v-container
+    v-else-if="showingCritiqueForm && showingExpandedForm == true"
+    fluid
+    class="bg-white"
+  >
+    <h2 class="center">Create Event Critique</h2>
+    <!-- <br />
+    <v-button
+      variant="outlined"
+      style="margin-left: 25%; margin-right: 25%"
+      @click="showingExpandedForm = false"
+      >Expanded Form</v-button
+    >
+    <br /> -->
 
-  <!-- <v-container fluid class="bg-cream" > -->
-  <!-- <v-container fluid class="fill-height bg-white"> -->
-  <!-- <v-form> -->
-  <!-- Do more research on DOM stuff, scripts, and templates. -->
-  <!-- grid would be better practice. Add button at end of form later to dynamically fill other fields based on Jury/Recital/Capstone -->
-  <!-- When something goes off the page, Vue allows for scrolling by default. Can abuse this to load multiple components at a time -->
-  <!-- <v-label for="deportment">
-        <b>Deportment</b>(poise, entrance/exit, bow)</v-label
-      ><br />
-      <span class="border"
-        ><input type="text" id="deportment" name="deportmentComment" value=""
-      /></span>
+    <v-form>
+      <v-text-field
+        clearable
+        label="Deportment (poise, entrance/exit, bow)"
+        v-model="deportmentComment"
+      ></v-text-field>
+
       <v-select
-        label="Select"
-        :items="['Poor', 'Fair', 'Good', 'Exellent', '']"
+        clearable
+        label="Deportment Grade"
+        v-model="deportmentGrade"
+        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
       ></v-select>
 
-      <v-label for="tone">
-        <b>Tone</b>(beauty, control/clarity, vibrato, warmth)</v-label
-      ><br />
-      <span class="border"
-        ><input type="text" id="tone" name="toneComment" value=""
-      /></span>
+      <v-text-field
+        clearable
+        label="Tone (beauty, control/clarity, vibrato, warmth)"
+        v-model="toneComment"
+      >
+      </v-text-field>
+
       <v-select
-        label="Select"
-        :items="['Poor', 'Fair', 'Good', 'Exellent', '']"
+        clearable
+        label="Tone Grade"
+        v-model="toneGrade"
+        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
       ></v-select>
 
-      <v-label for="accuracy_intonation">
-        <b>Accuracy/Intonation</b>(correct notes with correct rhythm, tuning
-        with keyboard and/or ensemble)</v-label
-      ><br />
-      <span class="border"
-        ><input
-          type="text"
-          id="accuracy_intonation"
-          name="accuracy_intonationComment"
-          value=""
-      /></span>
+      <v-text-field
+        clearable
+        label="Accuracy/Intonation (correct notes with correct rhythm, tuning
+        with keyboard and/or ensemble)"
+        v-model="accuracy_intonationComment"
+      ></v-text-field>
+
       <v-select
-        label="Select"
-        :items="['Poor', 'Fair', 'Good', 'Exellent', '']"
+        clearable
+        label="Accuracy/Intonation Grade"
+        v-model="accuracy_intonationGrade"
+        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
       ></v-select>
 
-      <v-label for="technique">
-        <b>Technique</b>(correct notes with correct rhythm, tuning with keyboard
-        and/or ensemble)</v-label
-      ><br />
-      <span class="border"
-        ><input type="text" id="technique" name="techniqueComment" value=""
-      /></span>
+      <v-text-field
+        clearable
+        label="Technique (attacks, releases, flexibility, range, resonance, placement, support, agility)"
+        v-model="techniqueComment"
+      ></v-text-field>
+
       <v-select
-        label="Select"
-        :items="['Poor', 'Fair', 'Good', 'Exellent', '']"
+        clearable
+        label="Technique Grade"
+        v-model="techniqueGrade"
+        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
       ></v-select>
 
-      <v-label for="interpretation_musicianship">
-        <b>Interpretation, Musicianship</b>(phrasing, tempo, dynamics
-        communication, rapport)</v-label
-      ><br />
-      <span class="border"
-        ><input type="text" id="technique" name="techniqueComment" value=""
-      /></span>
+      <v-text-field
+        clearable
+        label="Interpretation & Musicianship (phrasing, tempo, dynamics
+        communication, rapport)"
+        v-model="interpretation_musicianshipComment"
+      ></v-text-field>
+
       <v-select
-        label="Select"
-        :items="['Poor', 'Fair', 'Good', 'Exellent', '']"
+        clearable
+        label="Interpretation & Musicianship Grade"
+        v-model="interpretation_musicianshipGrade"
+        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
       ></v-select>
 
-      <v-label for="balance_blend">
-        <b>Balance Blend</b>(with accompanist or within ensemble)</v-label
-      ><br />
-      <span class="border"
-        ><input
-          type="text"
-          id="balance_blend"
-          name="balance_blendComment"
-          value=""
-      /></span>
+      <v-text-field
+        clearable
+        label="Balance & Blend (with accompanist or within ensemble)"
+        v-model="balance_blendComment"
+      ></v-text-field>
+
       <v-select
-        label="Select"
-        :items="['Poor', 'Fair', 'Good', 'Exellent', '']"
+        clearable
+        label="Balance & Blend Grade"
+        v-model="balance_blendGrade"
+        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
       ></v-select>
 
-      <v-label for="diction">
-        <b>Diction/Articulation (vocal/instrumental)</b>(vowels; constanants,
-        legato, double/triple tongue)</v-label
-      ><br />
-      <span class="border"
-        ><input type="text" id="diction" name="dictionComment" value=""
-      /></span>
+      <v-text-field
+        clearable
+        label="Diction/Articulation(vocal/instrumental)"
+        v-model="diction_articulationComment"
+      ></v-text-field>
+
       <v-select
-        label="Select"
-        :items="['Poor', 'Fair', 'Good', 'Exellent', '']"
+        clearable
+        label="Diction/Articulation Grade"
+        v-model="diction_articulationGrade"
+        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
       ></v-select>
 
-      <v-label for="performance">
-        <b>Performance and Suggestions</b>(overall readiness to
-        perform)</v-label
-      ><br />
-      <span class="border"
-        ><input type="text" id="technique" name="techniqueComment" value=""
-      /></span>
+      <v-text-field
+        clearable
+        label="Performance & Suggestions (overall readiness to
+        perform)"
+        v-model="overallPerformanceComment"
+      ></v-text-field>
+
+      <v-select
+        clearable
+        label="Overall Performance Grade"
+        v-model="overallPerformanceGrade"
+        :items="['A', 'B', 'C', 'D', 'F', '']"
+      ></v-select>
+
       <br />
-      <br /><br /><br />
-      <v-btn variant="outlined">Save</v-btn
-      ><v-btn variant="outlined">Cancel</v-btn>
+      <v-btn
+        variant="outlined"
+        style="margin-left: 25%; margin-bottom: 20px"
+        @click="
+          saveCritique()
+          // isOpen = true;
+        "
+        >Save</v-btn
+      >
+      <!-- <teleport to="body">
+        <div>
+          <h3>Critique creation successful!</h3>
+          <v-button @click="isOpen = false"></v-button>
+        </div>
+      </teleport> -->
+      <v-btn
+        variant="outlined"
+        style="margin-left: 25%; margin-bottom: 20px"
+        @click="cancelClick()"
+        >Cancel</v-btn
+      >
+      <br /><br />
+    </v-form>
+  </v-container>
+
+  <!-- <v-container
+    v-else-if="showingCritiqueForm && showingExpandedForm == false"
+    fluid
+    class="bg-white"
+  >
+    <h2 class="center">Create Event Critique</h2>
+    <br />
+    <v-button
+      variant="outlined"
+      style="margin-left: 50%; margin-right: 50%"
+      @click="showingExpandedForm = true"
+      >Quick Form</v-button
+    >
+    <br />
+
+    <v-form>
+      <v-select
+        clearable
+        label="Deportment Grade"
+        v-model="deportmentGrade"
+        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+      ></v-select>
+
+      <v-select
+        clearable
+        label="Tone Grade"
+        v-model="toneGrade"
+        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+      ></v-select>
+
+      <v-select
+        clearable
+        label="Accuracy/Intonation Grade"
+        v-model="accuracy_intonationGrade"
+        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+      ></v-select>
+
+      <v-select
+        clearable
+        label="Technique Grade"
+        v-model="techniqueGrade"
+        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+      ></v-select>
+
+      <v-select
+        clearable
+        label="Interpretation & Musicianship Grade"
+        v-model="interpretation_musicianshipGrade"
+        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+      ></v-select>
+
+      <v-select
+        clearable
+        label="Balance & Blend Grade"
+        v-model="balance_blendGrade"
+        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+      ></v-select>
+
+      <v-select
+        clearable
+        label="Diction/Articulation Grade"
+        v-model="diction_articulationGrade"
+        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+      ></v-select>
+
+      <v-text-field
+        clearable
+        label="Performance & Suggestions (overall readiness to
+        perform)"
+        v-model="overallPerformanceComment"
+      ></v-text-field>
+
+      <v-select
+        clearable
+        label="Overall Performance Grade"
+        v-model="overallPerformanceGrade"
+        :items="['A', 'B', 'C', 'D', 'F', '']"
+      ></v-select>
+
+      <br />
+      <v-btn
+        variant="outlined"
+        style="margin-left: 25%; margin-right: 25%"
+        @click="
+          saveCritique()
+          // isOpen = true;
+        "
+        >Save</v-btn
+      > -->
+  <!-- <teleport to="body">
+        <div>
+          <h3>Critique creation successful!</h3>
+          <v-button @click="isOpen = false"></v-button>
+        </div>
+      </teleport> -->
+  <!-- <v-btn variant="outlined" @click="cancelClick()">Cancel</v-btn>
     </v-form>
   </v-container> -->
-
-  <!-- <v-data-table>
-    
-  </v-data-table> -->
 </template>
 
 <script>
-// HAS CAUSED ME BUGS
-// import { start } from "repl";
 import EventDataService from "../services/EventDataService";
+import CritiqueDataService from "../services/CritiqueDataService";
+import Utils from "../config/utils.js";
+import { ref } from "vue";
 
+const isOpen = ref(false);
 export default {
   name: "CreateCritique",
-  components: {},
   data: () => ({
+    user: {},
     itemsPerPage: 10,
+    timeslots: [],
+    selectedTimeslot: null,
+    showingCritiqueForm: false,
+    showingExpandedForm: true,
+    deportmentComment: "",
+    deportmentGrade: "",
+    toneComment: "",
+    toneGrade: "",
+    accuracy_intonationComment: "",
+    accuracy_intonationGrade: "",
+    techniqueComment: "",
+    techniqueGrade: "",
+    interpretation_musicianshipComment: "",
+    interpretation_musicianshipGrade: "",
+    balance_blendComment: "",
+    balance_blendGrade: "",
+    diction_articulationComment: "",
+    diction_articulationGrade: "",
+    overallPerformanceComment: "",
+    overallPerformanceGrade: "",
     headers: [
       {
-        title: "Student",
+        title: "Event Type",
         align: "start",
-        sortable: false,
-        key: "student",
+        sortable: true,
+        key: "eventType",
+      },
+      {
+        title: "First Name",
+        align: "start",
+        sortable: true,
+        key: "students[0].fName",
+      },
+      {
+        title: "Last Name",
+        align: "start",
+        sortable: true,
+        key: "students[0].lName",
       },
       {
         title: "Instrument",
         align: "start",
+        sortable: true,
+        key: "students[0].instrumentName",
+      },
+      {
+        title: "Type",
+        align: "start",
+        sortable: true,
+        key: "students[0].instrumentType",
+      },
+      {
+        title: "Create",
+        key: "actions",
         sortable: false,
-        key: "instrument",
       },
     ],
   }),
@@ -169,7 +336,15 @@ export default {
     async retrieveTodaysTimeslots(date) {
       await EventDataService.getStudentTimeslotsForDate(date)
         .then((response) => {
-          console.log(response.data);
+          console.log(response);
+          for (let i = 0; i < response.data.length; i++) {
+            let event = response.data[i];
+            for (let j = 0; j < event.timeslots.length; j++) {
+              let timeslot = event.timeslots[j];
+              timeslot.eventType = event.eventType;
+              this.timeslots.push(timeslot);
+            }
+          }
         })
         .catch((e) => {
           console.log(e);
@@ -184,6 +359,170 @@ export default {
       return `${month}/${day}/${year}`;
     },
 
+    handleClick(item) {
+      this.selectedTimeslot = item.raw;
+      console.log(this.selectedTimeslot);
+      this.showingCritiqueForm = true;
+    },
+
+    cancelClick() {
+      //set all fields to blank state
+      this.deportmentComment = "";
+      this.deportmentGrade = "";
+
+      this.toneComment = "";
+      this.toneGrade = "";
+
+      this.accuracy_intonationComment = "";
+      this.accuracy_intonationGrade = "";
+
+      this.techniqueComment = "";
+      this.techniqueGrade = "";
+
+      this.interpretation_musicianshipComment = "";
+      this.interpretation_musicianshipGrade = "";
+
+      this.balance_blendComment = "";
+      this.balance_blendGrade = "";
+
+      this.diction_articulationComment = "";
+      this.diction_articulationGrade = "";
+
+      this.overallPerformanceComment = "";
+      this.overallPerformanceGrade = "";
+      //change form state and go back to the studentTimeslots
+      this.showingCritiqueForm = false;
+    },
+
+    saveCritique() {
+      console.log(this.deportmentGrade);
+      console.log(this.selectedTimeslot);
+      //individually sets each critique line variable JSON
+      let deportmentCritique = {
+        type: "Deportment",
+        grade: this.deportmentGrade,
+        comment: this.deportmentComment,
+        critiquerId: this.user.userId,
+        timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+      };
+      let toneCritique = {
+        type: "Tone",
+        grade: this.toneGrade,
+        comment: this.toneComment,
+        critiquerId: this.user.userId,
+        timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+      };
+      let accuracy_intonationCritique = {
+        type: "Accuracy/Intonation",
+        grade: this.accuracy_intonationGrade,
+        comment: this.accuracy_intonationComment,
+        critiquerId: this.user.userId,
+        timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+      };
+      let techniqueCritique = {
+        type: "Technique",
+        grade: this.techniqueGrade,
+        comment: this.techniqueComment,
+        critiquerId: this.user.userId,
+        timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+      };
+      let interpretation_musicianshipCritique = {
+        type: "Interpretation & Musicianship",
+        grade: this.interpretation_musicianshipGrade,
+        comment: this.interpretation_musicianshipComment,
+        critiquerId: this.user.userId,
+        timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+      };
+      let balance_blendCritique = {
+        type: "Balance & Blend",
+        grade: this.balance_blendGrade,
+        comment: this.balance_blendComment,
+        critiquerId: this.user.userId,
+        timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+      };
+      let diction_articulationCritique = {
+        type: "Diction/Articulation",
+        grade: this.diction_articulationGrade,
+        comment: this.diction_articulationComment,
+        critiquerId: this.user.userId,
+        timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+      };
+      let overallPerformanceCritique = {
+        type: "Overall Performance & Suggestions",
+        grade: this.overallPerformanceGrade,
+        comment: this.overallPerformanceComment,
+        critiquerId: this.user.userId,
+        timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+      };
+
+      //Create each critique line in the DB
+      CritiqueDataService.create(deportmentCritique)
+        .then((response) => {
+          console.log("Success");
+          console.log(response);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+      CritiqueDataService.create(toneCritique)
+        .then((response) => {
+          console.log("Success");
+          console.log(response);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+      CritiqueDataService.create(accuracy_intonationCritique)
+        .then((response) => {
+          console.log("Success");
+          console.log(response);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+      CritiqueDataService.create(techniqueCritique)
+        .then((response) => {
+          console.log("Success");
+          console.log(response);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+      CritiqueDataService.create(interpretation_musicianshipCritique)
+        .then((response) => {
+          console.log("Success");
+          console.log(response);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+      CritiqueDataService.create(balance_blendCritique)
+        .then((response) => {
+          console.log("Success");
+          console.log(response);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+      CritiqueDataService.create(diction_articulationCritique)
+        .then((response) => {
+          console.log("Success");
+          console.log(response);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+      CritiqueDataService.create(overallPerformanceCritique)
+        .then((response) => {
+          console.log("Success");
+          console.log(response);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+
+      this.showingCritiqueForm = false;
+    },
     getComparisonDate() {
       const today = new Date();
       const day = String(today.getDate()).padStart(2, "0");
@@ -193,14 +532,43 @@ export default {
     },
   },
   async mounted() {
-    this.retrieveTodaysTimeslots("2017-04-24");
+    // this.retrieveTodaysTimeslots("2017-04-24");
+    await this.retrieveTodaysTimeslots("2017-04-24");
+    this.user = Utils.getStore("user");
+    console.log(this.user);
   },
 };
 </script>
 
-<!-- <style scoped> -->
 <style scoped>
 .center {
   text-align: center;
 }
+
+/* Was trying to create popup with following
+https://www.youtube.com/watch?v=7gNi7QwYLCw 
+Need to consult Chloe about teleport
+to add this later as functionality*/
+
+/* .root {
+  position: relative;
+}
+
+.modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.2);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal > div {
+  background-color: #fff;
+  padding: 50px;
+  border-radius: 10px;
+} */
 </style>
