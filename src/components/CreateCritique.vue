@@ -335,16 +335,10 @@ export default {
         key: "eventType",
       },
       {
-        title: "First Name",
+        title: "Students",
         align: "start",
         sortable: true,
-        key: "students[0].fName",
-      },
-      {
-        title: "Last Name",
-        align: "start",
-        sortable: true,
-        key: "students[0].lName",
+        key: "performingStudents",
       },
       {
         title: "Instrument",
@@ -398,8 +392,7 @@ export default {
       this.showingCritiqueForm = true;
     },
 
-    cancelClick() {
-      //set all fields to blank state
+    clearFields() {
       this.deportmentComment = "";
       this.deportmentGrade = "";
 
@@ -409,7 +402,7 @@ export default {
       this.accuracy_intonationComment = "";
       this.accuracy_intonationGrade = "";
 
-      this.techniqueComment = "";
+      this.techniqueComment = " ";
       this.techniqueGrade = "";
 
       this.interpretation_musicianshipComment = "";
@@ -423,6 +416,11 @@ export default {
 
       this.overallPerformanceComment = "";
       this.overallPerformanceGrade = "";
+    },
+
+    cancelClick() {
+      //set all fields to blank state
+      this.clearFields();
       //change form state and go back to the studentTimeslots
       this.showingCritiqueForm = false;
     },
@@ -583,6 +581,7 @@ export default {
             console.log(e);
           });
       }
+
       this.popupTrigger = true;
       // this.showingCritiqueForm = false;
     },
@@ -759,7 +758,7 @@ export default {
   async mounted() {
     // this.retrieveTodaysTimeslots("2017-04-24");
     const currentDate = this.getComparisonDate();
-    await this.retrieveTodaysTimeslots(this.getComparisonDate());
+    await this.retrieveTodaysTimeslots(this.getComparisonDate);
     this.user = Utils.getStore("user");
     console.log(this.user);
   },
