@@ -129,28 +129,81 @@
             </tr>
           </template>
         </v-data-table>
-        <v-dialog v-model="dialogDelete" max-width="500px">
-          <v-card>
-            <v-card-title class="text-h5"
-              >Are you sure you want to delete this item?</v-card-title
-            >
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue-darken-1" variant="text" @click="closeDelete"
-                >Cancel</v-btn
-              >
-              <v-btn
-                color="blue-darken-1"
-                variant="text"
-                @click="deleteItemConfirm"
-                >OK</v-btn
-              >
-              <v-spacer></v-spacer>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
       </v-card-text>
+      <v-card-actions>
+        <v-btn color="blue-darken-1" variant="text" @click="showDialog = false"
+          >Close</v-btn
+        >
+      </v-card-actions>
     </v-card>
+    <v-dialog v-model="dialogDelete" max-width="500px">
+      <v-card>
+        <v-card-title class="text-h5"
+          >Are you sure you want to delete this item?</v-card-title
+        >
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue-darken-1" variant="text" @click="closeDelete"
+            >Cancel</v-btn
+          >
+          <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm"
+            >OK</v-btn
+          >
+          <v-spacer></v-spacer>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="dialogEdit" max-width="500px">
+      <v-card>
+        <v-card-text>
+          <v-row class="ml-5">
+            <strong class="text-red-lighten-1">{{
+              this.editErrorMessage
+            }}</strong>
+          </v-row>
+          <v-row class="mt-4 ml-5">
+            <v-col cols="6"
+              >{{ "Start Time-" + this.editStartOriginal }}
+            </v-col>
+            <v-col cols="6">
+              {{ "End Time-" + this.editEndOriginal }}
+            </v-col>
+          </v-row>
+          <v-row class="mt-4 ml-5">
+            <v-col cols="6">
+              <v-select
+                v-model="editSelectedStart"
+                label="Start Time"
+                :items="availabilityStartArray"
+                return-object
+                :style="{ width: '160px' }"
+                @update:modelValue="editStartChange()"
+              ></v-select>
+            </v-col>
+            <v-col cols="6">
+              <v-select
+                class="mr-15"
+                v-model="editSelectedEnd"
+                label="End Time"
+                :items="editEndArray"
+                return-object
+                :style="{ width: '160px' }"
+              ></v-select>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue-darken-1" variant="text" @click="closeEdit"
+            >Cancel</v-btn
+          >
+          <v-btn color="blue-darken-1" variant="text" @click="editItemConfirm"
+            >SAVE</v-btn
+          >
+          <v-spacer></v-spacer>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-dialog>
 </template>
 <script>
@@ -185,8 +238,15 @@ export default {
     ],
     dialogDelete: false,
     editedAvail: null,
-    editedIndex: 0,
+    editedIndex: -1,
     errorMessage: "",
+    dialogEdit: false,
+    editSelectedStart: null,
+    editEndArray: [],
+    editSelectedEnd: null,
+    editStartOriginal: null,
+    editEndOriginal: null,
+    editErrorMessage: "",
   }),
   methods: {
     async retrieveEventsDateAndAfter(date) {
@@ -208,6 +268,7 @@ export default {
         });
     },
     displayEventAvailability(event) {
+      this.errorMessage = "";
       this.selectedEvent = event;
       this.fillAvailabilityArrays();
       this.currentAvailability = this.userAvailability.filter(
@@ -226,13 +287,15 @@ export default {
       let tempTime = this.selectedEvent.startTime;
 
       while (tempTime <= this.selectedEvent.endTime) {
-        const obj = { title: this.formatTime(tempTime), value: tempTime };
-        this.availabilitySlots.push(obj);
-        this.availabilityStartArray.push(obj);
+        this.availabilitySlots.push({
+          title: this.formatTime(tempTime),
+          value: tempTime,
+        });
         tempTime = this.addDurationMinutes(tempTime);
       }
 
-      this.availabilityEndArray = this.availabilitySlots;
+      this.availabilityEndArray = Array.from(this.availabilitySlots);
+      this.availabilityStartArray = Array.from(this.availabilitySlots);
 
       this.availabilityEndArray.shift(); //removes the first timeslot from the end array
       this.availabilityStartArray.pop(); //removes the last timeslot from the start array
@@ -286,6 +349,7 @@ export default {
           .then((response) => {
             this.errorMessage = "";
             this.currentAvailability.push(response.data);
+            this.userAvailability.push(response.data);
           })
           .catch((e) => {
             console.log(e);
@@ -309,30 +373,106 @@ export default {
             }
           }
         });
+      } else {
+        this.currentAvailability.forEach((obj) => {
+          if (!result) {
+            if (
+              (entry.startTime <= obj.startTime &&
+                entry.endTime > obj.startTime) ||
+              (entry.startTime > obj.startTime && entry.startTime < obj.endTime)
+            ) {
+              if (obj.id != entry.id) {
+                result = true;
+              }
+            }
+          }
+        });
       }
       return result;
     },
     deleteItem(item) {
       this.editedIndex = this.currentAvailability.indexOf(item);
-      this.editedAvail = Object.assign({}, item);
+      this.editedAvail = item;
       this.dialogDelete = true;
     },
     deleteItemConfirm() {
-      AvailabilityDataService.remove(this.editedAvail.id)
-        .then((response) => {
-          console.log(response);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      AvailabilityDataService.remove(
+        this.currentAvailability[this.editedIndex].id
+      ).catch((error) => {
+        console.log(error);
+      });
+      this.userAvailability.splice(
+        this.userAvailability.indexOf(
+          this.currentAvailability[this.editedIndex]
+        ),
+        1
+      );
       this.currentAvailability.splice(this.editedIndex, 1);
       this.closeDelete();
     },
     closeDelete() {
       this.dialogDelete = false;
       this.$nextTick(() => {
-        this.editedItem = null;
+        this.editedAvail = null;
         this.editedIndex = -1;
+      });
+    },
+    editItem(item) {
+      this.editedIndex = this.currentAvailability.indexOf(item);
+      this.editedAvail = item;
+      this.editSelectedStart = this.availabilitySlots.find(
+        (obj) => obj.value == this.editedAvail.startTime
+      );
+      this.editSelectedEnd = this.availabilitySlots.find(
+        (obj) => obj.value == this.editedAvail.endTime
+      );
+
+      this.editStartOriginal = this.editSelectedStart.title;
+      this.editEndOriginal = this.editSelectedEnd.title;
+
+      this.editStartChange();
+      this.dialogEdit = true;
+    },
+    editStartChange() {
+      this.editEndArray = this.availabilitySlots.filter(
+        (obj) => obj.value >= this.editSelectedStart.value
+      );
+
+      this.editEndArray.shift(); //removes the first timeslot from the end array
+
+      if (!this.editEndArray.includes(this.editSelectedEnd)) {
+        this.editSelectedEnd = null;
+      }
+    },
+    editItemConfirm() {
+      const index = this.userAvailability.indexOf(
+        this.currentAvailability[this.editedIndex]
+      );
+      const data = {
+        id: this.editedAvail.id,
+        startTime: this.editSelectedStart.value,
+        endTime: this.editSelectedEnd.value,
+      };
+      if (this.checkForOverlap(data)) {
+        this.editErrorMessage =
+          "That time would overlap with an existing time. Please try again";
+      } else {
+        AvailabilityDataService.update(data).catch((error) => {
+          console.log(error);
+        });
+        this.currentAvailability[this.editedIndex].startTime = data.startTime;
+        this.currentAvailability[this.editedIndex].endTime = data.endTime;
+        this.userAvailability[index].startTime = data.startTime;
+        this.userAvailability[index].endTime = data.endTime;
+
+        this.closeEdit();
+      }
+    },
+    closeEdit() {
+      this.editErrorMessage = "";
+      this.dialogEdit = false;
+      this.$nextTick(() => {
+        this.editedAvail = null;
       });
     },
   },

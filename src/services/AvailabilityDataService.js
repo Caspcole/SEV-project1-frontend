@@ -13,5 +13,9 @@ class AvailabilityDataService {
   remove(id) {
     return http.delete(this.baseUrl + id);
   }
+
+  update(data) {
+    return http.put(this.baseUrl + data.id, data);
+  }
 }
 export default new AvailabilityDataService();
