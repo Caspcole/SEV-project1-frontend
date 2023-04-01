@@ -177,7 +177,7 @@ export default {
       await EventDataService.getSemesterCritiques(semester)
         .then((response) => {
           this.semesterCritiques = response.data;
-          this.semesterCritiques.forEach((obj) => {
+          this.semesterCritiques.forEach((entry) => {
             entry.stuName =
               entry.studentInstrument.student.user.fName +
               " " +
