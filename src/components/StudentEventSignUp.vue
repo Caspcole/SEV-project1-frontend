@@ -4,11 +4,15 @@
     <v-container>
       <v-row>
         <v-col>
-          <h3>{{ eventOb }}</h3>
+          <h3>{{ eventOb.type }}</h3>
           <!-- We need to add Event names to the database -->
         </v-col>
         <v-col>
           <h3>{{ eventOb.date }}</h3>
+          <h4>Time Slots:</h4>
+          <h4 v-for="timeslot in eventOb.eventTimes" :key="timeslot.id">
+            {{ timeslot.startTime }}
+          </h4>
         </v-col>
       </v-row>
       <v-row>
@@ -24,6 +28,7 @@
     </v-container>
     <h3>Songs</h3>
     <v-card v-for="song in studentSongs" :key="song.id">
+      <p>Please select a composer and then a song</p>
       <v-container>
         <v-row>
           <v-col>
@@ -34,29 +39,30 @@
               item-value="id"
               item-title="fName"
               autocomplete="off"
-              return-object
               @update:modelValue="
-                updateAvaliableSongs(song.id, selectedComposers[song.id].id)
+                updateAvaliableSongs(song.id, selectedComposers[song.id])
               "
+              :disabled="disabledStudentSongs[song.id]"
             >
-              <template v-slot:append-item>
-                <div v-intersect="onIntersect" class="pa-4 teal--text">
-                  Loading more items ...
-                </div>
-              </template>
             </v-autocomplete>
-            <p>{{ studentSongs }}</p>
           </v-col>
           <v-col>
-            <v-combobox
+            <!-- Ask if the v-model should change -->
+            <v-autocomplete
               clearable
-              v-model="songs[selectedComposers[song.id]]"
+              v-model="selectedSongs[song.id]"
               label="Song"
-              :items="songs"
+              :items="
+                selectedComposers[song.id]
+                  ? composerSongs[song.id]
+                  : searchSongs
+              "
               item-value="id"
               item-title="title"
+              :filter="songFilter"
+              :disabled="disabledStudentSongs[song.id]"
             >
-            </v-combobox>
+            </v-autocomplete>
           </v-col>
           <v-col>
             <!-- <v-checkbox
@@ -65,15 +71,36 @@
             ></v-checkbox> -->
           </v-col>
         </v-row>
+        <v-row>
+          <!-- Grey ou the save button if another song is being edited -->
+          <v-btn
+            :disabled="disabledStudentSongs[selectedStudentSong]"
+            @click="onSave(song.id)"
+            >Save Song</v-btn
+          >
+          <!-- Grey out the edit button if another song is being edited -->
+          <v-btn
+            :disabled="!disabledStudentSongs[selectedStudentSong]"
+            @click="editStudentSong(song.id)"
+            >Edit Song</v-btn
+          >
+        </v-row>
       </v-container>
       <!-- figure out how to v-model each song's translation checkbox -->
 
       <!-- <input v-model="translation.text" /> -->
     </v-card>
+    <p>{{ studentSongs }}</p>
     <!-- make button work -->
-    <v-btn @click="">Add Song From Repertoir</v-btn>
+    <v-btn @click="">Add Song From Repertoire</v-btn>
+    <br />
     <br />
     <v-btn @click="addStudentSong">Add New Song</v-btn>
+  </div>
+  <br />
+  <br />
+  <div>
+    <v-btn @click="submitPage">Submit Page</v-btn>
   </div>
 </template>
 
@@ -91,28 +118,56 @@ export default {
   },
   data() {
     return {
-      // songs: [
-      //   { title: "song1", composer: "mossypaint", id: 1 },
-      //   { title: "song2", composer: "troubleshoot", id: 2 },
-      // ],
       numOfStudentSongs: 0,
+      allSongs: [],
+      searchSongs: [],
+      songSearch: "",
+      songLoading: false,
+
+      selectedStudentSong: null,
+      selectedComposers: [],
+      disabledStudentSongs: [],
+      selectedSong: {},
+
       studentSongs: [],
-      songs: [],
+      composerSongs: [],
       selectedSongs: [],
       composers: [],
       displayedComposers: [],
-      composersPage: 1,
-      selectedComposers: [],
-      dialog: false,
-      studentId: "0",
-      student: { instructor: "Tim", instrument: "Voice" },
+      // composersPage: 1,
+      // selectedComposers: [],
+      student: { instructor: "Tim", instrument: "Voice", id: "0" },
     };
   },
   async created() {
     await this.getComposers();
-    this.addStudentSong();
+    await this.getAllSongs();
+  },
+  computed: {
+    filteredSongs() {
+      return this.items.filter((item) =>
+        this.songFilter(item, this.songSearch, item.text)
+      );
+    },
   },
   methods: {
+    onSave() {
+      if (!this.disabledStudentSongs[this.selectedStudentSong]) {
+        this.studentSongs[this.selectedStudentSong].composer =
+          this.selectedComposers[this.selectedStudentSong].id;
+
+        this.studentSongs[this.selectedStudentSong].piece =
+          this.selectedSongs[this.selectedStudentSong].id;
+
+        this.disabledStudentSongs[this.selectedStudentSong] = true;
+      }
+      console.log(this.studentSongs);
+    },
+
+    editStudentSong(studentSongId) {
+      // add check that no other songs are being edited
+      this.disabledStudentSongs[studentSongId] = false;
+    },
     // async requiresTranslation(songId) {
     //   // await SongTranslationsDataService.getBySongId(parseInt(songId))
     //   await SongTranslationsDataService.getBySongId(parseInt("1"))
@@ -131,53 +186,66 @@ export default {
     //     });
     // },
     addStudentSong() {
+      if (this.studentSongs.length > 0) {
+        this.onSave();
+      }
+
+      this.selectedStudentSong = this.numOfStudentSongs;
+
       this.studentSongs.push({
-        title: "",
+        piece: "",
         composer: "",
         id: this.numOfStudentSongs,
       });
+
+      this.disabledStudentSongs.push(false);
       this.numOfStudentSongs++;
     },
+
+    submitPage() {},
+
     async getComposers() {
       await ComposersDataService.getAll()
         .then((response) => {
           this.composers = response.data;
-          this.displayedComposers(this.composersPage);
         })
         .catch((e) => {
           console.log(e);
         });
-      console.log(this.composers);
     },
-    displayedComposers(cutoffNum) {},
+
+    async getAllSongs() {
+      await SongsDataService.getAll()
+        .then((response) => {
+          this.allSongs = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
 
     async updateAvaliableSongs(studentSongId, composerId) {
       await SongsDataService.getByComposerId(composerId)
         .then((response) => {
-          // this.songs.eval("composerId" + composerId + "= response.data;");
-          this.songs[composerId] = response.data;
+          this.composerSongs[studentSongId] = response.data;
         })
         .catch((e) => {
           console.log(e);
         });
-      console.log(this.songs[composerId][0]);
-      this.studentSongs[studentSongId].composer = composerId.toString();
     },
-    onIntersect() {
-      console.log("load more...");
-      this.composersPage += 1;
-      // this.getBeers();
+
+    songFilter(item, queryText, itemText) {
+      return (
+        itemText.toLowerCase().indexOf(queryText.toLowerCase()) !== -1 &&
+        queryText.length >= 2
+      );
     },
-    // async retrieveStudentData() {
-    //   await StudentDataService.get(parseInt(this.studentId))
-    //     .then((response) => {
-    //       this.student = response.data;
-    //       console.log(this.student);
-    //     })
-    //     .catch((e) => {
-    //       console.log(e);
-    //     });
-    // },
+  },
+  watch: {
+    // want deep watchers for this
+    songItems() {
+      this.selectedItem = null;
+    },
   },
   // mounted() {},
 };

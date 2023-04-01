@@ -38,45 +38,36 @@
               v-for="(time, index) in currentEventTimes"
               :key="index"
               v-model="selectedEventTimes"
-              :label="time.startTime"
+              v-on:change="updateSelectedEventTimes()"
+              :label="time.startTime.substring(0, 5)"
               :value="time"
             >
-              <!-- Use v-bind (: for short) to dynamically change attributes -->
             </v-checkbox>
           </v-card>
-
-          <!-- <p>{{ selectedEventTimes }}</p> -->
           <br />
 
-          <v-btn @click="SignUpForEventObject(currentEvent)">Next</v-btn>
+          <!-- Have some logic to grey out the button if there are no time slots selected -->
+          <v-btn @click="SignUpForEventObject(returningObject)">Next</v-btn>
           <!-- Need some logic to get the type of instrument the student is using -->
         </v-col>
       </v-row>
     </v-container>
-    <p>{{ currentEvent }}</p>
-    <StudentEventSignUp
-      v-if="selectedEvent"
-      :eventOb="currentEvent"
-    ></StudentEventSignUp>
   </div>
 </template>
 
 <script>
 import EventDataService from "../services/EventDataService";
 import EventTimeDataService from "../services/EventTimeDataService";
-import StudentEventSignUp from "./StudentEventSignUp.vue";
 // change the name of EventTimeDataService to EventTimeslotDataService
 export default {
   name: "student-event-list",
-  components: {
-    StudentEventSignUp,
-  },
   data: () => ({
     dialog: false,
     search: "",
     events: [],
     selectedEvent: false,
     currentEvent: {},
+    returningObject: {},
     currentEventTimes: [],
     selectedEventTimes: [],
     currentDate: new Date(),
@@ -84,8 +75,8 @@ export default {
   }),
   emits: ["SignUpForEventObject"],
   setup(props, { emit }) {
-    const SignUpForEventObject = (eventOb) => {
-      emit("SignUpForEventObject", eventOb);
+    const SignUpForEventObject = (returningObject) => {
+      emit("SignUpForEventObject", returningObject);
     };
     return {
       SignUpForEventObject,
@@ -96,14 +87,12 @@ export default {
       this.currentEvent = event;
       this.determineEventTimes();
       this.selectedEvent = true;
-      // console.log(this.currentEvent.id);
     },
 
     async retrieveEventsDateAndAfter(date) {
       await EventDataService.getGTEDate(date)
         .then((response) => {
           this.events = response.data;
-          // console.log(this.events);
         })
         .catch((e) => {
           console.log(e);
@@ -114,7 +103,6 @@ export default {
       await EventDataService.getAll()
         .then((response) => {
           this.events = response.data;
-          // console.log(this.events);
         })
         .catch((e) => {
           console.log(e);
@@ -126,7 +114,6 @@ export default {
       await EventTimeDataService.getByEvent(eventId)
         .then((response) => {
           this.currentEventTimes = response.data;
-          // console.log(this.currentEventTimes);
         })
         .catch((e) => {
           console.log(e);
@@ -140,21 +127,29 @@ export default {
       await this.retrieveEventTimes(this.currentEvent.id);
     },
 
+    updateSelectedEventTimes() {
+      this.returningObject = this.currentEvent;
+      this.returningObject.eventTimes = this.selectedEventTimes;
+
+      // Strip the ending seconds from the start and end times
+      for (let i = 0; i < this.returningObject.eventTimes.length; i++) {
+        this.returningObject.eventTimes[i].startTime =
+          this.returningObject.eventTimes[i].startTime.substring(0, 5);
+        this.returningObject.eventTimes[i].endTime =
+          this.returningObject.eventTimes[i].endTime.substring(0, 5);
+      }
+    },
+
     async retrieveCourses() {
       await CourseDataService.getAll()
         .then((response) => {
           this.courses = response.data;
           this.filteredCourses = this.courses;
-          // console.log(this.courses);
         })
         .catch((e) => {
           console.log(e);
         });
     },
-    // signUp() {
-    //   this.toSignUp = true;
-    //   this.emit("SignUpForEventObject", eventOb);
-    // },
   },
   async mounted() {
     this.currentDate = new Date();

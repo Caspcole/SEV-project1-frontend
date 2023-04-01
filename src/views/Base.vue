@@ -61,7 +61,12 @@
           <TestEx v-else-if="route === 'Your Events'"></TestEx>
           <StudentEventList
             v-else-if="route === 'Event Sign-Ups'"
+            @SignUpForEventObject="changeToEventFormSignUp"
           ></StudentEventList>
+          <StudentEventSignUp
+            v-else-if="route === 'Event Form Sign-Up'"
+            :eventOb="eventOb"
+          ></StudentEventSignUp>
         </div>
       </v-col>
     </v-row>
@@ -80,6 +85,7 @@ import MainNav from "../components/MainNav.vue";
 import StudentHome from "../components/StudentHome.vue";
 import TestEx from "../components/TestEx.vue";
 import StudentEventList from "../components/StudentEventList.vue";
+import StudentEventSignUp from "../components/StudentEventSignUp.vue";
 export default {
   name: "Base",
   components: {
@@ -88,7 +94,8 @@ export default {
     Settings,
     StudentHome, //Landing Page for the Students
     TestEx, //
-    StudentEventList,
+    StudentEventList, //Student page to select event and time to sign up
+    StudentEventSignUp,
   },
   data: () => ({
     user: {},
@@ -151,6 +158,10 @@ export default {
         .catch((error) => {
           console.log("error", error);
         });
+    },
+    changeToEventFormSignUp(eventOb) {
+      this.eventOb = eventOb;
+      this.changeComponent("Event Form Sign-Up");
     },
     // settings(link) {
     //   this.changeComponent(link);
