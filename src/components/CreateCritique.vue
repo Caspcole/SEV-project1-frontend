@@ -13,19 +13,22 @@
   </v-container>
 
   <v-container
-    v-else-if="showingCritiqueForm && showingExpandedForm == true"
+    v-else-if="
+      showingCritiqueForm &&
+      showingExpandedForm == true &&
+      popupTrigger == false
+    "
     fluid
     class="bg-white"
   >
     <h2 class="center">Create Event Critique</h2>
-    <!-- <br />
-    <v-button
-      variant="outlined"
-      style="margin-left: 25%; margin-right: 25%"
-      @click="showingExpandedForm = false"
-      >Expanded Form</v-button
-    >
-    <br /> -->
+    <br />
+    <div class="d-flex justify-center">
+      <v-btn variant="outlined" @click="showingExpandedForm = false"
+        >Quick Form</v-btn
+      >
+    </div>
+    <br />
 
     <v-form>
       <v-text-field
@@ -141,7 +144,7 @@
         variant="outlined"
         style="margin-left: 25%; margin-bottom: 20px"
         @click="
-          saveCritique()
+          saveExpandedCritique()
           // isOpen = true;
         "
         >Save</v-btn
@@ -162,19 +165,25 @@
     </v-form>
   </v-container>
 
-  <!-- <v-container
-    v-else-if="showingCritiqueForm && showingExpandedForm == false"
+  <v-container
+    v-else-if="
+      showingCritiqueForm &&
+      showingExpandedForm == false &&
+      popupTrigger == false
+    "
     fluid
     class="bg-white"
   >
     <h2 class="center">Create Event Critique</h2>
     <br />
-    <v-button
-      variant="outlined"
-      style="margin-left: 50%; margin-right: 50%"
-      @click="showingExpandedForm = true"
-      >Quick Form</v-button
-    >
+    <div class="d-flex justify-center">
+      <v-btn
+        variant="outlined"
+        style="margin-left: 50%; margin-right: 50%"
+        @click="showingExpandedForm = true"
+        >Expanded Form</v-btn
+      >
+    </div>
     <br />
 
     <v-form>
@@ -244,22 +253,43 @@
       <br />
       <v-btn
         variant="outlined"
-        style="margin-left: 25%; margin-right: 25%"
+        style="margin-left: 25%; margin-right: 25%; margin-bottom: 20px"
         @click="
-          saveCritique()
+          saveQuickCritique();
+          popupTrigger = true;
           // isOpen = true;
         "
         >Save</v-btn
-      > -->
-  <!-- <teleport to="body">
+      >
+      <!-- <teleport to="body">
         <div>
           <h3>Critique creation successful!</h3>
           <v-button @click="isOpen = false"></v-button>
         </div>
       </teleport> -->
-  <!-- <v-btn variant="outlined" @click="cancelClick()">Cancel</v-btn>
+      <v-btn variant="outlined" @click="cancelClick()">Cancel</v-btn>
     </v-form>
-  </v-container> -->
+  </v-container>
+
+  <v-container v-else-if="popupTrigger == true">
+    <div>
+      <h2 class="center" style="padding-top: 25%">
+        Critique created successfully!
+      </h2>
+      <div class="d-flex justify-center" style="padding-top: 10px">
+        <v-btn
+          class="popup-close"
+          variant="outlined"
+          @click="
+            popupTrigger = false;
+            this.showingCritiqueForm = false;
+          "
+        >
+          Close
+        </v-btn>
+      </div>
+    </div>
+  </v-container>
 </template>
 
 <script>
@@ -276,8 +306,10 @@ export default {
     itemsPerPage: 10,
     timeslots: [],
     selectedTimeslot: null,
+    selectedCritique: null,
     showingCritiqueForm: false,
-    showingExpandedForm: true,
+    showingExpandedForm: false,
+    popupTrigger: false,
     deportmentComment: "",
     deportmentGrade: "",
     toneComment: "",
@@ -294,6 +326,7 @@ export default {
     diction_articulationGrade: "",
     overallPerformanceComment: "",
     overallPerformanceGrade: "",
+
     headers: [
       {
         title: "Event Type",
@@ -336,7 +369,7 @@ export default {
     async retrieveTodaysTimeslots(date) {
       await EventDataService.getStudentTimeslotsForDate(date)
         .then((response) => {
-          console.log(response);
+          console.log(response.data.raw);
           for (let i = 0; i < response.data.length; i++) {
             let event = response.data[i];
             for (let j = 0; j < event.timeslots.length; j++) {
@@ -394,135 +427,327 @@ export default {
       this.showingCritiqueForm = false;
     },
 
-    saveCritique() {
+    saveQuickCritique() {
       console.log(this.deportmentGrade);
       console.log(this.selectedTimeslot);
       //individually sets each critique line variable JSON
-      let deportmentCritique = {
-        type: "Deportment",
-        grade: this.deportmentGrade,
-        comment: this.deportmentComment,
-        critiquerId: this.user.userId,
-        timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
-      };
-      let toneCritique = {
-        type: "Tone",
-        grade: this.toneGrade,
-        comment: this.toneComment,
-        critiquerId: this.user.userId,
-        timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
-      };
-      let accuracy_intonationCritique = {
-        type: "Accuracy/Intonation",
-        grade: this.accuracy_intonationGrade,
-        comment: this.accuracy_intonationComment,
-        critiquerId: this.user.userId,
-        timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
-      };
-      let techniqueCritique = {
-        type: "Technique",
-        grade: this.techniqueGrade,
-        comment: this.techniqueComment,
-        critiquerId: this.user.userId,
-        timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
-      };
-      let interpretation_musicianshipCritique = {
-        type: "Interpretation & Musicianship",
-        grade: this.interpretation_musicianshipGrade,
-        comment: this.interpretation_musicianshipComment,
-        critiquerId: this.user.userId,
-        timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
-      };
-      let balance_blendCritique = {
-        type: "Balance & Blend",
-        grade: this.balance_blendGrade,
-        comment: this.balance_blendComment,
-        critiquerId: this.user.userId,
-        timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
-      };
-      let diction_articulationCritique = {
-        type: "Diction/Articulation",
-        grade: this.diction_articulationGrade,
-        comment: this.diction_articulationComment,
-        critiquerId: this.user.userId,
-        timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
-      };
-      let overallPerformanceCritique = {
-        type: "Overall Performance & Suggestions",
-        grade: this.overallPerformanceGrade,
-        comment: this.overallPerformanceComment,
-        critiquerId: this.user.userId,
-        timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
-      };
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let deportmentCritique = {
+          type: "Deportment",
+          grade: this.deportmentGrade,
+          comment: "N/A",
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(deportmentCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
 
-      //Create each critique line in the DB
-      CritiqueDataService.create(deportmentCritique)
-        .then((response) => {
-          console.log("Success");
-          console.log(response);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-      CritiqueDataService.create(toneCritique)
-        .then((response) => {
-          console.log("Success");
-          console.log(response);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-      CritiqueDataService.create(accuracy_intonationCritique)
-        .then((response) => {
-          console.log("Success");
-          console.log(response);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-      CritiqueDataService.create(techniqueCritique)
-        .then((response) => {
-          console.log("Success");
-          console.log(response);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-      CritiqueDataService.create(interpretation_musicianshipCritique)
-        .then((response) => {
-          console.log("Success");
-          console.log(response);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-      CritiqueDataService.create(balance_blendCritique)
-        .then((response) => {
-          console.log("Success");
-          console.log(response);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-      CritiqueDataService.create(diction_articulationCritique)
-        .then((response) => {
-          console.log("Success");
-          console.log(response);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-      CritiqueDataService.create(overallPerformanceCritique)
-        .then((response) => {
-          console.log("Success");
-          console.log(response);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let toneCritique = {
+          type: "Tone",
+          grade: this.toneGrade,
+          comment: "N/A",
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(toneCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
 
-      this.showingCritiqueForm = false;
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let accuracy_intonationCritique = {
+          type: "Accuracy/Intonation",
+          grade: this.accuracy_intonationGrade,
+          comment: "N/A",
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(accuracy_intonationCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let techniqueCritique = {
+          type: "Technique",
+          grade: this.techniqueGrade,
+          comment: "N/A",
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(techniqueCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let techniqueCritique = {
+          type: "Technique",
+          grade: this.techniqueGrade,
+          comment: "N/A",
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(techniqueCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let interpretation_musicianshipCritique = {
+          type: "Interpretation & Musicianship",
+          grade: this.interpretation_musicianshipGrade,
+          comment: "N/A",
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(interpretation_musicianshipCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let balance_blendCritique = {
+          type: "Balance & Blend",
+          grade: this.balance_blendGrade,
+          comment: "N/A",
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(balance_blendCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let diction_articulationCritique = {
+          type: "Diction/Articulation",
+          grade: this.diction_articulationGrade,
+          comment: "N/A",
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(diction_articulationCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let overallPerformanceCritique = {
+          type: "Overall Performance & Suggestions",
+          grade: this.overallPerformanceGrade,
+          comment: this.overallPerformanceComment,
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(overallPerformanceCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+      this.popupTrigger = true;
+      // this.showingCritiqueForm = false;
     },
+
+    saveExpandedCritique() {
+      console.log(this.deportmentGrade);
+      console.log(this.selectedTimeslot);
+      //individually sets each critique line variable JSON
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let deportmentCritique = {
+          type: "Deportment",
+          grade: this.deportmentGrade,
+          comment: this.deportmentComment,
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(deportmentCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let toneCritique = {
+          type: "Tone",
+          grade: this.toneGrade,
+          comment: this.toneComment,
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(toneCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let accuracy_intonationCritique = {
+          type: "Accuracy/Intonation",
+          grade: this.accuracy_intonationGrade,
+          comment: this.accuracy_intonationComment,
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(accuracy_intonationCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let techniqueCritique = {
+          type: "Technique",
+          grade: this.techniqueGrade,
+          comment: this.techniqueComment,
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(techniqueCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let techniqueCritique = {
+          type: "Technique",
+          grade: this.techniqueGrade,
+          comment: this.techniqueComment,
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(techniqueCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let interpretation_musicianshipCritique = {
+          type: "Interpretation & Musicianship",
+          grade: this.interpretation_musicianshipGrade,
+          comment: this.interpretation_musicianshipComment,
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(interpretation_musicianshipCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let balance_blendCritique = {
+          type: "Balance & Blend",
+          grade: this.balance_blendGrade,
+          comment: this.balance_blendComment,
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(balance_blendCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let diction_articulationCritique = {
+          type: "Diction/Articulation",
+          grade: this.diction_articulationGrade,
+          comment: this.diction_articulationComment,
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(diction_articulationCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+
+      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
+        let overallPerformanceCritique = {
+          type: "Overall Performance & Suggestions",
+          grade: this.overallPerformanceGrade,
+          comment: this.overallPerformanceComment,
+          critiquerId: this.user.userId,
+          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+        };
+        CritiqueDataService.create(overallPerformanceCritique)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+
+      this.popupTrigger = true;
+      // this.showingCritiqueForm = false;
+    },
+
     getComparisonDate() {
       const today = new Date();
       const day = String(today.getDate()).padStart(2, "0");
@@ -533,7 +758,8 @@ export default {
   },
   async mounted() {
     // this.retrieveTodaysTimeslots("2017-04-24");
-    await this.retrieveTodaysTimeslots("2017-04-24");
+    const currentDate = this.getComparisonDate();
+    await this.retrieveTodaysTimeslots(this.getComparisonDate());
     this.user = Utils.getStore("user");
     console.log(this.user);
   },
@@ -544,31 +770,4 @@ export default {
 .center {
   text-align: center;
 }
-
-/* Was trying to create popup with following
-https://www.youtube.com/watch?v=7gNi7QwYLCw 
-Need to consult Chloe about teleport
-to add this later as functionality*/
-
-/* .root {
-  position: relative;
-}
-
-.modal {
-  position: absolute;
-  top: 0;
-  left: 0;
-  background-color: rgba(0, 0, 0, 0.2);
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal > div {
-  background-color: #fff;
-  padding: 50px;
-  border-radius: 10px;
-} */
 </style>
