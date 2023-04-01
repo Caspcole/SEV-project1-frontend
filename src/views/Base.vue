@@ -65,6 +65,8 @@
           <FacultyCritiqueView
             v-else-if="route === 'View Student Critiques'"
           ></FacultyCritiqueView>
+          <CreateAvailability v-else-if="route === 'Event Availability'">
+          </CreateAvailability>
         </div>
       </v-col>
     </v-row>
@@ -84,6 +86,7 @@ import StudentHome from "../components/student/StudentHome.vue";
 import TestEx from "../components/TestEx.vue";
 import StudentEventList from "../components/student/StudentEventList.vue";
 import FacultyCritiqueView from "../components/faculty/CritiqueView.vue";
+import CreateAvailability from "../components/faculty/CreateAvailability.vue";
 export default {
   name: "Base",
   components: {
@@ -94,6 +97,7 @@ export default {
     TestEx, //
     StudentEventList,
     FacultyCritiqueView,
+    CreateAvailability,
   },
   data: () => ({
     user: {},
