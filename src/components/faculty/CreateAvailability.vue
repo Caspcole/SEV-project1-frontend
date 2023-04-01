@@ -445,6 +445,10 @@ export default {
       }
     },
     editItemConfirm() {
+      if (this.editSelectedEnd == undefined) {
+        this.editErrorMessage = "Please select an End Time";
+        return;
+      }
       const index = this.userAvailability.indexOf(
         this.currentAvailability[this.editedIndex]
       );
