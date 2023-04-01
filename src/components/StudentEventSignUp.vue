@@ -152,15 +152,18 @@ export default {
   },
   methods: {
     onSave() {
-      if (!this.disabledStudentSongs[this.selectedStudentSong]) {
-        this.studentSongs[this.selectedStudentSong].composer =
-          this.selectedComposers[this.selectedStudentSong].id;
+      if (!this.selectedComposers[this.selectedStudentSong] == null) {
+        if (!this.disabledStudentSongs[this.selectedStudentSong]) {
+          this.studentSongs[this.selectedStudentSong].composer =
+            this.selectedComposers[this.selectedStudentSong].id;
 
-        this.studentSongs[this.selectedStudentSong].piece =
-          this.selectedSongs[this.selectedStudentSong].id;
+          this.studentSongs[this.selectedStudentSong].piece =
+            this.selectedSongs[this.selectedStudentSong].id;
 
-        this.disabledStudentSongs[this.selectedStudentSong] = true;
+          this.disabledStudentSongs[this.selectedStudentSong] = true;
+        }
       }
+
       console.log(this.studentSongs);
     },
 
