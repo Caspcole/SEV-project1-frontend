@@ -1,4 +1,5 @@
 <template>
+  <v-card-title v-if="!showingCritiqueForm"> Student Timeslots </v-card-title>
   <v-container v-if="!showingCritiqueForm" fluid class="bg-white">
     <h3 class="center">Select Timeslot for Critique</h3>
     <br />
@@ -21,6 +22,16 @@
     fluid
     class="bg-white"
   >
+    <v-card-title
+      v-if="
+        showingCritiqueForm &&
+        showingExpandedForm == true &&
+        popupTrigger == false
+      "
+    >
+      Expanded Critique Form
+    </v-card-title>
+
     <h2 class="center">Create Event Critique</h2>
     <br />
     <div class="d-flex justify-center">
@@ -35,12 +46,14 @@
         clearable
         label="Deportment (poise, entrance/exit, bow)"
         v-model="deportmentComment"
+        required
       ></v-text-field>
 
       <v-select
         clearable
         label="Deportment Grade"
         v-model="deportmentGrade"
+        required
         :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
       ></v-select>
 
@@ -48,6 +61,7 @@
         clearable
         label="Tone (beauty, control/clarity, vibrato, warmth)"
         v-model="toneComment"
+        required
       >
       </v-text-field>
 
@@ -56,6 +70,7 @@
         label="Tone Grade"
         v-model="toneGrade"
         :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+        required
       ></v-select>
 
       <v-text-field
@@ -63,6 +78,7 @@
         label="Accuracy/Intonation (correct notes with correct rhythm, tuning
         with keyboard and/or ensemble)"
         v-model="accuracy_intonationComment"
+        required
       ></v-text-field>
 
       <v-select
@@ -70,12 +86,14 @@
         label="Accuracy/Intonation Grade"
         v-model="accuracy_intonationGrade"
         :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+        required
       ></v-select>
 
       <v-text-field
         clearable
         label="Technique (attacks, releases, flexibility, range, resonance, placement, support, agility)"
         v-model="techniqueComment"
+        required
       ></v-text-field>
 
       <v-select
@@ -83,6 +101,7 @@
         label="Technique Grade"
         v-model="techniqueGrade"
         :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+        required
       ></v-select>
 
       <v-text-field
@@ -90,6 +109,7 @@
         label="Interpretation & Musicianship (phrasing, tempo, dynamics
         communication, rapport)"
         v-model="interpretation_musicianshipComment"
+        required
       ></v-text-field>
 
       <v-select
@@ -97,12 +117,14 @@
         label="Interpretation & Musicianship Grade"
         v-model="interpretation_musicianshipGrade"
         :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+        required
       ></v-select>
 
       <v-text-field
         clearable
         label="Balance & Blend (with accompanist or within ensemble)"
         v-model="balance_blendComment"
+        required
       ></v-text-field>
 
       <v-select
@@ -110,12 +132,14 @@
         label="Balance & Blend Grade"
         v-model="balance_blendGrade"
         :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+        required
       ></v-select>
 
       <v-text-field
         clearable
         label="Diction/Articulation(vocal/instrumental)"
         v-model="diction_articulationComment"
+        required
       ></v-text-field>
 
       <v-select
@@ -123,6 +147,7 @@
         label="Diction/Articulation Grade"
         v-model="diction_articulationGrade"
         :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+        required
       ></v-select>
 
       <v-text-field
@@ -130,6 +155,7 @@
         label="Performance & Suggestions (overall readiness to
         perform)"
         v-model="overallPerformanceComment"
+        required
       ></v-text-field>
 
       <v-select
@@ -137,6 +163,7 @@
         label="Overall Performance Grade"
         v-model="overallPerformanceGrade"
         :items="['A', 'B', 'C', 'D', 'F', '']"
+        required
       ></v-select>
 
       <br />
@@ -174,6 +201,15 @@
     fluid
     class="bg-white"
   >
+    <v-card-title
+      v-if="
+        showingCritiqueForm &&
+        showingExpandedForm == false &&
+        popupTrigger == false
+      "
+    >
+      Quick Critique Form
+    </v-card-title>
     <h2 class="center">Create Event Critique</h2>
     <br />
     <div class="d-flex justify-center">
@@ -192,6 +228,7 @@
         label="Deportment Grade"
         v-model="deportmentGrade"
         :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+        required
       ></v-select>
 
       <v-select
@@ -199,6 +236,7 @@
         label="Tone Grade"
         v-model="toneGrade"
         :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+        required
       ></v-select>
 
       <v-select
@@ -206,6 +244,7 @@
         label="Accuracy/Intonation Grade"
         v-model="accuracy_intonationGrade"
         :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+        required
       ></v-select>
 
       <v-select
@@ -213,6 +252,7 @@
         label="Technique Grade"
         v-model="techniqueGrade"
         :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+        required
       ></v-select>
 
       <v-select
@@ -220,6 +260,7 @@
         label="Interpretation & Musicianship Grade"
         v-model="interpretation_musicianshipGrade"
         :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+        required
       ></v-select>
 
       <v-select
@@ -227,6 +268,7 @@
         label="Balance & Blend Grade"
         v-model="balance_blendGrade"
         :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+        required
       ></v-select>
 
       <v-select
@@ -234,6 +276,7 @@
         label="Diction/Articulation Grade"
         v-model="diction_articulationGrade"
         :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+        required
       ></v-select>
 
       <v-text-field
@@ -241,6 +284,7 @@
         label="Performance & Suggestions (overall readiness to
         perform)"
         v-model="overallPerformanceComment"
+        required
       ></v-text-field>
 
       <v-select
@@ -248,6 +292,7 @@
         label="Overall Performance Grade"
         v-model="overallPerformanceGrade"
         :items="['A', 'B', 'C', 'D', 'F', '']"
+        required
       ></v-select>
 
       <br />
@@ -326,6 +371,7 @@ export default {
     diction_articulationGrade: "",
     overallPerformanceComment: "",
     overallPerformanceGrade: "",
+    errorActive: true,
 
     headers: [
       {
@@ -429,6 +475,7 @@ export default {
       console.log(this.deportmentGrade);
       console.log(this.selectedTimeslot);
       //individually sets each critique line variable JSON
+
       for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let deportmentCritique = {
           type: "Deportment",
@@ -581,7 +628,6 @@ export default {
             console.log(e);
           });
       }
-
       this.popupTrigger = true;
       // this.showingCritiqueForm = false;
     },
@@ -589,6 +635,7 @@ export default {
     saveExpandedCritique() {
       console.log(this.deportmentGrade);
       console.log(this.selectedTimeslot);
+
       //individually sets each critique line variable JSON
       for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let deportmentCritique = {
@@ -757,8 +804,10 @@ export default {
   },
   async mounted() {
     // this.retrieveTodaysTimeslots("2017-04-24");
-    const currentDate = this.getComparisonDate();
-    await this.retrieveTodaysTimeslots(this.getComparisonDate);
+    const currentDate = "2023-03-31";
+    // const currentDate = this.getComparisonDate();
+    await this.retrieveTodaysTimeslots("2023-03-31");
+    // await this.retrieveTodaysTimeslots(this.getComparisonDate());
     this.user = Utils.getStore("user");
     console.log(this.user);
   },
