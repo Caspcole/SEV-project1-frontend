@@ -65,7 +65,7 @@ export default defineComponent({
         {
           title: "Faculty",
           links: [
-            "Student Critiques",
+            "View Student Critiques",
             "Create Event Critique",
             "Event Availability",
           ],
@@ -84,7 +84,6 @@ export default defineComponent({
   emits: ["changeComp"],
   setup(props, { emit }) {
     const changeComp = (link) => {
-      console.log(link);
       emit("changeComp", link);
     };
     return {

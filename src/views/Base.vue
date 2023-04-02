@@ -67,6 +67,11 @@
             v-else-if="route === 'Event Form Sign-Up'"
             :eventOb="eventOb"
           ></StudentEventSignUp>
+          <FacultyCritiqueView
+            v-else-if="route === 'View Student Critiques'"
+          ></FacultyCritiqueView>
+          <CreateAvailability v-else-if="route === 'Event Availability'">
+          </CreateAvailability>
         </div>
       </v-col>
     </v-row>
@@ -82,10 +87,13 @@ import AuthServices from "../services/authServices.js";
 import Settings from "../components/Settings.vue";
 // Import all components and insert into homepage
 import MainNav from "../components/MainNav.vue";
-import StudentHome from "../components/StudentHome.vue";
+import StudentHome from "../components/student/StudentHome.vue";
 import TestEx from "../components/TestEx.vue";
 import StudentEventList from "../components/StudentEventList.vue";
+
 import StudentEventSignUp from "../components/StudentEventSignUp.vue";
+import FacultyCritiqueView from "../components/faculty/CritiqueView.vue";
+import CreateAvailability from "../components/faculty/CreateAvailability.vue";
 export default {
   name: "Base",
   components: {
@@ -96,6 +104,8 @@ export default {
     TestEx, //
     StudentEventList, //Student page to select event and time to sign up
     StudentEventSignUp,
+    FacultyCritiqueView,
+    CreateAvailability,
   },
   data: () => ({
     user: {},
@@ -134,7 +144,6 @@ export default {
   methods: {
     //Changing between the components 'pages'
     changeComponent(link) {
-      console.log(link);
       this.route = link;
     },
     //Logging in
