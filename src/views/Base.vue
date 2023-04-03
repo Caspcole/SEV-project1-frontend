@@ -89,9 +89,9 @@ import Settings from "../components/Settings.vue";
 import MainNav from "../components/MainNav.vue";
 import StudentHome from "../components/student/StudentHome.vue";
 import TestEx from "../components/TestEx.vue";
-import StudentEventList from "../components/StudentEventList.vue";
+import StudentEventList from "../components/student/StudentEventList.vue";
 
-import StudentEventSignUp from "../components/StudentEventSignUp.vue";
+import StudentEventSignUp from "../components/student/StudentEventSignUp.vue";
 import FacultyCritiqueView from "../components/faculty/CritiqueView.vue";
 import CreateAvailability from "../components/faculty/CreateAvailability.vue";
 export default {

@@ -108,8 +108,8 @@
 // Get translations
 // Get songs
 // import StudentDataService from "../services/StudentDataService";
-import ComposersDataService from "../services/ComposersDataService";
-import SongsDataService from "../services/SongsDataService";
+import ComposersDataService from "../../services/ComposersDataService";
+import SongsDataService from "../../services/SongsDataService";
 
 export default {
   name: "student-event-signup",
