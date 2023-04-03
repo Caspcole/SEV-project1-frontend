@@ -75,9 +75,11 @@
           <FacultyCritiqueView
             v-if="this.$route.fullPath === '/facultyViewCritiques'"
           ></FacultyCritiqueView>
-          <!-- Accompanist Section -->
           <!-- Admin Section -->
-          <CreateAvailability v-else-if="route === 'Event Availability'">
+          <!-- Availability -->
+          <CreateAvailability
+            v-if="this.$route.fullPath === '/createAvailability'"
+          >
           </CreateAvailability>
         </div>
       </v-col>

@@ -67,14 +67,12 @@ export default defineComponent({
           links: [
             { link: "View Student Critiques", route: "facultyViewCritiques" },
             { link: "Create Event Critique", route: "facultyCreateCritiques" },
-            { link: "Event Availability", route: "facultyAvailability" },
+            { link: "Event Availability", route: "createAvailability" },
           ],
         },
         {
           title: "Accompanist",
-          links: [
-            { link: "Event Availability", route: "accompanistAvailability" },
-          ],
+          links: [{ link: "Event Availability", route: "createAvailability" }],
         },
         {
           title: "Admin",

@@ -66,18 +66,12 @@ const router = createRouter({
       name: "facultyCreateCritiques",
       alias: "/facultyCreateCritiques",
     },
+    // Accompanist and Faculty Availability
     {
       path: "/base",
       component: Base,
-      name: "facultyAvailability",
-      alias: "/facultyAvailability",
-    },
-    // Accompanist Routes
-    {
-      path: "/base",
-      component: Base,
-      name: "accompnaistAvailability",
-      alias: "/accompanistAvailability",
+      name: "createAvailability",
+      alias: "/createAvailability",
     },
     // Admin Routes
     {
