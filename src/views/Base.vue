@@ -56,7 +56,7 @@
       <v-col cols="10" class="bg-white">
         <!-- Your components go here -->
         <div class="grid-container">
-          <StudentHome v-if="route === 'Repertoire'"></StudentHome>
+          <StudentHome v-if="route === ''"></StudentHome>
           <Settings v-else-if="route === 'Settings'"></Settings>
           <TestEx v-else-if="route === 'Your Events'"></TestEx>
           <StudentEventList
