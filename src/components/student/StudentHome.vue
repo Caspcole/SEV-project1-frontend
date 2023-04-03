@@ -1,7 +1,5 @@
 <template>
   <v-container fluid class="bg-white">
-    <!-- <v-card-text>Hello World</v-card-text>
-        <v-card-form class="bg-red"></v-card-form> -->
     <v-row align="start">
       <v-col>
         <v-card>

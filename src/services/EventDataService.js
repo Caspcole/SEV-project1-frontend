@@ -8,20 +8,13 @@ class EventDataService {
   getGTEDate(date) {
     return http.get(this.baseUrl + `date/${date}`);
   }
-  // get(id) {
-  //   return http.get(`/schedule-t2/course/${id}`);
-  // }
-  // create(data) {
-  //   return http.post("/schedule-t2/course", data);
-  // }
-  // update(id, data) {
-  //   return http.put(`/schedule-t2/course/${id}`, data);
-  // }
-  // delete(id) {
-  //   return http.delete(`/schedule-t2/course/${id}`);
-  // }
-  // deleteAll() {
-  //   return http.delete(`/schedule-t2/course`);
-  // }
+  getSemesterCritiques(semesterId) {
+    return http.get(this.baseUrl + "semesterCritiques/" + semesterId);
+  }
+  getStudentSemesterCritiques(semesterId, userId) {
+    return http.get(
+      this.baseUrl + "semesterCritiques/" + semesterId + "/user/" + userId
+    );
+  }
 }
 export default new EventDataService();

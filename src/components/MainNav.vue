@@ -26,9 +26,9 @@
                       color="primary"
                       prominent
                       class="elevation-0"
-                      @click="changeComp(link)"
+                      @click="changeComp(link.route)"
                     >
-                      {{ link }}
+                      {{ link.link }}
                     </v-btn>
                   </v-col>
                 </v-row>
@@ -55,43 +55,52 @@ export default defineComponent({
         {
           title: "Student",
           links: [
-            "Repertoire",
-            "Your Events",
-            "Event Sign-Ups",
-            "Your Critiques",
-            "Recordings",
+            { link: "View Repertoire", route: "studentRepertoire" },
+            { link: "Upcoming Events", route: "studentViewEvents" },
+            { link: "Event Sign-Ups", route: "studentEventSignUps" },
+            { link: "View Your Critiques", route: "studentCritiques" },
+            { link: "Event Recordings", route: "studentRecordings" },
           ],
         },
         {
           title: "Faculty",
           links: [
-            "Student Critiques",
-            "Create Event Critique",
-            "Event Availability",
+            { link: "View Student Critiques", route: "facultyViewCritiques" },
+            { link: "Create Event Critique", route: "facultyCreateCritiques" },
+            { link: "Event Availability", route: "facultyAvailability" },
           ],
         },
         {
           title: "Accompanist",
-          links: ["Event Availability"],
+          links: [
+            { link: "Event Availability", route: "accompanistAvailability" },
+          ],
         },
         {
           title: "Admin",
-          links: ["Create Event", "Events"],
+          links: [
+            { link: "Create Event", route: "adminCreateEvents" },
+            { link: "Events", route: "adminViewEvents" },
+          ],
         },
       ],
     };
   },
-  emits: ["changeComp"],
-  setup(props, { emit }) {
-    const changeComp = (link) => {
-      console.log(link);
-      emit("changeComp", link);
-    };
-    return {
-      changeComp,
-    };
+  // emits: ["changeComp"],
+  // setup(props, { emit }) {
+  //   const changeComp = (route) => {
+  //     this.$router.push({ path: route });
+  //   };
+  //   return {
+  //     changeComp,
+  //   };
+  // },
+  methods: {
+    changeComp(route) {
+      console.log(route);
+      this.$router.push({ path: route });
+    },
   },
-  methods: {},
 });
 </script>
 

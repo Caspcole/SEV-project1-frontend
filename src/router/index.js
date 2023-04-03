@@ -16,6 +16,82 @@ const router = createRouter({
       component: Base,
       name: "base",
     },
+    // Student Routes
+    {
+      path: "/base",
+      component: Base,
+      name: "studentSettings",
+      alias: "/studentSettings",
+    },
+    {
+      path: "/base",
+      component: Base,
+      name: "studentRepertoire",
+      alias: "/studentRepertoire",
+    },
+    {
+      path: "/base",
+      component: Base,
+      name: "studentViewEvents",
+      alias: "/studentViewEvents",
+    },
+    {
+      path: "/base",
+      component: Base,
+      name: "studentEventSignUps",
+      alias: "/studentEventSignUps",
+    },
+    {
+      path: "/base",
+      component: Base,
+      name: "studentCritiques",
+      alias: "/studentCritiques",
+    },
+    {
+      path: "/base",
+      component: Base,
+      name: "studentRecordings",
+      alias: "/studentRecordings",
+    },
+    // Faculty Routes
+    {
+      path: "/base",
+      component: Base,
+      name: "facultyViewCritiques",
+      alias: "/facultyViewCritiques",
+    },
+    {
+      path: "/base",
+      component: Base,
+      name: "facultyCreateCritiques",
+      alias: "/facultyCreateCritiques",
+    },
+    {
+      path: "/base",
+      component: Base,
+      name: "facultyAvailability",
+      alias: "/facultyAvailability",
+    },
+    // Accompanist Routes
+    {
+      path: "/base",
+      component: Base,
+      name: "accompnaistAvailability",
+      alias: "/accompanistAvailability",
+    },
+    // Admin Routes
+    {
+      path: "/base",
+      component: Base,
+      name: "adminCreateEvents",
+      alias: "/adminCreateEvents",
+    },
+    {
+      path: "/base",
+      component: Base,
+      name: "adminViewEvents",
+      alias: "/adminViewEvents",
+    },
   ],
 });
 
