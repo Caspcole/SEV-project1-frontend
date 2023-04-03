@@ -470,6 +470,8 @@ export default {
 
       this.overallPerformanceComment = "";
       this.overallPerformanceGrade = "";
+
+      this.errorMessage = "";
     },
 
     cancelClick() {
