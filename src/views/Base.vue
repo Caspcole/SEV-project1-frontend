@@ -100,7 +100,7 @@ import StudentSettings from "../components/student/StudentSettings.vue";
 // Import all components and insert into homepage
 import MainNav from "../components/MainNav.vue";
 import StudentHome from "../components/student/StudentHome.vue";
-import CreateCritique from "../components/CreateCritique.vue";
+import CreateCritique from "../components/faculty/CreateCritique.vue";
 import StudentEventList from "../components/student/StudentEventList.vue";
 import StudentViewCritique from "../components/student/StudentViewCritique.vue";
 import FacultyCritiqueView from "../components/faculty/CritiqueView.vue";

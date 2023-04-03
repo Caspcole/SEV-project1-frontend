@@ -344,11 +344,11 @@
 </template>
 
 <script>
-import EventDataService from "../services/EventDataService";
-import CritiqueDataService from "../services/CritiqueDataService";
-import UserRoleDataService from "../services/UserRoleDataService";
-import JurorTimeslotDataService from "../services/JurorTimeslotDataService";
-import Utils from "../config/utils.js";
+import EventDataService from "../../services/EventDataService";
+import CritiqueDataService from "../../services/CritiqueDataService";
+import UserRoleDataService from "../../services/UserRoleDataService";
+import JurorTimeslotDataService from "../../services/JurorTimeslotDataService";
+import Utils from "../../config/utils.js";
 import { ref } from "vue";
 
 const isOpen = ref(false);
