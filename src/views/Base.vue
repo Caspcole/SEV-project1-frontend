@@ -189,7 +189,7 @@ export default {
     },
     changeToEventFormSignUp(eventOb) {
       this.eventOb = eventOb;
-      this.$route.push("studentEventFormSignUp");
+      this.$router.push({ path: "studentEventFormSignUp" });
     },
     studentSettings(route) {
       this.$router.push({ path: route });
