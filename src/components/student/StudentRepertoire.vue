@@ -13,6 +13,7 @@
   </v-container>
 </template>
 <script>
+import Utils from "../../config/utils.js";
 import RepertoireDataService from "../../services/RepertoireDataService";
 export default {
   name: "studentRepertoireView",
@@ -25,7 +26,6 @@ export default {
       RepertoireDataService.getByUser(this.user.userId)
         .then((response) => {
           this.semesters = response.data;
-          console.log(this.semesters);
         })
         .catch((e) => {
           console.log(e);
