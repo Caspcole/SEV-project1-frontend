@@ -70,7 +70,7 @@
             @SignUpForEventObject="changeToEventFormSignUp"
           ></StudentEventList>
           <StudentEventSignUp
-            v-if="this.$route.fullPath === 'Event Form Sign-Up'"
+            v-if="this.$route.fullPath === '/studentEventFormSignUp'"
             :eventOb="eventOb"
           ></StudentEventSignUp>
           <StudentViewCritique
