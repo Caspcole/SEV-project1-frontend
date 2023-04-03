@@ -1,12 +1,12 @@
 <template>
   <v-container fluid class="bg-white">
-    <v-card-text>Your Settings Page</v-card-text>
+    <v-card-text>Student Settings Page</v-card-text>
   </v-container>
 </template>
 
 <script>
 export default {
-  name: "Settings",
+  name: "studentSettings",
   components: {},
   data: () => ({}),
 };

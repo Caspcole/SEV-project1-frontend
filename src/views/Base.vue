@@ -40,7 +40,9 @@
                 {{ user.email }}
               </p>
               <v-divider class="my-3"></v-divider>
-              <v-btn variant="text" @click="settings()"> Settings </v-btn>
+              <v-btn variant="text" @click="studentSettings(myItems.route)">
+                Student Settings
+              </v-btn>
               <br />
               <v-btn variant="text" @click="logout()"> Logout </v-btn>
             </div>
@@ -51,20 +53,30 @@
     <!-- <v-container fluid class="fill-height"> -->
     <v-row class="fill-height">
       <v-col cols="2" class="bg-blue">
-        <MainNav @changeComp="changeComponent"></MainNav>
+        <MainNav></MainNav>
       </v-col>
       <v-col cols="10" class="bg-white">
         <!-- Your components go here -->
         <div class="grid-container">
-          <StudentHome v-if="route === 'Repertoire'"></StudentHome>
-          <Settings v-else-if="route === 'Settings'"></Settings>
-          <TestEx v-else-if="route === 'Your Events'"></TestEx>
+          <!-- Student Section -->
+          <StudentHome
+            v-if="this.$route.fullPath === '/studentBase'"
+          ></StudentHome>
+          <StudentSettings
+            v-if="this.$route.fullPath === '/studentSettings'"
+          ></StudentSettings>
           <StudentEventList
-            v-else-if="route === 'Event Sign-Ups'"
+            v-if="this.$route.fullPath === '/studentViewEvents'"
           ></StudentEventList>
+          <StudentViewCritique
+            v-if="this.$route.fullPath === '/studentCritiques'"
+          ></StudentViewCritique>
+          <!-- Faculty Section -->
           <FacultyCritiqueView
-            v-else-if="route === 'View Student Critiques'"
+            v-if="this.$route.fullPath === '/facultyViewCritiques'"
           ></FacultyCritiqueView>
+          <!-- Accompanist Section -->
+          <!-- Admin Section -->
           <CreateAvailability v-else-if="route === 'Event Availability'">
           </CreateAvailability>
         </div>
@@ -79,12 +91,12 @@ import ocLogo from "../../public/oc_logo_social.png";
 //Login Stuff
 import Utils from "../config/utils.js";
 import AuthServices from "../services/authServices.js";
-import Settings from "../components/Settings.vue";
+import StudentSettings from "../components/student/StudentSettings.vue";
 // Import all components and insert into homepage
 import MainNav from "../components/MainNav.vue";
 import StudentHome from "../components/student/StudentHome.vue";
-import TestEx from "../components/TestEx.vue";
 import StudentEventList from "../components/student/StudentEventList.vue";
+import StudentViewCritique from "../components/student/StudentViewCritique.vue";
 import FacultyCritiqueView from "../components/faculty/CritiqueView.vue";
 import CreateAvailability from "../components/faculty/CreateAvailability.vue";
 export default {
@@ -92,11 +104,15 @@ export default {
   components: {
     ocLogo,
     MainNav, //Left navigation panel
-    Settings,
+    //Student Component
+    StudentSettings,
     StudentHome, //Landing Page for the Students
-    TestEx, //
     StudentEventList,
+    StudentViewCritique,
+    //Faculty Component
     FacultyCritiqueView,
+    //Accompanist Component
+    //Admin Component
     CreateAvailability,
   },
   data: () => ({
@@ -114,10 +130,11 @@ export default {
         title: "Switch Account",
         value: "switchAcc",
       },
+
       {
         prependIcon: "mdi-account-settings-variant",
-        title: "Settings",
-        value: "settings",
+        value: "studentSettings",
+        route: "studentSettings",
       },
       {
         prependIcon: "mdi-logout",
@@ -135,9 +152,9 @@ export default {
   },
   methods: {
     //Changing between the components 'pages'
-    changeComponent(link) {
-      this.route = link;
-    },
+    // changeComponent(link) {
+    //   this.route = link;
+    // },
     //Logging in
     resetMenu() {
       this.user = null;
@@ -160,9 +177,10 @@ export default {
           console.log("error", error);
         });
     },
-    // settings(link) {
-    //   this.changeComponent(link);
-    // },
+    studentSettings(route) {
+      this.$router.push({ path: route });
+      location.reload();
+    },
   },
   watch: {
     group() {
