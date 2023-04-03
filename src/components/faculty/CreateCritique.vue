@@ -36,7 +36,7 @@
     <br />
     <div class="d-flex justify-center">
       <v-btn variant="outlined" @click="showingExpandedForm = false"
-        >Quick Form</v-btn
+        >Select Quick Form</v-btn
       >
     </div>
     <br />
@@ -221,7 +221,7 @@
         variant="outlined"
         style="margin-left: 50%; margin-right: 50%"
         @click="showingExpandedForm = true"
-        >Expanded Form</v-btn
+        >Select Expanded Form</v-btn
       >
     </div>
     <br />
