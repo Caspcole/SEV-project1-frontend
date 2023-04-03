@@ -99,6 +99,8 @@
   </div>
   <br />
   <br />
+  <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
+
   <div>
     <v-btn @click="submitPage">Submit Page</v-btn>
   </div>
@@ -118,6 +120,8 @@ export default {
   },
   data() {
     return {
+      errorMessage: "",
+
       numOfStudentSongs: 0,
       allSongs: [],
       searchSongs: [],
@@ -237,12 +241,13 @@ export default {
         });
     },
 
-    songFilter(item, queryText, itemText) {
-      return (
-        itemText.toLowerCase().indexOf(queryText.toLowerCase()) !== -1 &&
-        queryText.length >= 2
-      );
-    },
+    // songFilter(item, queryText, itemText) {
+    //   return (
+    //     itemText.toLowerCase().indexOf(queryText.toLowerCase()) !== -1 &&
+    //     queryText.length >= 2
+    //   );
+    // },
+    validateSongs() {},
   },
   watch: {
     // want deep watchers for this
