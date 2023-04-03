@@ -166,6 +166,10 @@
         required
       ></v-select>
 
+      <div>
+        <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
+      </div>
+
       <br />
       <v-btn
         variant="outlined"
@@ -296,12 +300,14 @@
       ></v-select>
 
       <br />
+      <div>
+        <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
+      </div>
       <v-btn
         variant="outlined"
         style="margin-left: 25%; margin-right: 25%; margin-bottom: 20px"
         @click="
-          saveQuickCritique();
-          popupTrigger = true;
+          saveQuickCritique()
           // isOpen = true;
         "
         >Save</v-btn
@@ -371,7 +377,7 @@ export default {
     diction_articulationGrade: "",
     overallPerformanceComment: "",
     overallPerformanceGrade: "",
-    errorActive: true,
+    errorMessage: "",
 
     headers: [
       {
@@ -475,6 +481,11 @@ export default {
       console.log(this.deportmentGrade);
       console.log(this.selectedTimeslot);
       //individually sets each critique line variable JSON
+
+      //if all req fields have data
+      if (!this.validateQuickForm()) {
+        return;
+      }
 
       for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let deportmentCritique = {
@@ -628,14 +639,114 @@ export default {
             console.log(e);
           });
       }
+
+      this.errorMessage = "";
       this.popupTrigger = true;
       // this.showingCritiqueForm = false;
     },
 
+    validateQuickForm() {
+      var result = true;
+
+      if (this.deportmentGrade == "") {
+        result = false;
+        this.errorMessage = "Error: Please select a Deportment grade";
+      } else if (this.toneGrade == "") {
+        result = false;
+        this.errorMessage = "Error: Please select a Tone grade";
+      } else if (this.accuracy_intonationGrade == "") {
+        result = false;
+        this.errorMessage = "Error: Please select an Accuracy/Intonation grade";
+      } else if (this.techniqueGrade == "") {
+        result = false;
+        this.errorMessage = "Error: Please select a Technique grade";
+      } else if (this.interpretation_musicianshipGrade == "") {
+        result = false;
+        this.errorMessage =
+          "Error: Please select an Interpretation & Musicianship grade";
+      } else if (this.balance_blendGrade == "") {
+        result = false;
+        this.errorMessage = "Error: Please select an Balance & Blend grade";
+      } else if (this.diction_articulationGrade == "") {
+        result = false;
+        this.errorMessage = "Error: Please select a Diction/Articulation grade";
+      } else if (this.overallPerformanceComment == "") {
+        result = false;
+        this.errorMessage = "Error: Please give an Overall Performance comment";
+      } else if (this.overallPerformanceGrade == "") {
+        result = false;
+        this.errorMessage = "Error: Please select an Overall Performance grade";
+      }
+
+      return result;
+    },
+
+    validateExpandedForm() {
+      var result = true;
+
+      if (this.deportmentComment == "") {
+        result = false;
+        this.errorMessage = "Error: Please provide a Deporment comment";
+      } else if (this.deportmentGrade == "") {
+        result = false;
+        this.errorMessage = "Error: Please select a Deportment grade";
+      } else if (this.toneComment == "") {
+        result = false;
+        this.errorMessage = "Error: Please provide a Tone comment";
+      } else if (this.toneGrade == "") {
+        result = false;
+        this.errorMessage = "Error: Please select a Tone grade";
+      } else if (this.accuracy_intonationComment == "") {
+        result = false;
+        this.errorMessage =
+          "Error: Please provide an Accuracy/Intonation comment";
+      } else if (this.accuracy_intonationGrade == "") {
+        result = false;
+        this.errorMessage = "Error: Please select an Accuracy/Intonation grade";
+      } else if (this.techniqueComment == "") {
+        result = false;
+        this.errorMessage = "Error: Please provide a Technique comment";
+      } else if (this.techniqueGrade == "") {
+        result = false;
+        this.errorMessage = "Error: Please select a Technique grade";
+      } else if (this.interpretation_musicianshipComment == "") {
+        result = false;
+        this.errorMessage =
+          "Error: Please provide an Interpretation & Musicianship comment";
+      } else if (this.interpretation_musicianshipGrade == "") {
+        result = false;
+        this.errorMessage =
+          "Error: Please select an Interpretation & Musicianship grade";
+      } else if (this.balance_blendComment == "") {
+        result = false;
+        this.errorMessage = "Error: Please provide an Balance & Blend comment";
+      } else if (this.balance_blendGrade == "") {
+        result = false;
+        this.errorMessage = "Error: Please select an Balance & Blend grade";
+      } else if (this.diction_articulationComment == "") {
+        result = false;
+        this.errorMessage =
+          "Error: Please provide a Diction/Articulation comment";
+      } else if (this.diction_articulationGrade == "") {
+        result = false;
+        this.errorMessage = "Error: Please select a Diction/Articulation grade";
+      } else if (this.overallPerformanceComment == "") {
+        result = false;
+        this.errorMessage = "Error: Please give an Overall Performance comment";
+      } else if (this.overallPerformanceGrade == "") {
+        result = false;
+        this.errorMessage = "Error: Please select an Overall Performance grade";
+      }
+
+      return result;
+    },
     saveExpandedCritique() {
       console.log(this.deportmentGrade);
       console.log(this.selectedTimeslot);
 
+      if (!this.validateExpandedForm()) {
+        return;
+      }
       //individually sets each critique line variable JSON
       for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let deportmentCritique = {
@@ -790,6 +901,7 @@ export default {
           });
       }
 
+      this.errorMessage = "";
       this.popupTrigger = true;
       // this.showingCritiqueForm = false;
     },
