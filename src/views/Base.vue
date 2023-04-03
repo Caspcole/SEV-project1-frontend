@@ -65,6 +65,9 @@
           <StudentSettings
             v-if="this.$route.fullPath === '/studentSettings'"
           ></StudentSettings>
+          <CreateCritique
+            v-if="this.$route.fullPath === '/facultyCreateCritiques'"
+          ></CreateCritique>
           <StudentEventList
             v-if="this.$route.fullPath === '/studentEventSignUps'"
           ></StudentEventList>
