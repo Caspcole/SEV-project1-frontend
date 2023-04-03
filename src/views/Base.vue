@@ -77,6 +77,8 @@
           ></FacultyCritiqueView>
           <!-- Accompanist Section -->
           <!-- Admin Section -->
+          <CreateAvailability v-else-if="route === 'Event Availability'">
+          </CreateAvailability>
         </div>
       </v-col>
     </v-row>
@@ -96,6 +98,7 @@ import StudentHome from "../components/student/StudentHome.vue";
 import StudentEventList from "../components/student/StudentEventList.vue";
 import StudentViewCritique from "../components/student/StudentViewCritique.vue";
 import FacultyCritiqueView from "../components/faculty/CritiqueView.vue";
+import CreateAvailability from "../components/faculty/CreateAvailability.vue";
 export default {
   name: "Base",
   components: {
@@ -110,6 +113,7 @@ export default {
     FacultyCritiqueView,
     //Accompanist Component
     //Admin Component
+    CreateAvailability,
   },
   data: () => ({
     user: {},
