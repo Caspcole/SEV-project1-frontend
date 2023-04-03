@@ -346,6 +346,8 @@
 <script>
 import EventDataService from "../services/EventDataService";
 import CritiqueDataService from "../services/CritiqueDataService";
+import UserRoleDataService from "../services/UserRoleDataService";
+import JurorTimeslotDataService from "../services/JurorTimeslotDataService";
 import Utils from "../config/utils.js";
 import { ref } from "vue";
 
@@ -477,7 +479,8 @@ export default {
       this.showingCritiqueForm = false;
     },
 
-    saveQuickCritique() {
+    async saveQuickCritique() {
+      var facultyId, jurorTimeslotId;
       console.log(this.deportmentGrade);
       console.log(this.selectedTimeslot);
       //individually sets each critique line variable JSON
@@ -487,151 +490,153 @@ export default {
         return;
       }
 
+      // get userRoleId for current user
+      await UserRoleDataService.getRolesForUser(this.user.userId)
+        .then((response) => {
+          facultyId = response.data.find((obj) => {
+            return obj.role == "faculty";
+          }).id;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+
+      // create JurorTimeslot
+      let jurorTimeslotData = {
+        eventTimeslotId: this.selectedTimeslot.eventTimeslotId,
+        jurorId: facultyId,
+      };
+
+      await JurorTimeslotDataService.create(jurorTimeslotData)
+        .then((response) => {
+          jurorTimeslotId = response.data.id;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+
       for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let deportmentCritique = {
           type: "Deportment",
           grade: this.deportmentGrade,
           comment: "N/A",
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+          jurorTimeslotId: jurorTimeslotId,
+          studentTimeslotId:
+            this.selectedTimeslot.students[i].studentTimeslotId,
         };
-        CritiqueDataService.create(deportmentCritique)
+        await CritiqueDataService.create(deportmentCritique)
           .then((response) => {
             console.log(response);
           })
           .catch((e) => {
             console.log(e);
           });
-      }
 
-      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let toneCritique = {
           type: "Tone",
           grade: this.toneGrade,
           comment: "N/A",
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+          jurorTimeslotId: jurorTimeslotId,
+          studentTimeslotId:
+            this.selectedTimeslot.students[i].studentTimeslotId,
         };
-        CritiqueDataService.create(toneCritique)
+        await CritiqueDataService.create(toneCritique)
           .then((response) => {
             console.log(response);
           })
           .catch((e) => {
             console.log(e);
           });
-      }
 
-      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let accuracy_intonationCritique = {
           type: "Accuracy/Intonation",
           grade: this.accuracy_intonationGrade,
           comment: "N/A",
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+          jurorTimeslotId: jurorTimeslotId,
+          studentTimeslotId:
+            this.selectedTimeslot.students[i].studentTimeslotId,
         };
-        CritiqueDataService.create(accuracy_intonationCritique)
+        await CritiqueDataService.create(accuracy_intonationCritique)
           .then((response) => {
             console.log(response);
           })
           .catch((e) => {
             console.log(e);
           });
-      }
 
-      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let techniqueCritique = {
           type: "Technique",
           grade: this.techniqueGrade,
           comment: "N/A",
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+          jurorTimeslotId: jurorTimeslotId,
+          studentTimeslotId:
+            this.selectedTimeslot.students[i].studentTimeslotId,
         };
-        CritiqueDataService.create(techniqueCritique)
+        await CritiqueDataService.create(techniqueCritique)
           .then((response) => {
             console.log(response);
           })
           .catch((e) => {
             console.log(e);
           });
-      }
 
-      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
-        let techniqueCritique = {
-          type: "Technique",
-          grade: this.techniqueGrade,
-          comment: "N/A",
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
-        };
-        CritiqueDataService.create(techniqueCritique)
-          .then((response) => {
-            console.log(response);
-          })
-          .catch((e) => {
-            console.log(e);
-          });
-      }
-
-      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let interpretation_musicianshipCritique = {
           type: "Interpretation & Musicianship",
           grade: this.interpretation_musicianshipGrade,
           comment: "N/A",
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+          jurorTimeslotId: jurorTimeslotId,
+          studentTimeslotId:
+            this.selectedTimeslot.students[i].studentTimeslotId,
         };
-        CritiqueDataService.create(interpretation_musicianshipCritique)
+        await CritiqueDataService.create(interpretation_musicianshipCritique)
           .then((response) => {
             console.log(response);
           })
           .catch((e) => {
             console.log(e);
           });
-      }
 
-      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let balance_blendCritique = {
           type: "Balance & Blend",
           grade: this.balance_blendGrade,
           comment: "N/A",
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+          jurorTimeslotId: jurorTimeslotId,
+          studentTimeslotId:
+            this.selectedTimeslot.students[i].studentTimeslotId,
         };
-        CritiqueDataService.create(balance_blendCritique)
+        await CritiqueDataService.create(balance_blendCritique)
           .then((response) => {
             console.log(response);
           })
           .catch((e) => {
             console.log(e);
           });
-      }
 
-      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let diction_articulationCritique = {
           type: "Diction/Articulation",
           grade: this.diction_articulationGrade,
           comment: "N/A",
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+          jurorTimeslotId: jurorTimeslotId,
+          studentTimeslotId:
+            this.selectedTimeslot.students[i].studentTimeslotId,
         };
-        CritiqueDataService.create(diction_articulationCritique)
+        await CritiqueDataService.create(diction_articulationCritique)
           .then((response) => {
             console.log(response);
           })
           .catch((e) => {
             console.log(e);
           });
-      }
 
-      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let overallPerformanceCritique = {
           type: "Overall Performance & Suggestions",
           grade: this.overallPerformanceGrade,
           comment: this.overallPerformanceComment,
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+          jurorTimeslotId: jurorTimeslotId,
+          studentTimeslotId:
+            this.selectedTimeslot.students[i].studentTimeslotId,
         };
-        CritiqueDataService.create(overallPerformanceCritique)
+        await CritiqueDataService.create(overallPerformanceCritique)
           .then((response) => {
             console.log(response);
           })
@@ -740,159 +745,162 @@ export default {
 
       return result;
     },
-    saveExpandedCritique() {
+    async saveExpandedCritique() {
+      var facultyId, jurorTimeslotId;
       console.log(this.deportmentGrade);
       console.log(this.selectedTimeslot);
 
       if (!this.validateExpandedForm()) {
         return;
       }
-      //individually sets each critique line variable JSON
+
+      // get userRoleId for current user
+      await UserRoleDataService.getRolesForUser(this.user.userId)
+        .then((response) => {
+          facultyId = response.data.find((obj) => {
+            return obj.role == "faculty";
+          }).id;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+
+      // create JurorTimeslot
+      let jurorTimeslotData = {
+        eventTimeslotId: this.selectedTimeslot.eventTimeslotId,
+        jurorId: facultyId,
+      };
+
+      await JurorTimeslotDataService.create(jurorTimeslotData)
+        .then((response) => {
+          jurorTimeslotId = response.data.id;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+
       for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let deportmentCritique = {
           type: "Deportment",
           grade: this.deportmentGrade,
           comment: this.deportmentComment,
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+          jurorTimeslotId: jurorTimeslotId,
+          studentTimeslotId:
+            this.selectedTimeslot.students[i].studentTimeslotId,
         };
-        CritiqueDataService.create(deportmentCritique)
+        await CritiqueDataService.create(deportmentCritique)
           .then((response) => {
             console.log(response);
           })
           .catch((e) => {
             console.log(e);
           });
-      }
 
-      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let toneCritique = {
           type: "Tone",
           grade: this.toneGrade,
           comment: this.toneComment,
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+          jurorTimeslotId: jurorTimeslotId,
+          studentTimeslotId:
+            this.selectedTimeslot.students[i].studentTimeslotId,
         };
-        CritiqueDataService.create(toneCritique)
+        await CritiqueDataService.create(toneCritique)
           .then((response) => {
             console.log(response);
           })
           .catch((e) => {
             console.log(e);
           });
-      }
 
-      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let accuracy_intonationCritique = {
           type: "Accuracy/Intonation",
           grade: this.accuracy_intonationGrade,
           comment: this.accuracy_intonationComment,
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+          jurorTimeslotId: jurorTimeslotId,
+          studentTimeslotId:
+            this.selectedTimeslot.students[i].studentTimeslotId,
         };
-        CritiqueDataService.create(accuracy_intonationCritique)
+        await CritiqueDataService.create(accuracy_intonationCritique)
           .then((response) => {
             console.log(response);
           })
           .catch((e) => {
             console.log(e);
           });
-      }
 
-      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let techniqueCritique = {
           type: "Technique",
           grade: this.techniqueGrade,
           comment: this.techniqueComment,
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+          jurorTimeslotId: jurorTimeslotId,
+          studentTimeslotId:
+            this.selectedTimeslot.students[i].studentTimeslotId,
         };
-        CritiqueDataService.create(techniqueCritique)
+        await CritiqueDataService.create(techniqueCritique)
           .then((response) => {
             console.log(response);
           })
           .catch((e) => {
             console.log(e);
           });
-      }
 
-      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
-        let techniqueCritique = {
-          type: "Technique",
-          grade: this.techniqueGrade,
-          comment: this.techniqueComment,
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
-        };
-        CritiqueDataService.create(techniqueCritique)
-          .then((response) => {
-            console.log(response);
-          })
-          .catch((e) => {
-            console.log(e);
-          });
-      }
-
-      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let interpretation_musicianshipCritique = {
           type: "Interpretation & Musicianship",
           grade: this.interpretation_musicianshipGrade,
           comment: this.interpretation_musicianshipComment,
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+          jurorTimeslotId: jurorTimeslotId,
+          studentTimeslotId:
+            this.selectedTimeslot.students[i].studentTimeslotId,
         };
-        CritiqueDataService.create(interpretation_musicianshipCritique)
+        await CritiqueDataService.create(interpretation_musicianshipCritique)
           .then((response) => {
             console.log(response);
           })
           .catch((e) => {
             console.log(e);
           });
-      }
 
-      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let balance_blendCritique = {
           type: "Balance & Blend",
           grade: this.balance_blendGrade,
           comment: this.balance_blendComment,
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+          jurorTimeslotId: jurorTimeslotId,
+          studentTimeslotId:
+            this.selectedTimeslot.students[i].studentTimeslotId,
         };
-        CritiqueDataService.create(balance_blendCritique)
+        await CritiqueDataService.create(balance_blendCritique)
           .then((response) => {
             console.log(response);
           })
           .catch((e) => {
             console.log(e);
           });
-      }
 
-      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let diction_articulationCritique = {
           type: "Diction/Articulation",
           grade: this.diction_articulationGrade,
           comment: this.diction_articulationComment,
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+          jurorTimeslotId: jurorTimeslotId,
+          studentTimeslotId:
+            this.selectedTimeslot.students[i].studentTimeslotId,
         };
-        CritiqueDataService.create(diction_articulationCritique)
+        await CritiqueDataService.create(diction_articulationCritique)
           .then((response) => {
             console.log(response);
           })
           .catch((e) => {
             console.log(e);
           });
-      }
 
-      for (let i = 0; i < this.selectedTimeslot.students.length; i++) {
         let overallPerformanceCritique = {
           type: "Overall Performance & Suggestions",
           grade: this.overallPerformanceGrade,
           comment: this.overallPerformanceComment,
-          critiquerId: this.user.userId,
-          timeslotId: this.selectedTimeslot.students[0].studentTimeslotId,
+          jurorTimeslotId: jurorTimeslotId,
+          studentTimeslotId:
+            this.selectedTimeslot.students[i].studentTimeslotId,
         };
-        CritiqueDataService.create(overallPerformanceCritique)
+        await CritiqueDataService.create(overallPerformanceCritique)
           .then((response) => {
             console.log(response);
           })
@@ -915,11 +923,10 @@ export default {
     },
   },
   async mounted() {
-    // this.retrieveTodaysTimeslots("2017-04-24");
-    const currentDate = "2023-03-31";
-    // const currentDate = this.getComparisonDate();
-    await this.retrieveTodaysTimeslots("2023-03-31");
-    // await this.retrieveTodaysTimeslots(this.getComparisonDate());
+    // const currentDate = "2023-03-31";
+    const currentDate = this.getComparisonDate();
+    // await this.retrieveTodaysTimeslots("2023-03-31");
+    await this.retrieveTodaysTimeslots(this.getComparisonDate());
     this.user = Utils.getStore("user");
     console.log(this.user);
   },
