@@ -3,9 +3,9 @@
     <v-card-title> Repertoire: </v-card-title>
   </v-card>
   <v-container>
-    <v-btn color="primary" @click="displayDialog"> Add Song </v-btn>
+    <v-btn color="primary" @click="displayDialog"> Add Piece </v-btn>
     <v-expansion-panels class="mt-10" variant="accordion">
-      <v-expansion-panel v-for="semester in semesters">
+      <v-expansion-panel v-for="semester in userSemesters">
         <v-expansion-panel-title>
           {{ "  " + semester.semesterTitle }}
         </v-expansion-panel-title>
@@ -44,34 +44,67 @@
       </v-expansion-panel>
     </v-expansion-panels>
   </v-container>
-  <v-dialog v-model="dialog" max-width="500px">
+  <v-dialog v-model="dialog" max-width="700px">
     <v-card>
+      <v-card-title> Add a piece to your repertoire </v-card-title>
       <v-card-text>
         <v-row class="ml-5">
           <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
         </v-row>
+        <v-row class="mt-4 ml-5"> Select your instrument and semester </v-row>
+        <v-row><v-divider></v-divider></v-row>
+        <v-row class="mt-4 ml-5">
+          <v-col cols="6">
+            <v-select
+              clearable
+              v-model="selectedStudentInstrument"
+              label="Instrument"
+              :items="studentInstruments"
+              item-title="instrument.name"
+              return-object
+              :style="{ width: '250px' }"
+              @update:modelValue="composerUpdated()"
+            ></v-select>
+          </v-col>
+          <v-col cols="6">
+            <v-select
+              clearable
+              v-model="selectedSemester"
+              label="Semester (optional)"
+              :items="semesters"
+              item-value="id"
+              item-title="title"
+              :style="{ width: '250px' }"
+            ></v-select>
+          </v-col>
+        </v-row>
+        <v-row class="mt-4 ml-5"> Select the piece </v-row>
+        <v-row><v-divider></v-divider></v-row>
         <v-row class="mt-4 ml-5">
           <v-col cols="6">
             <v-autocomplete
+              clearable
               v-model="selectedComposer"
               v-model:search="composerSearch"
               label="Composer"
               :items="displayComposers"
               return-object
-              :style="{ width: '160px' }"
-              :no-data-text="noDataText"
+              :style="{ width: '250px' }"
+              :no-data-text="noComposerDataText"
               @update:modelValue="composerUpdated()"
             ></v-autocomplete>
           </v-col>
           <v-col cols="6">
-            <v-select
+            <v-autocomplete
+              clearable
               class="mr-15"
               v-model="selectedSong"
               label="Pieces"
               :items="songs"
               return-object
-              :style="{ width: '160px' }"
-            ></v-select>
+              :no-data-text="noPieceDataText"
+              :style="{ width: '250px' }"
+            ></v-autocomplete>
           </v-col>
         </v-row>
       </v-card-text>
@@ -91,12 +124,18 @@ import Utils from "../../config/utils.js";
 import RepertoireDataService from "../../services/RepertoireDataService";
 import ComposerDataService from "../../services/ComposerDataService";
 import SongDataService from "../../services/SongDataService";
+import SemesterDataService from "../../services/SemesterDataService";
+import StudentInstrumentDataService from "../../services/StudentInstrumentDataService";
 export default {
   name: "studentRepertoireView",
   data: () => ({
     user: {},
-    semesters: [],
+    userSemesters: [],
     dialog: false,
+    studentInstruments: [],
+    selectedStudentInstrument: null,
+    semesters: [],
+    selectedSemester: null,
     composers: [],
     displayComposers: [],
     selectedComposer: null,
@@ -110,8 +149,8 @@ export default {
     async fillSemesters() {
       RepertoireDataService.getByUser(this.user.userId)
         .then((response) => {
-          this.semesters = response.data;
-          this.semesters.forEach((obj) => {
+          this.userSemesters = response.data;
+          this.userSemesters.forEach((obj) => {
             if (obj.id == null) {
               obj.semesterTitle = "Additional Repertoire";
             } else {
@@ -133,7 +172,6 @@ export default {
               obj.studentInstruments[index].repertoire.push(rep.song);
             });
           });
-          console.log("retreived data", this.semesters);
         })
         .catch((e) => {
           console.log(e);
@@ -152,16 +190,17 @@ export default {
         });
     },
     async composerUpdated() {
-      console.log("updated");
-      // this.selectedSong = null;
-      // this.songs = [];
-      // await SongDataService.getByComposerId(this.selectedComposer.id)
-      //   .then((response) => {
-      //     this.songs = response.data;
-      //   })
-      //   .catch((e) => {
-      //     console.log(e);
-      //   });
+      this.selectedSong = null;
+      this.songs = [];
+      if (this.selectedComposer != null) {
+        await SongDataService.getByComposerId(this.selectedComposer.id)
+          .then((response) => {
+            this.songs = response.data;
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
     },
     displayDialog() {
       this.dialog = true;
@@ -177,6 +216,28 @@ export default {
         return composer.title.toLowerCase().indexOf(value.toLowerCase()) > -1;
       });
     },
+    async retrieveAllSemesters() {
+      await SemesterDataService.getAll()
+        .then((response) => {
+          this.semesters = response.data;
+          this.semesters.forEach(
+            (obj) => (obj.title = obj.year + " - " + obj.code)
+          );
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+    async retrieveStudentInstruments() {
+      await StudentInstrumentDataService.getByUser(this.user.userId)
+        .then((response) => {
+          this.studentInstruments = response.data;
+          console.log(this.studentInstruments);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
   },
   watch: {
     composerSearch(val) {
@@ -190,11 +251,18 @@ export default {
     },
   },
   computed: {
-    noDataText() {
+    noComposerDataText() {
       if (this.hasSearched) {
         return "No composers found";
       } else {
         return "Start typing to search for composers";
+      }
+    },
+    noPieceDataText() {
+      if (this.selectedComposer != null) {
+        return "No songs currently for this composer";
+      } else {
+        return "No composer selected";
       }
     },
   },
@@ -202,6 +270,8 @@ export default {
     this.user = Utils.getStore("user");
     await this.fillSemesters();
     this.fillComposers();
+    this.retrieveAllSemesters();
+    this.retrieveStudentInstruments();
   },
 };
 </script>
