@@ -63,7 +63,6 @@
               item-title="instrument.name"
               return-object
               :style="{ width: '250px' }"
-              @update:modelValue="composerUpdated()"
             ></v-select>
           </v-col>
           <v-col cols="6">
@@ -113,7 +112,9 @@
         <v-btn color="blue-darken-1" variant="text" @click="closeDialog"
           >Cancel</v-btn
         >
-        <v-btn color="blue-darken-1" variant="text" @click="addSong">ADD</v-btn>
+        <v-btn color="blue-darken-1" variant="text" @click="addPiece"
+          >ADD</v-btn
+        >
         <v-spacer></v-spacer>
       </v-card-actions>
     </v-card>
@@ -203,13 +204,50 @@ export default {
       }
     },
     displayDialog() {
+      this.errorMessage = "";
       this.dialog = true;
     },
-    addSong() {
+    async addPiece() {
+      if (!this.isValid()) {
+        return;
+      }
+
+      const data = {
+        studentInstrumentId: this.selectedStudentInstrument.id,
+        songId: this.selectedSong.id,
+        semesterId: this.selectedSemester,
+      };
+
+      await RepertoireDataService.create(data).catch((e) => {
+        console.log(e);
+      });
+
+      this.fillSemesters();
+      this.selectedStudentInstrument = null;
+      this.selectedSemester = null;
+      this.selectedComposer = null;
+      this.selectedSong = null;
+
       this.closeDialog();
     },
     closeDialog() {
       this.dialog = false;
+    },
+    isValid() {
+      var result = true;
+
+      if (this.selectedStudentInstrument == null) {
+        this.errorMessage = "Please select your instrument";
+        result = false;
+      } else if (this.selectedComposer == null) {
+        this.errorMessage = "Please select a composer";
+        result = false;
+      } else if (this.selectedSong == null) {
+        this.errorMessage = "Please select a piece";
+        result = false;
+      }
+
+      return result;
     },
     querySelections(value) {
       this.displayComposers = this.composers.filter((composer) => {
@@ -232,7 +270,6 @@ export default {
       await StudentInstrumentDataService.getByUser(this.user.userId)
         .then((response) => {
           this.studentInstruments = response.data;
-          console.log(this.studentInstruments);
         })
         .catch((e) => {
           console.log(e);
