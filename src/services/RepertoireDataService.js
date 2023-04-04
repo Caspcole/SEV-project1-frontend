@@ -10,6 +10,10 @@ class RepertoireDataService {
     return http.get(this.baseUrl + "userId/" + userId);
   }
 
+  getSemesterByUser(userId) {
+    return http.get(this.baseUrl + "semesters/userId/" + userId);
+  }
+
   remove(id) {
     return http.delete(this.baseUrl + id);
   }
