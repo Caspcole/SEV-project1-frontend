@@ -134,6 +134,7 @@ export default {
     group: null,
     role: "",
     route: "",
+    eventOb: {},
     myItems: [
       {
         prependIcon: "mdi-account",

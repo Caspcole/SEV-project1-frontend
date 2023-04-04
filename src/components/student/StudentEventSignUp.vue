@@ -28,7 +28,7 @@
     </v-container>
     <h3>Songs</h3>
     <v-card v-for="song in studentSongs" :key="song.id">
-      <p>Please select a composer and then a song</p>
+      <p>Please select a composer, then a piece</p>
       <v-container>
         <v-row>
           <v-col>
@@ -51,7 +51,7 @@
             <v-autocomplete
               clearable
               v-model="selectedSongs[song.id]"
-              label="Song"
+              label="Piece"
               :items="
                 selectedComposers[song.id]
                   ? composerSongs[song.id]
@@ -65,10 +65,7 @@
             </v-autocomplete>
           </v-col>
           <v-col>
-            <!-- <v-checkbox
-              label="translation required"
-              :model-value="requiresTranslation(song.id)"
-            ></v-checkbox> -->
+            <v-btn @click="deleteStudentSong(song.id)">Delete</v-btn>
           </v-col>
         </v-row>
         <v-row>
@@ -90,17 +87,19 @@
 
       <!-- <input v-model="translation.text" /> -->
     </v-card>
-    <p>{{ studentSongs }}</p>
     <!-- make button work -->
     <v-btn @click="">Add Song From Repertoire</v-btn>
     <br />
     <br />
-    <v-btn @click="addStudentSong">Add New Song</v-btn>
+    <v-btn @click="addStudentSong">Add Song from All Songs</v-btn>
+    <br />
+    <br />
+    <p>Do you have a song not listed from the Add Song button?</p>
+    <v-btn @click="addStudentSong">Register a Song</v-btn>
   </div>
   <br />
-  <br />
   <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
-
+  <br />
   <div>
     <v-btn @click="submitPage">Submit Page</v-btn>
   </div>
@@ -131,7 +130,7 @@ export default {
       selectedStudentSong: null,
       selectedComposers: [],
       disabledStudentSongs: [],
-      selectedSong: {},
+      selectedSongs: [],
 
       studentSongs: [],
       composerSongs: [],
@@ -140,7 +139,7 @@ export default {
       displayedComposers: [],
       // composersPage: 1,
       // selectedComposers: [],
-      student: { instructor: "Tim", instrument: "Voice", id: "0" },
+      student: { instructor: "Tim Hunter", instrument: "Pianno", id: "0" },
     };
   },
   async created() {
@@ -156,19 +155,33 @@ export default {
   },
   methods: {
     onSave() {
-      if (!this.selectedComposers[this.selectedStudentSong] == null) {
-        if (!this.disabledStudentSongs[this.selectedStudentSong]) {
+      this.errorMessage = "";
+      if (this.selectedComposers[this.selectedStudentSong]) {
+        if (this.selectedSongs[this.selectedStudentSong]) {
           this.studentSongs[this.selectedStudentSong].composer =
-            this.selectedComposers[this.selectedStudentSong].id;
-
+            this.selectedComposers[this.selectedStudentSong];
+          console.log(this.selectedComposers[this.selectedStudentSong].id);
           this.studentSongs[this.selectedStudentSong].piece =
-            this.selectedSongs[this.selectedStudentSong].id;
+            this.selectedSongs[this.selectedStudentSong];
 
           this.disabledStudentSongs[this.selectedStudentSong] = true;
+        } else {
+          this.errorMessage = "Please select a piece.";
         }
+      } else {
+        this.errorMessage = "Please select a composer.";
       }
+    },
 
+    deleteStudentSong(songId) {
       console.log(this.studentSongs);
+
+      console.log(this.studentSongs.length - 2);
+      for (let i = songId; i < this.studentSongs.length - 2; i++) {
+        this.studentSongs[i] = this.studentSongs[i + 1];
+        this.studentSongs[i].id = i;
+      }
+      this.studentSongs = this.studentSongs.splice(0, -1);
     },
 
     editStudentSong(studentSongId) {
@@ -209,7 +222,9 @@ export default {
       this.numOfStudentSongs++;
     },
 
-    submitPage() {},
+    submitPage() {
+      this.onSave();
+    },
 
     async getComposers() {
       await ComposersDataService.getAll()
@@ -247,14 +262,23 @@ export default {
     //     queryText.length >= 2
     //   );
     // },
-    validateSongs() {},
-  },
-  watch: {
-    // want deep watchers for this
-    songItems() {
-      this.selectedItem = null;
+    validateSongs() {
+      this.studentSongs.forEach((song) => {
+        // console.log(song);
+        if (song.composer == "") {
+          this.errorMessage = "Please do not leave a composer blank.";
+        } else if (song.piece == "") {
+          this.errorMessage = "Please do not leave a piece blank.";
+        }
+      });
     },
   },
+  // watch: {
+  //   // want deep watchers for this
+  //   songItems() {
+  //     this.selectedItem = null;
+  //   },
+  // },
   // mounted() {},
 };
 </script>
