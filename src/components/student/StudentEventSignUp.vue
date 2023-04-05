@@ -59,7 +59,6 @@
               "
               item-value="id"
               item-title="title"
-              :filter="songFilter"
               :disabled="disabledStudentSongs[song.id]"
             >
             </v-autocomplete>
@@ -87,6 +86,10 @@
 
       <!-- <input v-model="translation.text" /> -->
     </v-card>
+    <p>{{ studentSongs }}</p>
+    <p>{{ selectedComposers }}</p>
+    <p>{{ selectedSongs }}</p>
+
     <!-- make button work -->
     <v-btn @click="">Add Song From Repertoire</v-btn>
     <br />
@@ -95,7 +98,7 @@
     <br />
     <br />
     <p>Do you have a song not listed from the Add Song button?</p>
-    <v-btn @click="addStudentSong">Register a Song</v-btn>
+    <v-btn @click="">Register a Song</v-btn>
   </div>
   <br />
   <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
@@ -156,32 +159,54 @@ export default {
   methods: {
     onSave() {
       this.errorMessage = "";
-      if (this.selectedComposers[this.selectedStudentSong]) {
-        if (this.selectedSongs[this.selectedStudentSong]) {
-          this.studentSongs[this.selectedStudentSong].composer =
-            this.selectedComposers[this.selectedStudentSong];
-          console.log(this.selectedComposers[this.selectedStudentSong].id);
-          this.studentSongs[this.selectedStudentSong].piece =
-            this.selectedSongs[this.selectedStudentSong];
 
-          this.disabledStudentSongs[this.selectedStudentSong] = true;
+      if (!this.disabledStudentSongs[this.selectedStudentSong]) {
+        if (this.selectedComposers[this.selectedStudentSong]) {
+          if (this.selectedSongs[this.selectedStudentSong]) {
+            this.studentSongs[this.selectedStudentSong].composer =
+              this.selectedComposers[this.selectedStudentSong];
+            this.studentSongs[this.selectedStudentSong].piece =
+              this.selectedSongs[this.selectedStudentSong];
+
+            this.disabledStudentSongs[this.selectedStudentSong] = true;
+            return true;
+          } else {
+            this.errorMessage = "Please select a piece.";
+            return false;
+          }
         } else {
-          this.errorMessage = "Please select a piece.";
+          this.errorMessage = "Please select a composer.";
+          return false;
         }
       } else {
-        this.errorMessage = "Please select a composer.";
+        return true;
       }
     },
 
     deleteStudentSong(songId) {
-      console.log(this.studentSongs);
+      let isNotSaved = this.onSave;
+      this.errorMessage = "";
 
-      console.log(this.studentSongs.length - 2);
-      for (let i = songId; i < this.studentSongs.length - 2; i++) {
+      if (isNotSaved) {
+      }
+
+      for (let i = songId; i < this.studentSongs.length - 1; i++) {
+        console.log(this.studentSongs[i]);
         this.studentSongs[i] = this.studentSongs[i + 1];
         this.studentSongs[i].id = i;
+
+        this.selectedComposers[i] = this.selectedComposers[i + 1];
+
+        this.selectedSongs[i] = this.selectedSongs[i + 1];
       }
-      this.studentSongs = this.studentSongs.splice(0, -1);
+      if (this.selectedStudentSong == songId) {
+        this.disabledStudentSongs[songId] = true;
+      }
+
+      this.studentSongs.pop();
+      this.selectedComposers.pop();
+      this.selectedSongs.pop();
+      this.numOfStudentSongs--;
     },
 
     editStudentSong(studentSongId) {
@@ -206,20 +231,25 @@ export default {
     //     });
     // },
     addStudentSong() {
+      let validSave = false;
       if (this.studentSongs.length > 0) {
-        this.onSave();
+        validSave = this.onSave();
+      } else {
+        validSave = true;
       }
 
-      this.selectedStudentSong = this.numOfStudentSongs;
+      if (validSave) {
+        this.selectedStudentSong = this.numOfStudentSongs;
 
-      this.studentSongs.push({
-        piece: "",
-        composer: "",
-        id: this.numOfStudentSongs,
-      });
+        this.studentSongs.push({
+          piece: "",
+          composer: "",
+          id: this.numOfStudentSongs,
+        });
 
-      this.disabledStudentSongs.push(false);
-      this.numOfStudentSongs++;
+        this.disabledStudentSongs.push(false);
+        this.numOfStudentSongs++;
+      }
     },
 
     submitPage() {
