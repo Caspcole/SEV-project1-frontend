@@ -5,6 +5,7 @@ class SemesterDataService {
   getAll() {
     return http.get(this.baseUrl);
   }
+
   getCurrent(date) {
     return http.get(this.baseUrl + "date/" + date);
   }

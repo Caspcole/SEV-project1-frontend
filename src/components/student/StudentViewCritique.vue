@@ -169,17 +169,6 @@ export default {
           console.log(e);
         });
     },
-    async getRole() {
-      await UserRoleDataService.getRolesForUser(this.user.userId)
-        .then((response) => {
-          facultyId = response.data.find((obj) => {
-            return obj.role == "faculty";
-          }).id;
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    },
     displayStudentCritiques(student) {
       this.selectedStudent = student;
       this.showDialog = true;
@@ -234,7 +223,7 @@ export default {
     this.user = Utils.getStore("user");
     await this.getCurrentSemester();
     console.log(this.selectedSemester);
-    await this.semesterSearchUpdate(this.selectedSemester.id);
+    await this.semesterSearchUpdate(this.selectedSemester);
   },
 };
 </script>
