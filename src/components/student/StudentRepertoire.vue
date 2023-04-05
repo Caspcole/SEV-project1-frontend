@@ -281,7 +281,8 @@ export default {
       const data = {
         studentInstrumentId: this.selectedStudentInstrument.id,
         songId: this.selectedSong.id,
-        semesterId: this.selectedSemester,
+        semesterId:
+          this.selectedSemester == null ? null : this.selectedSemester.id,
       };
 
       await RepertoireDataService.create(data).catch((e) => {
