@@ -323,7 +323,7 @@ export default {
           if (
             obj.studentInstrumentId == this.selectedStudentInstrument.id &&
             obj.songId == this.selectedSong.id &&
-            obj.semesterId == this.selectedSemester
+            this.compareSemesters(obj.semesterId, this.selectedSemester)
           ) {
             if (this.isEdit) {
               return obj.id != this.editedRepertoire.id;
