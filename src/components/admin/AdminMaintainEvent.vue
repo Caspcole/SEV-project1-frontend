@@ -28,7 +28,7 @@
         <v-toolbar flat>
           <v-toolbar-title> EVENTS </v-toolbar-title>
           <v-spacer></v-spacer>
-          <v-btn color="primary">Add Event</v-btn>
+          <v-btn color="primary" @click="addEvent()">Add Event</v-btn>
         </v-toolbar>
       </template>
       <template #item="{ item }">
@@ -83,68 +83,60 @@
   </v-dialog>
   <v-dialog v-model="dialog" max-width="700px">
     <v-card>
-      <v-card-title v-if="!isEdit">
-        Add a piece to your repertoire
+      <v-card-title>
+        <div v-if="isEdit">Edit Event</div>
+        <div v-else>New Event</div>
       </v-card-title>
-      <v-card-title v-else> Edit a repertoire piece </v-card-title>
       <v-card-text>
         <v-row class="ml-5">
           <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
         </v-row>
-        <v-row class="mt-4 ml-5"> Select your instrument and semester </v-row>
-        <v-row><v-divider></v-divider></v-row>
-        <v-row class="mt-4 ml-5">
-          <v-col cols="6">
-            <v-select
-              clearable
-              v-model="selectedStudentInstrument"
-              label="Instrument"
-              :items="studentInstruments"
-              item-title="instrument.name"
-              return-object
-              :style="{ width: '250px' }"
-            ></v-select>
+        <v-row>
+          <v-col>
+            <v-select> </v-select>
+            <!-- Type -->
           </v-col>
-          <v-col cols="6">
-            <v-select
-              clearable
-              v-model="selectedSemester"
-              label="Semester (optional)"
-              :items="semesters"
-              item-value="id"
-              item-title="title"
-              return-object
-              :style="{ width: '250px' }"
-            ></v-select>
+          <v-col>
+            <v-select></v-select>
+            <!-- Name -->
           </v-col>
         </v-row>
-        <v-row class="mt-4 ml-5"> Select the piece </v-row>
-        <v-row><v-divider></v-divider></v-row>
-        <v-row class="mt-4 ml-5">
-          <v-col cols="6">
-            <v-autocomplete
-              clearable
-              v-model="selectedComposer"
-              v-model:search="composerSearch"
-              label="Composer"
-              :items="displayComposers"
-              return-object
-              :style="{ width: '250px' }"
-              :no-data-text="noComposerDataText"
-              @update:modelValue="composerUpdated()"
-            ></v-autocomplete>
+        <v-row v-if="false">
+          <!-- if type is "other"-->
+        </v-row>
+        <v-row>
+          <v-col>
+            <v-select></v-select>
+            <!-- date -->
           </v-col>
-          <v-col cols="6">
-            <v-autocomplete
-              clearable
-              class="mr-15"
-              v-model="selectedSong"
-              label="Pieces"
-              :items="songs"
-              return-object
-              :no-data-text="noPieceDataText"
-              :style="{ width: '250px' }"
-            ></v-autocomplete>
+          <v-col>
+            <v-select></v-select>
+            <!-- start -->
+          </v-col>
+          <v-col>
+            <v-select></v-select>
+            <!-- end -->
+          </v-col>
+          <v-col>
+            <v-select></v-select>
+            <!-- duration -->
+          </v-col>
+        </v-row>
+        <v-row>
+          Options
+          <v-spacer></v-spacer>
+        </v-row>
+        <v-row>
+          <v-divider></v-divider>
+        </v-row>
+        <v-row>
+          <v-col>
+            <v-checkbox></v-checkbox>
+            <!-- visible -->
+          </v-col>
+          <v-col>
+            <v-checkbox></v-checkbox>
+            <!-- multiple TS slection -->
           </v-col>
         </v-row>
       </v-card-text>
@@ -156,14 +148,14 @@
         <v-btn
           color="blue-darken-1"
           variant="text"
-          @click="addPiece"
+          @click="addEventConfirm"
           v-if="!isEdit"
-          >SAVE</v-btn
+          >CREATE</v-btn
         >
         <v-btn
           color="blue-darken-1"
           variant="text"
-          @click="editItemConfirm"
+          @click="editEventConfirm"
           v-else
           >SAVE</v-btn
         >
@@ -189,7 +181,9 @@ export default {
       { title: "End Time", key: "endTime" },
       { title: "Actions", sortable: false, allign: "end" },
     ],
-    editedEvent: null,
+    editedEvent: {},
+    isEdit: false,
+    errorMessage: "",
   }),
   methods: {
     async retrieveAllSemesters() {
@@ -265,6 +259,26 @@ export default {
         this.editedEvent = null;
       });
     },
+    addEvent() {
+      this.editedEvent = {};
+      this.errorMessage = "";
+      this.isEdit = false;
+      this.dialog = true;
+    },
+    addEventConfirm() {
+      // validate
+
+      // create event
+
+      // create event TS
+
+      this.closeDialog();
+    },
+    closeDialog() {
+      this.dialog = false;
+    },
+    editEvent(event) {},
+    editEventConfirm() {},
   },
   async mounted() {
     await this.retrieveAllSemesters();
