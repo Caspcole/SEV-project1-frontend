@@ -45,17 +45,16 @@
               {{ this.formatTime(item.columns[header.key]) }}
             </div>
             <div v-else-if="header.title == 'Actions'">
-              <div v-if="this.isAfterToday(item.raw)">
-                <v-icon size="small" class="me-2" @click="editEvent(item.raw)">
-                  mdi-pencil
-                </v-icon>
-                <v-icon size="small" @click="deleteEvent(item.raw)">
-                  mdi-delete
-                </v-icon>
-              </div>
-              <div v-else>
-                <v-text>Passed</v-text>
-              </div>
+              <v-icon size="small" class="me-2" @click="editEvent(item.raw)">
+                mdi-pencil
+              </v-icon>
+              <v-icon
+                v-if="this.isAfterNow(item.raw)"
+                size="small"
+                @click="deleteEvent(item.raw)"
+              >
+                mdi-delete
+              </v-icon>
             </div>
             <div v-else>
               {{ item.columns[header.key] }}
@@ -65,6 +64,113 @@
       </template>
     </v-data-table>
   </v-container>
+  <v-dialog v-model="dialogDelete" max-width="500px">
+    <v-card>
+      <v-card-title class="text-h5"
+        >Are you sure you want to delete this item?</v-card-title
+      >
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="blue-darken-1" variant="text" @click="closeDelete"
+          >Cancel</v-btn
+        >
+        <v-btn color="blue-darken-1" variant="text" @click="deleteEventConfirm"
+          >OK</v-btn
+        >
+        <v-spacer></v-spacer>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+  <v-dialog v-model="dialog" max-width="700px">
+    <v-card>
+      <v-card-title v-if="!isEdit">
+        Add a piece to your repertoire
+      </v-card-title>
+      <v-card-title v-else> Edit a repertoire piece </v-card-title>
+      <v-card-text>
+        <v-row class="ml-5">
+          <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
+        </v-row>
+        <v-row class="mt-4 ml-5"> Select your instrument and semester </v-row>
+        <v-row><v-divider></v-divider></v-row>
+        <v-row class="mt-4 ml-5">
+          <v-col cols="6">
+            <v-select
+              clearable
+              v-model="selectedStudentInstrument"
+              label="Instrument"
+              :items="studentInstruments"
+              item-title="instrument.name"
+              return-object
+              :style="{ width: '250px' }"
+            ></v-select>
+          </v-col>
+          <v-col cols="6">
+            <v-select
+              clearable
+              v-model="selectedSemester"
+              label="Semester (optional)"
+              :items="semesters"
+              item-value="id"
+              item-title="title"
+              return-object
+              :style="{ width: '250px' }"
+            ></v-select>
+          </v-col>
+        </v-row>
+        <v-row class="mt-4 ml-5"> Select the piece </v-row>
+        <v-row><v-divider></v-divider></v-row>
+        <v-row class="mt-4 ml-5">
+          <v-col cols="6">
+            <v-autocomplete
+              clearable
+              v-model="selectedComposer"
+              v-model:search="composerSearch"
+              label="Composer"
+              :items="displayComposers"
+              return-object
+              :style="{ width: '250px' }"
+              :no-data-text="noComposerDataText"
+              @update:modelValue="composerUpdated()"
+            ></v-autocomplete>
+          </v-col>
+          <v-col cols="6">
+            <v-autocomplete
+              clearable
+              class="mr-15"
+              v-model="selectedSong"
+              label="Pieces"
+              :items="songs"
+              return-object
+              :no-data-text="noPieceDataText"
+              :style="{ width: '250px' }"
+            ></v-autocomplete>
+          </v-col>
+        </v-row>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="blue-darken-1" variant="text" @click="closeDialog"
+          >Cancel</v-btn
+        >
+        <v-btn
+          color="blue-darken-1"
+          variant="text"
+          @click="addPiece"
+          v-if="!isEdit"
+          >SAVE</v-btn
+        >
+        <v-btn
+          color="blue-darken-1"
+          variant="text"
+          @click="editItemConfirm"
+          v-else
+          >SAVE</v-btn
+        >
+        <v-spacer></v-spacer>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 <script>
 import SemesterDataService from "../../services/SemesterDataService";
@@ -83,6 +189,7 @@ export default {
       { title: "End Time", key: "endTime" },
       { title: "Actions", sortable: false, allign: "end" },
     ],
+    editedEvent: null,
   }),
   methods: {
     async retrieveAllSemesters() {
@@ -139,11 +246,24 @@ export default {
         minute: "numeric",
       });
     },
-    isAfterToday(event) {
+    isAfterNow(event) {
       let eventDate = new Date(event.date).getTime();
       let today = new Date().getTime();
 
       return eventDate > today;
+    },
+    deleteEvent(event) {
+      this.editedEvent = event;
+      this.dialogDelete = true;
+    },
+    async deleteEventConfirm() {
+      this.closeDelete();
+    },
+    closeDelete() {
+      this.dialogDelete = false;
+      this.$nextTick(() => {
+        this.editedEvent = null;
+      });
     },
   },
   async mounted() {
