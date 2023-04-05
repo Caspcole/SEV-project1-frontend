@@ -93,20 +93,34 @@
         </v-row>
         <v-row>
           <v-col>
-            <v-select> </v-select>
+            <v-select
+              clearable
+              v-model="editedEvent.type"
+              label="Type"
+              :items="eventTypes"
+              return-object
+            >
+            </v-select>
             <!-- Type -->
           </v-col>
           <v-col>
-            <v-select></v-select>
+            <v-text-field
+              v-model="editedEvent.name"
+              label="Name"
+            ></v-text-field>
             <!-- Name -->
           </v-col>
         </v-row>
-        <v-row v-if="false">
+        <v-row v-if="this.editedEvent.type == 'Other'">
           <!-- if type is "other"-->
+          <v-text-field
+            v-model="eventOtherType"
+            label="Please specify the event type"
+          ></v-text-field>
         </v-row>
         <v-row>
           <v-col>
-            <v-select></v-select>
+            <VueDatePicker v-model="this.editedEvent.date"></VueDatePicker>
             <!-- date -->
           </v-col>
           <v-col>
@@ -167,6 +181,8 @@
 <script>
 import SemesterDataService from "../../services/SemesterDataService";
 import EventDataService from "../../services/EventDataService";
+import VueDatePicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
 export default {
   name: "adminMaintainEvent",
   data: () => ({
@@ -182,8 +198,13 @@ export default {
       { title: "Actions", sortable: false, allign: "end" },
     ],
     editedEvent: {},
+    selectedEvent: {},
     isEdit: false,
     errorMessage: "",
+    eventTypes: [],
+    eventOtherType: null,
+    dialog: false,
+    dialogDelete: false,
   }),
   methods: {
     async retrieveAllSemesters() {
@@ -215,7 +236,6 @@ export default {
       await EventDataService.getBySemester(this.selectedSemester.id)
         .then((response) => {
           this.events = response.data;
-          console.log(this.events);
         })
         .catch((err) => {
           console.log(err);
@@ -261,6 +281,7 @@ export default {
     },
     addEvent() {
       this.editedEvent = {};
+      this.eventOtherType = "";
       this.errorMessage = "";
       this.isEdit = false;
       this.dialog = true;
@@ -280,6 +301,7 @@ export default {
     editEvent(event) {},
     editEventConfirm() {},
   },
+  components: { VueDatePicker },
   async mounted() {
     await this.retrieveAllSemesters();
     await this.getCurrentSemester();
