@@ -411,8 +411,6 @@ export default {
           obj.semesterId == semester.id
       );
       song.composer.title = song.composer.fName + " " + song.composer.lName;
-
-      console.log(semester);
       if (semester.id != null) {
         semester.title = semester.year + " - " + semester.code;
       }
