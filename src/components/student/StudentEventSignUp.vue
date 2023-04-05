@@ -4,7 +4,7 @@
     <v-container>
       <v-row>
         <v-col>
-          <h3>{{ eventOb.type }}</h3>
+          <h3>{{ eventOb }}</h3>
           <!-- We need to add Event names to the database -->
         </v-col>
         <v-col>
@@ -282,8 +282,16 @@ export default {
     },
 
     networkSave() {
-      var data = {};
+      createStudentTimeSlot();
+
+      saveToRepertoire();
     },
+    createStudentTimeSlot() {
+      var data = {
+        eventTimeslotId: this.eventOb.eventTimes[0].eventId,
+      };
+    },
+    saveToRepertoire() {},
   },
 };
 </script>
