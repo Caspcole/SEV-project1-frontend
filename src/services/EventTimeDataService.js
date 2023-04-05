@@ -1,24 +1,17 @@
 import http from "./services.js";
 class EventTimeDataService {
-  baseUrl = "/performance-t2/";
+  baseUrl = "/performance-t2/eventTimeslot/";
 
   getAll() {
-    return http.get(this.baseUrl + "eventTimeslot");
+    return http.get(this.baseUrl);
   }
+
   get(id) {
-    return http.get(this.baseUrl + `eventTimeslot/${id}`);
+    return http.get(this.baseUrl + id);
   }
+
   getByEvent(id) {
-    return http.get(this.baseUrl + `eventTimeslot/event/${id}`);
+    return http.get(this.baseUrl + `event/${id}`);
   }
-  // update(id, data) {
-  //   return http.put(`/schedule-t2/course/${id}`, data);
-  // }
-  // delete(id) {
-  //   return http.delete(`/schedule-t2/course/${id}`);
-  // }
-  // deleteAll() {
-  //   return http.delete(`/schedule-t2/course`);
-  // }
 }
 export default new EventTimeDataService();

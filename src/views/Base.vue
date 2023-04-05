@@ -65,6 +65,9 @@
           <StudentSettings
             v-if="this.$route.fullPath === '/studentSettings'"
           ></StudentSettings>
+          <CreateCritique
+            v-if="this.$route.fullPath === '/facultyCreateCritiques'"
+          ></CreateCritique>
           <StudentEventList
             v-if="this.$route.fullPath === '/studentEventSignUps'"
             @SignUpForEventObject="changeToEventFormSignUp"
@@ -86,6 +89,9 @@
             v-if="this.$route.fullPath === '/createAvailability'"
           >
           </CreateAvailability>
+          <StudentRepertoire
+            v-if="this.$route.fullPath === '/studentRepertoire'"
+          ></StudentRepertoire>
         </div>
       </v-col>
     </v-row>
@@ -102,12 +108,14 @@ import StudentSettings from "../components/student/StudentSettings.vue";
 // Import all components and insert into homepage
 import MainNav from "../components/MainNav.vue";
 import StudentHome from "../components/student/StudentHome.vue";
+import CreateCritique from "../components/faculty/CreateCritique.vue";
 import StudentEventList from "../components/student/StudentEventList.vue";
 import StudentViewCritique from "../components/student/StudentViewCritique.vue";
 
 import StudentEventSignUp from "../components/student/StudentEventSignUp.vue";
 import FacultyCritiqueView from "../components/faculty/CritiqueView.vue";
 import CreateAvailability from "../components/faculty/CreateAvailability.vue";
+import StudentRepertoire from "../components/student/StudentRepertoire.vue";
 export default {
   name: "Base",
   components: {
@@ -118,12 +126,14 @@ export default {
     StudentHome, //Landing Page for the Students
     StudentEventList, //Student page to select event and time to sign up
     StudentEventSignUp,
+    CreateCritique,
     StudentViewCritique,
     //Faculty Component
     FacultyCritiqueView,
     //Accompanist Component
     //Admin Component
     CreateAvailability,
+    StudentRepertoire,
   },
   data: () => ({
     user: {},
