@@ -83,12 +83,12 @@
         </v-row>
       </v-container>
       <!-- figure out how to v-model each song's translation checkbox -->
-
-      <!-- <input v-model="translation.text" /> -->
     </v-card>
     <p>{{ studentSongs }}</p>
     <p>{{ selectedComposers }}</p>
     <p>{{ selectedSongs }}</p>
+    <p>{{ disabledStudentSongs }}</p>
+    <p>{{ selectedStudentSong }}</p>
 
     <!-- make button work -->
     <v-btn @click="">Add Song From Repertoire</v-btn>
@@ -140,8 +140,7 @@ export default {
       selectedSongs: [],
       composers: [],
       displayedComposers: [],
-      // composersPage: 1,
-      // selectedComposers: [],
+
       student: { instructor: "Tim Hunter", instrument: "Pianno", id: "0" },
     };
   },
@@ -184,28 +183,24 @@ export default {
     },
 
     deleteStudentSong(songId) {
-      let isNotSaved = this.onSave;
-      this.errorMessage = "";
-
-      if (isNotSaved) {
-      }
-
       for (let i = songId; i < this.studentSongs.length - 1; i++) {
-        console.log(this.studentSongs[i]);
         this.studentSongs[i] = this.studentSongs[i + 1];
         this.studentSongs[i].id = i;
 
         this.selectedComposers[i] = this.selectedComposers[i + 1];
 
         this.selectedSongs[i] = this.selectedSongs[i + 1];
+
+        this.disabledStudentSongs[i] = this.disabledStudentSongs[i + 1];
       }
-      if (this.selectedStudentSong == songId) {
-        this.disabledStudentSongs[songId] = true;
+      if (this.selectedStudentSong - 1 >= 0) {
+        this.selectedStudentSong--;
       }
 
       this.studentSongs.pop();
       this.selectedComposers.pop();
       this.selectedSongs.pop();
+      this.disabledStudentSongs.pop();
       this.numOfStudentSongs--;
     },
 
@@ -213,23 +208,7 @@ export default {
       // add check that no other songs are being edited
       this.disabledStudentSongs[studentSongId] = false;
     },
-    // async requiresTranslation(songId) {
-    //   // await SongTranslationsDataService.getBySongId(parseInt(songId))
-    //   await SongTranslationsDataService.getBySongId(parseInt("1"))
-    //     .then((response) => {
-    //       console.log(response.data);
-    //       if (response.data != []) {
-    //         return "true";
-    //       } else {
-    //         return "false";
-    //       }
-    //       // this.student = response.data;
-    //       // console.log(this.student);
-    //     })
-    //     .catch((e) => {
-    //       console.log(e);
-    //     });
-    // },
+
     addStudentSong() {
       let validSave = false;
       if (this.studentSongs.length > 0) {
@@ -286,7 +265,6 @@ export default {
         });
     },
 
-    // songFilter(item, queryText, itemText) {
     //   return (
     //     itemText.toLowerCase().indexOf(queryText.toLowerCase()) !== -1 &&
     //     queryText.length >= 2
@@ -302,13 +280,10 @@ export default {
         }
       });
     },
+
+    networkSave() {
+      var data = {};
+    },
   },
-  // watch: {
-  //   // want deep watchers for this
-  //   songItems() {
-  //     this.selectedItem = null;
-  //   },
-  // },
-  // mounted() {},
 };
 </script>
