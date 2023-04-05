@@ -289,6 +289,8 @@ export default {
     createStudentTimeSlot() {
       var data = {
         eventTimeslotId: this.eventOb.eventTimes[0].eventId,
+        studentInstrumentId: 1, // filler while students aren't working
+        instructorId: 1,
       };
     },
     saveToRepertoire() {},
