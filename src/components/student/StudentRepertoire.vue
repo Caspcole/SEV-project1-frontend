@@ -14,6 +14,7 @@
             v-for="stuInstrument in semester.studentInstruments"
             class="mt-5"
             elevation="2"
+            color="orange-lighten-5"
           >
             <v-card-title>
               {{ stuInstrument.instrument.name }}
@@ -293,8 +294,20 @@ export default {
     closeDialog() {
       this.dialog = false;
     },
+    compareSemesters(objSemId, fieldSem) {
+      if (fieldSem == null) {
+        return objSemId == null;
+      }
+
+      return objSemId == fieldSem.id;
+    },
     isValid() {
       var result = true;
+
+      console.log(this.editedRepertoire);
+      console.log(this.selectedStudentInstrument.id);
+      console.log(this.selectedSong.id);
+      console.log(this.selectedSemester);
 
       if (this.selectedStudentInstrument == null) {
         this.errorMessage = "Please select your instrument";
@@ -324,10 +337,13 @@ export default {
         result = false;
       } else if (
         this.isEdit &&
-        this.editedRepertoire.studentInstrumentId ==
+        this.editedRepertoire.studentInstrumentId ===
           this.selectedStudentInstrument.id &&
-        this.editedRepertoire.songId == this.selectedSong.id &&
-        this.editedRepertoire.semesterId == this.selectedSemester
+        this.editedRepertoire.songId === this.selectedSong.id &&
+        this.compareSemesters(
+          this.editedRepertoire.semesterId,
+          this.selectedSemester
+        )
       ) {
         this.errorMessage = "No changes were made";
         result = false;
@@ -387,7 +403,7 @@ export default {
         this.editedIndex = -1;
       });
     },
-    editItem(semester, instrument, song) {
+    async editItem(semester, instrument, song) {
       this.editedRepertoire = this.repertoire.find(
         (obj) =>
           obj.studentInstrumentId == instrument.id &&
@@ -400,6 +416,14 @@ export default {
       this.selectedSemester = semester.id == null ? null : semester;
       this.selectedComposer = song.composer;
       this.selectedSong = song;
+
+      await SongDataService.getByComposerId(this.selectedComposer.id)
+        .then((response) => {
+          this.songs = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
 
       this.isEdit = true;
       this.errorMessage = "";
@@ -416,8 +440,6 @@ export default {
         songId: this.selectedSong.id,
         semesterId: this.selectedSemester,
       };
-
-      return;
 
       await RepertoireDataService.update(data).catch((e) => {
         console.log(e);
