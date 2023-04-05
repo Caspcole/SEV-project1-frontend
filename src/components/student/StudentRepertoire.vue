@@ -42,7 +42,13 @@
                         @click="deleteItem(semester, stuInstrument, song)"
                       >
                         Delete </v-btn
-                      ><v-btn variant="plain" class="text-center"> Edit </v-btn>
+                      ><v-btn
+                        variant="plain"
+                        class="text-center"
+                        @click="editItem(semester, stuInstrument, song)"
+                      >
+                        Edit
+                      </v-btn>
                     </v-card-actions>
                   </v-card>
                 </v-col>
@@ -72,7 +78,10 @@
   </v-dialog>
   <v-dialog v-model="dialog" max-width="700px">
     <v-card>
-      <v-card-title> Add a piece to your repertoire </v-card-title>
+      <v-card-title v-if="!isEdit">
+        Add a piece to your repertoire
+      </v-card-title>
+      <v-card-title v-else> Edit a repertoire piece </v-card-title>
       <v-card-text>
         <v-row class="ml-5">
           <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
@@ -138,7 +147,18 @@
         <v-btn color="blue-darken-1" variant="text" @click="closeDialog"
           >Cancel</v-btn
         >
-        <v-btn color="blue-darken-1" variant="text" @click="addPiece"
+        <v-btn
+          color="blue-darken-1"
+          variant="text"
+          @click="addPiece"
+          v-if="!isEdit"
+          >SAVE</v-btn
+        >
+        <v-btn
+          color="blue-darken-1"
+          variant="text"
+          @click="editItemConfirm"
+          v-else
           >SAVE</v-btn
         >
         <v-spacer></v-spacer>
@@ -174,6 +194,7 @@ export default {
     errorMessage: "",
     editedRepertoire: null,
     dialogDelete: false,
+    isEdit: false,
   }),
   methods: {
     async fillSemesters() {
@@ -243,6 +264,11 @@ export default {
     },
     displayDialog() {
       this.errorMessage = "";
+      this.selectedStudentInstrument = null;
+      this.selectedSemester = null;
+      this.selectedComposer = null;
+      this.selectedSong = null;
+      this.isEdit = false;
       this.dialog = true;
     },
     async addPiece() {
@@ -262,11 +288,6 @@ export default {
 
       this.fillSemesters();
       this.fillRepertoire();
-      this.selectedStudentInstrument = null;
-      this.selectedSemester = null;
-      this.selectedComposer = null;
-      this.selectedSong = null;
-
       this.closeDialog();
     },
     closeDialog() {
@@ -284,8 +305,33 @@ export default {
       } else if (this.selectedSong == null) {
         this.errorMessage = "Please select a piece";
         result = false;
+      } else if (
+        this.repertoire.findIndex((obj) => {
+          if (
+            obj.studentInstrumentId == this.selectedStudentInstrument.id &&
+            obj.songId == this.selectedSong.id &&
+            obj.semesterId == this.selectedSemester
+          ) {
+            if (this.isEdit) {
+              return obj.id != this.editedRepertoire.id;
+            }
+            return true;
+          }
+          return false;
+        }) != -1
+      ) {
+        this.errorMessage = "This piece already exists";
+        result = false;
+      } else if (
+        this.isEdit &&
+        this.editedRepertoire.studentInstrumentId ==
+          this.selectedStudentInstrument.id &&
+        this.editedRepertoire.songId == this.selectedSong.id &&
+        this.editedRepertoire.semesterId == this.selectedSemester
+      ) {
+        this.errorMessage = "No changes were made";
+        result = false;
       }
-
       return result;
     },
     querySelections(value) {
@@ -330,6 +376,7 @@ export default {
         }
       );
       this.fillSemesters();
+      this.fillRepertoire();
 
       this.closeDelete();
     },
@@ -339,6 +386,46 @@ export default {
         this.editedAvail = null;
         this.editedIndex = -1;
       });
+    },
+    editItem(semester, instrument, song) {
+      this.editedRepertoire = this.repertoire.find(
+        (obj) =>
+          obj.studentInstrumentId == instrument.id &&
+          obj.songId == song.id &&
+          obj.semesterId == semester.id
+      );
+      song.composer.title = song.composer.fName + " " + song.composer.lName;
+
+      this.selectedStudentInstrument = instrument;
+      this.selectedSemester = semester.id == null ? null : semester;
+      this.selectedComposer = song.composer;
+      this.selectedSong = song;
+
+      this.isEdit = true;
+      this.errorMessage = "";
+      this.dialog = true;
+    },
+    async editItemConfirm() {
+      if (!this.isValid()) {
+        return;
+      }
+
+      const data = {
+        id: this.editedRepertoire.id,
+        studentInstrumentId: this.selectedStudentInstrument.id,
+        songId: this.selectedSong.id,
+        semesterId: this.selectedSemester,
+      };
+
+      return;
+
+      await RepertoireDataService.update(data).catch((e) => {
+        console.log(e);
+      });
+
+      this.fillSemesters();
+      this.fillRepertoire();
+      this.closeDialog();
     },
   },
   watch: {
