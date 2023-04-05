@@ -7,7 +7,7 @@ class StudentInstrumentDataService {
   }
 
   getByUser(userId) {
-    return http.get(this.baseUrl + "/userId/" + userId);
+    return http.get(this.baseUrl + "userId/" + userId);
   }
 
   create(data) {

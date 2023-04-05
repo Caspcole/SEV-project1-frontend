@@ -104,7 +104,6 @@
 import SemesterDataService from "../../services/SemesterDataService";
 import EventDataService from "../../services/EventDataService";
 import Utils from "../../config/utils.js";
-import CritiqueViewVue from "../faculty/CritiqueView.vue";
 export default {
   name: "StudentViewCritique",
   data: () => ({
@@ -122,7 +121,6 @@ export default {
       { title: " " },
     ],
     months: [],
-    // days: [],
     dialog: false,
     selectedJurorCritiques: {},
   }),
@@ -151,7 +149,10 @@ export default {
         });
     },
     async semesterSearchUpdate(semester) {
-      await EventDataService.getStudentSemesterCritiques(semester.id, 269) //this.user.userId
+      await EventDataService.getStudentSemesterCritiques(
+        semester.id,
+        this.user.userId
+      )
         .then((response) => {
           this.semesterCritiques = response.data;
 
@@ -161,18 +162,13 @@ export default {
               string: date.toLocaleDateString("us-EN", { month: "long" }),
               number: date.toLocaleDateString("us-EN", { month: "numeric" }),
             };
-            // entry.day = {
-            //   string: date.toLocaleDateString("us-EN", { day: "numeric" }),
-            // };
           });
           this.getMonths();
-          // this.getDays();
         })
         .catch((e) => {
           console.log(e);
         });
     },
-
     displayStudentCritiques(student) {
       this.selectedStudent = student;
       this.showDialog = true;
@@ -185,11 +181,7 @@ export default {
         if (!this.months.some((item) => compareObj(item, obj.month))) {
           this.months.push(obj.month);
         }
-
-        // if(obj.month.number )
-        // set.add(obj.month);
       });
-      //this.months = Array.from(set); //sort here
 
       this.months.forEach((obj) => {
         obj.events = this.semesterCritiques.filter(
@@ -203,21 +195,6 @@ export default {
 
       console.log(this.months);
     },
-    // getDays() {
-    //   this.days = [];
-    //   var set = new Set();
-    //   this.semesterCritiques.forEach((obj) => {
-    //     set.add(obj.day;
-    //   });
-    //   this.days = Array.from(set); //sort here
-
-    //   this.days.forEach((obj) => {
-    //     obj.events = this.semesterCritiques.filter(
-    //       (critique) => critique.day == obj
-    //     );
-    //   });
-    //   console.log(this.months);
-    // },
     getMonth(month) {
       const monthArray = [
         "January",
@@ -246,7 +223,7 @@ export default {
     this.user = Utils.getStore("user");
     await this.getCurrentSemester();
     console.log(this.selectedSemester);
-    await this.semesterSearchUpdate(this.selectedSemester.id);
+    await this.semesterSearchUpdate(this.selectedSemester);
   },
 };
 </script>

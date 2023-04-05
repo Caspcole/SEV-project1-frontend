@@ -11,13 +11,13 @@ class CritiqueDataService {
   }
 
   update(id, data) {
-    return http.put(`/performance-t2/critique/${id}`, data);
+    return http.put(this.baseUrl + id, data);
   }
   delete(id) {
-    return http.delete(`/performance-t2/critique/${id}`);
+    return http.delete(this.baseUrl + id);
   }
   deleteAll() {
-    return http.delete(`/performace-t2/critique`);
+    return http.delete(this.baseUrl);
   }
 }
 export default new CritiqueDataService();
