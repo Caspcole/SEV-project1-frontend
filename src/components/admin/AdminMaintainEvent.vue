@@ -81,7 +81,7 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
-  <v-dialog v-model="dialog" max-width="700px">
+  <v-dialog v-model="dialog" max-width="750px">
     <v-card>
       <v-card-title>
         <div v-if="isEdit">Edit Event</div>
@@ -90,6 +90,36 @@
       <v-card-text>
         <v-row class="ml-5">
           <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
+        </v-row>
+        <v-row>
+          <v-col cols="3">
+            <div class="container">
+              <VueDatePicker
+                v-model="this.editedEvent.date"
+                position="left"
+              ></VueDatePicker>
+            </div>
+            <!-- date -->
+          </v-col>
+          <v-col cols="3">
+            <div class="container">
+              <vue-timepicker
+                :format="timeFormat"
+                v-model="timeData"
+              ></vue-timepicker>
+            </div>
+            <!-- start -->
+          </v-col>
+          <v-col cols="3">
+            <v-select></v-select>
+            <!-- end -->
+          </v-col>
+          <v-spacer></v-spacer>
+          <v-col cols="2">
+            <v-select></v-select>
+            <!-- duration -->
+          </v-col>
+          <div class="container"><p class="ma-0">Min</p></div>
         </v-row>
         <v-row>
           <v-col>
@@ -118,25 +148,7 @@
             label="Please specify the event type"
           ></v-text-field>
         </v-row>
-        <v-row>
-          <v-col>
-            <VueDatePicker v-model="this.editedEvent.date"></VueDatePicker>
-            <!-- date -->
-          </v-col>
-          <v-col>
-            <v-select></v-select>
-            <!-- start -->
-          </v-col>
-          <v-col>
-            <v-select></v-select>
-            <!-- end -->
-          </v-col>
-          <v-col>
-            <v-select></v-select>
-            <!-- duration -->
-          </v-col>
-        </v-row>
-        <v-row>
+        <v-row class="mt-15">
           Options
           <v-spacer></v-spacer>
         </v-row>
@@ -154,7 +166,7 @@
           </v-col>
         </v-row>
       </v-card-text>
-      <v-card-actions>
+      <v-card-actions class="mt-5">
         <v-spacer></v-spacer>
         <v-btn color="blue-darken-1" variant="text" @click="closeDialog"
           >Cancel</v-btn
@@ -183,6 +195,8 @@ import SemesterDataService from "../../services/SemesterDataService";
 import EventDataService from "../../services/EventDataService";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
+import VueTimePicker from "vue3-timepicker";
+import "vue3-timepicker/dist/VueTimepicker.css";
 export default {
   name: "adminMaintainEvent",
   data: () => ({
@@ -203,6 +217,13 @@ export default {
     errorMessage: "",
     eventTypes: [],
     eventOtherType: null,
+    timeFormat: "hh:mm a",
+    timeData: {
+      hh: "09",
+      mm: "15",
+      ss: "00",
+      a: "am",
+    },
     dialog: false,
     dialogDelete: false,
   }),
@@ -301,7 +322,7 @@ export default {
     editEvent(event) {},
     editEventConfirm() {},
   },
-  components: { VueDatePicker },
+  components: { VueDatePicker, "vue-timepicker": VueTimePicker },
   async mounted() {
     await this.retrieveAllSemesters();
     await this.getCurrentSemester();
@@ -309,3 +330,12 @@ export default {
   },
 };
 </script>
+<style>
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 60px; /* set a height for the container */
+}
+</style>
