@@ -18,7 +18,51 @@
     </v-row>
   </v-container>
   <v-container>
-    <v-data-table :headers="eventHeaders" :items="events" class="elevation-1">
+    <v-data-table
+      :headers="eventHeaders"
+      :items="events"
+      class="elevation-1"
+      :sort-by="[{ key: 'date', order: 'desc' }]"
+    >
+      <template #top>
+        <v-toolbar flat>
+          <v-toolbar-title> EVENTS </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn color="primary">Add Event</v-btn>
+        </v-toolbar>
+      </template>
+      <template #item="{ item }">
+        <tr>
+          <td v-for="(header, index) in eventHeaders" :key="index">
+            <div v-if="header.title == 'Date'">
+              {{ this.formatDate(item.columns[header.key]) }}
+            </div>
+            <div
+              v-else-if="
+                header.title == 'Start Time' || header.title == 'End Time'
+              "
+            >
+              {{ this.formatTime(item.columns[header.key]) }}
+            </div>
+            <div v-else-if="header.title == 'Actions'">
+              <div v-if="this.isAfterToday(item.raw)">
+                <v-icon size="small" class="me-2" @click="editEvent(item.raw)">
+                  mdi-pencil
+                </v-icon>
+                <v-icon size="small" @click="deleteEvent(item.raw)">
+                  mdi-delete
+                </v-icon>
+              </div>
+              <div v-else>
+                <v-text>Passed</v-text>
+              </div>
+            </div>
+            <div v-else>
+              {{ item.columns[header.key] }}
+            </div>
+          </td>
+        </tr>
+      </template>
     </v-data-table>
   </v-container>
 </template>
@@ -76,9 +120,32 @@ export default {
           console.log(err);
         });
     },
+    formatDate(date) {
+      if (date === null || date === undefined) {
+        return date;
+      }
+      return new Date(date).toLocaleDateString("us-US", {
+        month: "long",
+        day: "numeric",
+        timeZone: "UTC",
+      });
+    },
+    formatTime(time) {
+      if (time === null || time === undefined) {
+        return time;
+      }
+      return new Date("January 1, 2000 " + time).toLocaleTimeString("us-EN", {
+        hour: "numeric",
+        minute: "numeric",
+      });
+    },
+    isAfterToday(event) {
+      let eventDate = new Date(event.date).getTime();
+      let today = new Date().getTime();
+
+      return eventDate > today;
+    },
   },
-  watch: {},
-  computed: {},
   async mounted() {
     await this.retrieveAllSemesters();
     await this.getCurrentSemester();
