@@ -109,6 +109,7 @@
               :items="semesters"
               item-value="id"
               item-title="title"
+              return-object
               :style="{ width: '250px' }"
             ></v-select>
           </v-col>
@@ -299,15 +300,14 @@ export default {
         return objSemId == null;
       }
 
+      if (objSemId == null) {
+        return fieldSem == null;
+      }
+
       return objSemId == fieldSem.id;
     },
     isValid() {
       var result = true;
-
-      console.log(this.editedRepertoire);
-      console.log(this.selectedStudentInstrument.id);
-      console.log(this.selectedSong.id);
-      console.log(this.selectedSemester);
 
       if (this.selectedStudentInstrument == null) {
         this.errorMessage = "Please select your instrument";
@@ -412,6 +412,11 @@ export default {
       );
       song.composer.title = song.composer.fName + " " + song.composer.lName;
 
+      console.log(semester);
+      if (semester.id != null) {
+        semester.title = semester.year + " - " + semester.code;
+      }
+
       this.selectedStudentInstrument = instrument;
       this.selectedSemester = semester.id == null ? null : semester;
       this.selectedComposer = song.composer;
@@ -438,8 +443,11 @@ export default {
         id: this.editedRepertoire.id,
         studentInstrumentId: this.selectedStudentInstrument.id,
         songId: this.selectedSong.id,
-        semesterId: this.selectedSemester,
+        semesterId:
+          this.selectedSemester == null ? null : this.selectedSemester.id,
       };
+
+      console.log(data);
 
       await RepertoireDataService.update(data).catch((e) => {
         console.log(e);
