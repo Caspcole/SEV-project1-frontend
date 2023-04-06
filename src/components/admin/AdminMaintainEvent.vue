@@ -88,39 +88,63 @@
         <div v-else>New Event</div>
       </v-card-title>
       <v-card-text>
-        <v-row class="ml-5">
+        <v-row>
           <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
         </v-row>
-        <v-row>
+        <v-row align="end">
           <v-col cols="3">
-            <div class="container">
-              <VueDatePicker
-                v-model="this.editedEvent.date"
-                position="left"
-              ></VueDatePicker>
-            </div>
+            <p>Event Date</p>
+          </v-col>
+          <v-col cols="3">
+            <p>Start Time</p>
+          </v-col>
+          <v-col cols="3">
+            <p>End Time</p>
+          </v-col>
+          <v-spacer></v-spacer>
+          <v-col cols="3">
+            <p>Slot Duration</p>
+          </v-col>
+        </v-row>
+        <v-row align="start" class="mt-0">
+          <v-col cols="3">
+            <VueDatePicker
+              v-model="this.editedEvent.date"
+              position="left"
+              type="date"
+            ></VueDatePicker>
             <!-- date -->
           </v-col>
           <v-col cols="3">
-            <div class="container">
-              <vue-timepicker
-                :format="timeFormat"
-                v-model="timeData"
-              ></vue-timepicker>
-            </div>
+            <vue-timepicker
+              :format="timeFormat"
+              v-model="timeData"
+            ></vue-timepicker>
             <!-- start -->
           </v-col>
           <v-col cols="3">
-            <v-select></v-select>
+            <vue-timepicker
+              :format="timeFormat"
+              v-model="timeData"
+            ></vue-timepicker>
             <!-- end -->
           </v-col>
           <v-spacer></v-spacer>
-          <v-col cols="2">
-            <v-select></v-select>
+          <v-col cols="3">
+            <v-select
+              density="compact"
+              v-model="this.editedEvent.slotDuration"
+              variant="solo"
+              :items="[5, 10, 15]"
+            >
+              <template v-slot:selection="{ item, index }">
+                {{ item.title }} Minutes
+              </template></v-select
+            >
             <!-- duration -->
           </v-col>
-          <div class="container"><p class="ma-0">Min</p></div>
         </v-row>
+
         <v-row>
           <v-col>
             <v-select
@@ -302,6 +326,7 @@ export default {
     },
     addEvent() {
       this.editedEvent = {};
+      this.editedEvent.slotDuration = "10";
       this.eventOtherType = "";
       this.errorMessage = "";
       this.isEdit = false;
@@ -334,7 +359,7 @@ export default {
 .container {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: center;
   height: 60px; /* set a height for the container */
 }
