@@ -148,7 +148,7 @@ export default {
       studentSongs: [],
       composerSongs: [],
 
-      student: { instructor: "Tim Hunter", instrument: "Pianno", id: "0" }, // reaplace this when the eventOb passes in student info
+      student: { instructor: "Tim Hunter", instrument: "Piano", id: "0" }, // reaplace this when the eventOb passes in student info
     };
   },
   async created() {
