@@ -4,7 +4,7 @@
     <v-container>
       <v-row>
         <v-col>
-          <h3>{{ eventOb }}</h3>
+          <h3>{{ eventOb.type }}</h3>
           <!-- We need to add Event names to the database -->
         </v-col>
         <v-col>
@@ -33,11 +33,12 @@
         <v-row>
           <v-col>
             <v-autocomplete
+              clearable
               v-model="selectedComposers[song.id]"
               label="Composer"
               :items="composers"
               item-value="id"
-              item-title="fName"
+              item-title="fullName"
               autocomplete="off"
               @update:modelValue="
                 updateAvaliableSongs(song.id, selectedComposers[song.id])
@@ -47,7 +48,6 @@
             </v-autocomplete>
           </v-col>
           <v-col>
-            <!-- Ask if the v-model should change -->
             <v-autocomplete
               clearable
               v-model="selectedSongs[song.id]"
@@ -70,27 +70,32 @@
         <v-row>
           <!-- Grey ou the save button if another song is being edited -->
           <v-btn
-            :disabled="disabledStudentSongs[selectedStudentSong]"
+            :disabled="disabledStudentSongs[song.id]"
             @click="onSave(song.id)"
             >Save Song</v-btn
           >
           <!-- Grey out the edit button if another song is being edited -->
           <v-btn
-            :disabled="!disabledStudentSongs[selectedStudentSong]"
+            :disabled="!disabledStudentSongs[song.id]"
             @click="editStudentSong(song.id)"
             >Edit Song</v-btn
           >
         </v-row>
       </v-container>
-      <!-- figure out how to v-model each song's translation checkbox -->
     </v-card>
-    <p>{{ studentSongs }}</p>
-    <p>{{ selectedComposers }}</p>
-    <p>{{ selectedSongs }}</p>
-    <p>{{ disabledStudentSongs }}</p>
-    <p>{{ selectedStudentSong }}</p>
 
-    <!-- make button work -->
+    <v-dialog v-model="dialogPopup" width="auto">
+      <v-card>
+        <v-card-text> "{{ dialogMessage }}" </v-card-text>
+        <v-card-actions>
+          <v-btn color="primary" block @click="dialog = false"
+            >Close Dialog</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Add Song From Repertoire needs to be implemented -->
     <v-btn @click="">Add Song From Repertoire</v-btn>
     <br />
     <br />
@@ -98,6 +103,7 @@
     <br />
     <br />
     <p>Do you have a song not listed from the Add Song button?</p>
+    <!-- This button also needs to be implemented -->
     <v-btn @click="">Register a Song</v-btn>
   </div>
   <br />
@@ -109,11 +115,11 @@
 </template>
 
 <script>
-// Get translations
-// Get songs
-// import StudentDataService from "../services/StudentDataService";
 import ComposersDataService from "../../services/ComposersDataService";
 import SongsDataService from "../../services/SongsDataService";
+import StudentTimeslotDataService from "../../services/StudentTimeslotDataService";
+import TimeslotSongsDataService from "../../services/TimeslotSongsDataService";
+import RepertoireDataService from "../../services/RepertoireDataService";
 
 export default {
   name: "student-event-signup",
@@ -134,14 +140,15 @@ export default {
       selectedComposers: [],
       disabledStudentSongs: [],
       selectedSongs: [],
+      dialogPopup: false,
+
+      studentInstrumentId: 1,
+      instructorId: 1,
 
       studentSongs: [],
       composerSongs: [],
-      selectedSongs: [],
-      composers: [],
-      displayedComposers: [],
 
-      student: { instructor: "Tim Hunter", instrument: "Pianno", id: "0" },
+      student: { instructor: "Tim Hunter", instrument: "Pianno", id: "0" }, // reaplace this when the eventOb passes in student info
     };
   },
   async created() {
@@ -198,15 +205,28 @@ export default {
       }
 
       this.studentSongs.pop();
-      this.selectedComposers.pop();
-      this.selectedSongs.pop();
+      if (!this.disabledStudentSongs[this.selectedStudentSong]) {
+        this.selectedComposers.pop();
+        this.selectedSongs.pop();
+      }
+
       this.disabledStudentSongs.pop();
       this.numOfStudentSongs--;
     },
 
     editStudentSong(studentSongId) {
       // add check that no other songs are being edited
-      this.disabledStudentSongs[studentSongId] = false;
+      var countDisabledSongs = 0;
+      for (let i = 0; i < this.disabledStudentSongs.length; i++) {
+        if (!this.disabledStudentSongs[i]) {
+          countDisabledSongs++;
+        }
+      }
+
+      if (countDisabledSongs == 0) {
+        this.disabledStudentSongs[studentSongId] = false;
+        this.selectedStudentSong = studentSongId;
+      }
     },
 
     addStudentSong() {
@@ -232,7 +252,11 @@ export default {
     },
 
     submitPage() {
-      this.onSave();
+      var isSaved = this.onSave();
+
+      if (isSaved) {
+        this.networkSave();
+      }
     },
 
     async getComposers() {
@@ -243,6 +267,11 @@ export default {
         .catch((e) => {
           console.log(e);
         });
+      for (let i = 0; i < this.composers.length; i++) {
+        this.composers[
+          i
+        ].fullName = `${this.composers[i].fName} ${this.composers[i].lName}`;
+      }
     },
 
     async getAllSongs() {
@@ -281,19 +310,61 @@ export default {
       });
     },
 
-    networkSave() {
-      createStudentTimeSlot();
-
-      saveToRepertoire();
-    },
-    createStudentTimeSlot() {
-      var data = {
+    async createStudentTimeSlot() {
+      var studentTimeslotData = {
         eventTimeslotId: this.eventOb.eventTimes[0].eventId,
-        studentInstrumentId: 1, // filler while students aren't working
-        instructorId: 1,
+        studentInstrumentId: this.studentInstrumentId, // filler while students aren't working
+        instructorId: this.instructorId,
       };
+
+      await StudentTimeslotDataService.create(studentTimeslotData)
+        .then((response) => {
+          var createdStudentTimeslotId = response.data.id;
+
+          this.studentSongs.forEach(async (piece) => {
+            var timeslotSongData = {
+              timeslotId: createdStudentTimeslotId,
+              songId: piece.piece,
+            };
+
+            await TimeslotSongsDataService.create(timeslotSongData)
+              .then((response) => {})
+              .catch((e) => {
+                this.message = e.response.data.message;
+              });
+          });
+
+          this.dialogMessage = "Time slot successfully reserved";
+          this.dialogPopup = true;
+        })
+        .catch((e) => {
+          this.message = e.response.data.message;
+          this.dialogMessage =
+            "There was an error with reserving your time slot\n" +
+            `${this.message}`;
+        });
     },
-    saveToRepertoire() {},
+
+    async saveToRepertoire() {
+      this.studentSongs.forEach(async (piece) => {
+        const data = {
+          studentInstrumentId: this.studentInstrumentId,
+          songId: piece.piece,
+          // semesterId:
+          //   this.selectedSemester == null ? null : this.selectedSemester.id,
+        };
+
+        await RepertoireDataService.create(data).catch((e) => {
+          console.log(e);
+        });
+      });
+    },
+
+    networkSave() {
+      this.saveToRepertoire();
+
+      this.createStudentTimeSlot();
+    },
   },
 };
 </script>
