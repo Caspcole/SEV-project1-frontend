@@ -85,6 +85,8 @@
             v-if="this.$route.fullPath === '/facultyViewCritiques'"
           ></FacultyCritiqueView>
           <!-- Admin Section -->
+          <AdminEventsCRUD v-if="this.$route.fullPath === '/adminEventsCRUD'">
+          </AdminEventsCRUD>
           <!-- Availability -->
           <CreateAvailability
             v-if="this.$route.fullPath === '/createAvailability'"
@@ -117,6 +119,7 @@ import StudentEventSignUp from "../components/student/StudentEventSignUp.vue";
 import FacultyCritiqueView from "../components/faculty/CritiqueView.vue";
 import CreateAvailability from "../components/faculty/CreateAvailability.vue";
 import StudentRepertoire from "../components/student/StudentRepertoire.vue";
+import AdminEventsCRUD from "../components/admin/AdminEventsCRUD.vue";
 export default {
   name: "Base",
   components: {
@@ -135,6 +138,7 @@ export default {
     //Admin Component
     CreateAvailability,
     StudentRepertoire,
+    AdminEventsCRUD,
   },
   data: () => ({
     user: {},

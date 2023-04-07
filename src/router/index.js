@@ -80,17 +80,17 @@ const router = createRouter({
       alias: "/createAvailability",
     },
     // Admin Routes
+    // {
+    //   path: "/base",
+    //   component: Base,
+    //   name: "adminCreateEvents",
+    //   alias: "/adminCreateEvents",
+    // },
     {
       path: "/base",
       component: Base,
-      name: "adminCreateEvents",
-      alias: "/adminCreateEvents",
-    },
-    {
-      path: "/base",
-      component: Base,
-      name: "adminViewEvents",
-      alias: "/adminViewEvents",
+      name: "adminEventsCRUD",
+      alias: "/adminEventsCRUD",
     },
   ],
 });
