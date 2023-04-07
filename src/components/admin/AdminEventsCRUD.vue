@@ -1,7 +1,9 @@
 <template>
-  <v-card>
-    <v-card-title> View Events: </v-card-title>
-  </v-card>
+  <v-container>
+    <v-card>
+      <v-card-title class="d-flex justify-center"> View Events </v-card-title>
+    </v-card>
+  </v-container>
   <v-container>
     <v-row>
       <v-col cols="3">
