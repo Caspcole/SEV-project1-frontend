@@ -5,11 +5,10 @@
       <v-container>
         <v-row>
           <v-col>
-            <h3>{{ eventOb.type }}</h3>
-            <!-- We need to add Event names to the database -->
+            <h3>{{ eventOb.type }} on {{ eventOb.date }}</h3>
           </v-col>
           <v-col>
-            <h3>{{ eventOb.date }}</h3>
+            <h3></h3>
             <h4>Time Slots:</h4>
             <h4 v-for="timeslot in eventOb.eventTimes" :key="timeslot.id">
               {{ timeslot.startTime }}
