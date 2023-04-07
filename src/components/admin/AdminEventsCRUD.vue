@@ -18,6 +18,7 @@
       </v-col>
     </v-row>
   </v-container>
+
   <v-container>
     <v-row>
       <v-col>
@@ -55,6 +56,7 @@
       </v-col>
     </v-row>
   </v-container>
+
   <v-dialog v-model="showDialog" :style="{ width: '875px' }" class="mx-auto">
     <v-card>
       <v-card-title>
@@ -254,30 +256,12 @@ export default {
     monthFilter: null,
     semesterEvents: [],
     filteredEvents: [],
-    //----------------------
-    userAvailability: [],
-    availabilitySlots: [],
-    availabilityStart: null,
-    availabilityStartArray: [],
-    availabilityEnd: null,
-    availabilityEndArray: [],
-    currentAvailability: [],
+    //---------------------
     availabilityHeader: [
       { title: "Start Time", key: "startTime", sortable: false },
       { title: "End Time", key: "endTime", sortable: false },
       { title: "Actions", sortable: false, allign: "end" },
     ],
-    dialogDelete: false,
-    editedAvail: null,
-    editedIndex: -1,
-    errorMessage: "",
-    dialogEdit: false,
-    editSelectedStart: null,
-    editEndArray: [],
-    editSelectedEnd: null,
-    editStartOriginal: null,
-    editEndOriginal: null,
-    editErrorMessage: "",
   }),
   methods: {
     async retrieveAllSemesters() {
@@ -337,44 +321,6 @@ export default {
         .catch((e) => {
           console.log(e);
         });
-    },
-    // fillFilters() {
-    //   let set = new Set();
-    //   this.typeFilter = undefined;
-    //   this.semesterEvents.forEach((obj) =>
-    //     set.add(obj.eventTimeslot.event.type)
-    //   );
-    //   this.typeFilterArray = Array.from(set);
-
-    //   set = new Set();
-    //   this.monthFilter = undefined;
-    //   this.semesterEvents.forEach((obj) => set.add(obj.month));
-    //   this.monthFilterArray = Array.from(set);
-    // },
-    filterEvents() {
-      if (
-        this.studentFilter != undefined ||
-        this.typeFilter != undefined ||
-        this.monthFilter != undefined
-      ) {
-        this.filteredEvents = this.semesterEvents.filter((obj) => {
-          var isValid = true;
-
-          if (this.studentFilter != undefined) {
-            isValid = obj.stuName == this.studentFilter;
-          }
-          if (isValid && this.typeFilter != undefined) {
-            isValid = obj.eventTimeslot.event.type == this.typeFilter;
-          }
-          if (isValid && this.monthFilter != undefined) {
-            isValid = obj.month == this.monthFilter;
-          }
-
-          return isValid;
-        });
-      } else {
-        this.filteredEvents = this.semesterEvents;
-      }
     },
     async getAvailabilityForUser() {
       await AvailabilityDataService.getByUser(this.user.userId)
@@ -603,13 +549,9 @@ export default {
     await this.retrieveAllSemesters();
     this.semesters.forEach((obj) => (obj.title = obj.year + " - " + obj.code));
     this.currentDate = new Date();
-    let dateString = this.currentDate.toISOString().substring(0, 10);
-    // await this.retrieveEventsDateAndBefore(dateString);
-    // await this.retrieveEventsDateAndAfter(dateString);
 
     await this.getCurrentSemester();
     await this.semesterSearchUpdate(this.selectedSemester.id);
-    // await this.retrieveEvents(dateString);
   },
 };
 </script>
