@@ -87,6 +87,9 @@
           <StudentRepertoire
             v-if="this.$route.fullPath === '/studentRepertoire'"
           ></StudentRepertoire>
+          <AdminCreateEvent>
+            v-if="this.$route.fullPath === '/AdminCreateEvent'"
+          </AdminCreateEvent>
         </div>
       </v-col>
     </v-row>
@@ -109,6 +112,8 @@ import StudentViewCritique from "../components/student/StudentViewCritique.vue";
 import FacultyCritiqueView from "../components/faculty/CritiqueView.vue";
 import CreateAvailability from "../components/faculty/CreateAvailability.vue";
 import StudentRepertoire from "../components/student/StudentRepertoire.vue";
+import AdminCreateEvent from "../components/AdminCreateEvent.vue";
+
 export default {
   name: "Base",
   components: {
@@ -126,6 +131,7 @@ export default {
     //Admin Component
     CreateAvailability,
     StudentRepertoire,
+    AdminCreateEvent,
   },
   data: () => ({
     user: {},
