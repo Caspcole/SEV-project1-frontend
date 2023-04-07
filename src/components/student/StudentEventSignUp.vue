@@ -148,7 +148,9 @@ export default {
       studentSongs: [],
       composerSongs: [],
 
+      user: {},
       student: { instructor: "Tim Hunter", instrument: "Piano", id: "0" }, // reaplace this when the eventOb passes in student info
+      // semester info will be passed by eventOb
     };
   },
   async created() {
@@ -161,6 +163,9 @@ export default {
         this.songFilter(item, this.songSearch, item.text)
       );
     },
+  },
+  mounted() {
+    this.user = Utils.getStore("user");
   },
   methods: {
     onSave() {
