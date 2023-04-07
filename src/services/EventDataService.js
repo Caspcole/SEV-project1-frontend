@@ -29,6 +29,10 @@ class EventDataService {
     return http.get(this.baseUrl + "semesterCritiques/" + semesterId);
   }
 
+  getSemesterEvents(semesterId) {
+    return http.get(this.baseUrl + "semesterEvents/" + semesterId);
+  }
+
   getStudentSemesterCritiques(semesterId, userId) {
     return http.get(
       this.baseUrl + "semesterCritiques/" + semesterId + "/user/" + userId

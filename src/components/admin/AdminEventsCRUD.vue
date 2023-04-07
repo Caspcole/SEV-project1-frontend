@@ -4,30 +4,29 @@
   </v-card>
   <v-container>
     <v-row>
+      <v-col cols="3">
+        <v-select
+          v-model="selectedSemester"
+          label="Semester"
+          :items="semesters"
+          item-value="id"
+          item-title="title"
+          @update:modelValue="semesterSearchUpdate(selectedSemester)"
+        ></v-select>
+      </v-col>
+    </v-row>
+  </v-container>
+  <v-container>
+    <v-row>
       <v-col>
-        <v-data-table :headers="headers" :items="events" class="elevation-1">
+        <v-data-table
+          :headers="headers"
+          :items="filteredEvents"
+          class="elevation-1"
+        >
           <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title>EVENTS</v-toolbar-title>
-              <v-select
-                clearable
-                label="Student"
-                :style="{ width: '70px' }"
-              ></v-select>
-              <v-divider class="mx-4" inset vertical></v-divider>
-
-              <v-select
-                clearable
-                label="Event Type"
-                :style="{ width: '70px' }"
-              ></v-select>
-              <v-divider class="mx-4" inset vertical></v-divider>
-
-              <v-select
-                clearable
-                label="Month"
-                :style="{ width: '70px' }"
-              ></v-select>
             </v-toolbar>
           </template>
           <template #item="{ item }">
@@ -225,6 +224,8 @@
 import EventDataService from "../../services/EventDataService";
 import Utils from "../../config/utils.js";
 import AvailabilityDataService from "../../services/AvailabilityDataService";
+import SemesterDataService from "../../services/SemesterDataService";
+
 export default {
   name: "createAvailability",
   data: () => ({
@@ -235,10 +236,23 @@ export default {
       { title: "End Time", key: "endTime" },
       // { title: "Actions", key: "actions", sortable: false },
     ],
-    events: [],
     selectedEvent: null,
     user: {},
     showDialog: false,
+
+    //Filter logic
+    //----------------------
+    // studentFilterArray: [],
+    // studentFilter: null,
+    selectedSemester: null,
+    semesters: [],
+    typeFilterArray: [],
+    typeFilter: null,
+    monthFilterArray: [],
+    monthFilter: null,
+    semesterEvents: [],
+    filteredEvents: [],
+    //----------------------
     userAvailability: [],
     availabilitySlots: [],
     availabilityStart: null,
@@ -264,10 +278,41 @@ export default {
     editErrorMessage: "",
   }),
   methods: {
+    async retrieveAllSemesters() {
+      await SemesterDataService.getAll()
+        .then((response) => {
+          this.semesters = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+    async getCurrentSemester() {
+      this.currentDate = new Date();
+      let dateString = this.currentDate.toISOString().substring(0, 10);
+      await SemesterDataService.getCurrent(dateString)
+        .then((response) => {
+          this.selectedSemester = this.semesters.find(
+            (obj) => obj.id == response.data[0].id
+          );
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+    async semesterSearchUpdate(semester) {
+      await EventDataService.getSemesterEvents(semester) // change
+        .then((response) => {
+          this.filteredEvents = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
     async retrieveEventsDateAndAfter(date) {
       await EventDataService.getGTEDate(date)
         .then((response) => {
-          this.events = response.data;
+          this.filteredEvents = response.data;
         })
         .catch((e) => {
           console.log(e);
@@ -276,7 +321,7 @@ export default {
     async retrieveEventsDateAndBefore(date) {
       await EventDataService.getLTEDate(date)
         .then((response) => {
-          this.events = response.data;
+          this.filteredEvents = response.data;
         })
         .catch((e) => {
           console.log(e);
@@ -285,19 +330,32 @@ export default {
     async retrieveEvents(date) {
       await EventDataService.getAll(date)
         .then((response) => {
-          this.events = response.data;
+          this.filteredEvents = response.data;
         })
         .catch((e) => {
           console.log(e);
         });
     },
+    // fillFilters() {
+    //   let set = new Set();
+    //   this.typeFilter = undefined;
+    //   this.semesterEvents.forEach((obj) =>
+    //     set.add(obj.eventTimeslot.event.type)
+    //   );
+    //   this.typeFilterArray = Array.from(set);
+
+    //   set = new Set();
+    //   this.monthFilter = undefined;
+    //   this.semesterEvents.forEach((obj) => set.add(obj.month));
+    //   this.monthFilterArray = Array.from(set);
+    // },
     filterEvents() {
       if (
         this.studentFilter != undefined ||
         this.typeFilter != undefined ||
         this.monthFilter != undefined
       ) {
-        this.filteredCritiques = this.semesterCritiques.filter((obj) => {
+        this.filteredEvents = this.semesterEvents.filter((obj) => {
           var isValid = true;
 
           if (this.studentFilter != undefined) {
@@ -313,7 +371,7 @@ export default {
           return isValid;
         });
       } else {
-        this.filteredCritiques = this.semesterCritiques;
+        this.filteredEvents = this.semesterEvents;
       }
     },
     async getAvailabilityForUser() {
@@ -540,12 +598,16 @@ export default {
   },
   async mounted() {
     this.user = Utils.getStore("user");
+    await this.retrieveAllSemesters();
+    this.semesters.forEach((obj) => (obj.title = obj.year + " - " + obj.code));
     this.currentDate = new Date();
     let dateString = this.currentDate.toISOString().substring(0, 10);
     // await this.retrieveEventsDateAndBefore(dateString);
     // await this.retrieveEventsDateAndAfter(dateString);
-    await this.retrieveEvents(dateString);
-    await this.getAvailabilityForUser();
+
+    await this.getCurrentSemester();
+    await this.semesterSearchUpdate(this.selectedSemester.id);
+    // await this.retrieveEvents(dateString);
   },
 };
 </script>
