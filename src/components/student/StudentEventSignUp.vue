@@ -36,7 +36,7 @@
     <v-card class="pa-2 ma-2">
       <h3>Songs</h3>
       <v-card v-for="song in studentSongs" :key="song.id">
-        <p>Please select a composer, then a piece</p>
+        <p class="ma-2">Please select a composer, then a piece</p>
         <v-container>
           <v-row>
             <v-col>
