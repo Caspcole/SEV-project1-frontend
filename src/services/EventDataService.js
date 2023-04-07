@@ -6,7 +6,11 @@ class EventDataService {
     return http.get(this.baseUrl);
   }
   getGTEDate(date) {
-    return http.get(this.baseUrl + `date/${date}`);
+    return http.get(this.baseUrl + `gtedate/${date}`);
+  }
+
+  getLTEDate(date) {
+    return http.get(this.baseUrl + `ltedate/${date}`);
   }
 
   create(data) {

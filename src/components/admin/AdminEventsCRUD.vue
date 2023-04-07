@@ -9,6 +9,25 @@
           <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title>EVENTS</v-toolbar-title>
+              <v-select
+                clearable
+                label="Student"
+                :style="{ width: '70px' }"
+              ></v-select>
+              <v-divider class="mx-4" inset vertical></v-divider>
+
+              <v-select
+                clearable
+                label="Event Type"
+                :style="{ width: '70px' }"
+              ></v-select>
+              <v-divider class="mx-4" inset vertical></v-divider>
+
+              <v-select
+                clearable
+                label="Month"
+                :style="{ width: '70px' }"
+              ></v-select>
             </v-toolbar>
           </template>
           <template #item="{ item }">
@@ -25,12 +44,8 @@
                   {{ item.columns[header.key] }}
                 </div>
                 <div v-else>
-                  <v-btn
-                    small
-                    color="primary"
-                    @click="displayEventAvailability(item.raw)"
-                    >Create Availability</v-btn
-                  >
+                  <!-- @click="displayEventAvailability(item.raw)" -->
+                  <v-btn small color="primary">Create Availability</v-btn>
                 </div>
               </td>
             </tr>
@@ -218,7 +233,7 @@ export default {
       { title: "Event Date", key: "date" },
       { title: "Start Time", key: "startTime" },
       { title: "End Time", key: "endTime" },
-      { title: "Actions", key: "actions", sortable: false },
+      // { title: "Actions", key: "actions", sortable: false },
     ],
     events: [],
     selectedEvent: null,
@@ -257,6 +272,49 @@ export default {
         .catch((e) => {
           console.log(e);
         });
+    },
+    async retrieveEventsDateAndBefore(date) {
+      await EventDataService.getLTEDate(date)
+        .then((response) => {
+          this.events = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+    async retrieveEvents(date) {
+      await EventDataService.getAll(date)
+        .then((response) => {
+          this.events = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+    filterEvents() {
+      if (
+        this.studentFilter != undefined ||
+        this.typeFilter != undefined ||
+        this.monthFilter != undefined
+      ) {
+        this.filteredCritiques = this.semesterCritiques.filter((obj) => {
+          var isValid = true;
+
+          if (this.studentFilter != undefined) {
+            isValid = obj.stuName == this.studentFilter;
+          }
+          if (isValid && this.typeFilter != undefined) {
+            isValid = obj.eventTimeslot.event.type == this.typeFilter;
+          }
+          if (isValid && this.monthFilter != undefined) {
+            isValid = obj.month == this.monthFilter;
+          }
+
+          return isValid;
+        });
+      } else {
+        this.filteredCritiques = this.semesterCritiques;
+      }
     },
     async getAvailabilityForUser() {
       await AvailabilityDataService.getByUser(this.user.userId)
@@ -484,7 +542,9 @@ export default {
     this.user = Utils.getStore("user");
     this.currentDate = new Date();
     let dateString = this.currentDate.toISOString().substring(0, 10);
-    await this.retrieveEventsDateAndAfter(dateString);
+    // await this.retrieveEventsDateAndBefore(dateString);
+    // await this.retrieveEventsDateAndAfter(dateString);
+    await this.retrieveEvents(dateString);
     await this.getAvailabilityForUser();
   },
 };
