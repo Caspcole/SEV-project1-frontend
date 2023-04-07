@@ -1,14 +1,35 @@
 <template>
-  <v-card>
-    <v-card-title> Event Availability: </v-card-title>
-  </v-card>
+  <v-container>
+    <v-card>
+      <v-card-title class="d-flex justify-center"> View Events </v-card-title>
+    </v-card>
+  </v-container>
+  <v-container>
+    <v-row>
+      <v-col cols="3">
+        <v-select
+          v-model="selectedSemester"
+          label="Semester"
+          :items="semesters"
+          item-value="id"
+          item-title="title"
+          @update:modelValue="semesterSearchUpdate(selectedSemester)"
+        ></v-select>
+      </v-col>
+    </v-row>
+  </v-container>
+
   <v-container>
     <v-row>
       <v-col>
-        <v-data-table :headers="headers" :items="events" class="elevation-1">
+        <v-data-table
+          :headers="headers"
+          :items="filteredEvents"
+          class="elevation-1"
+        >
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title>UPCOMING EVENTS</v-toolbar-title>
+              <v-toolbar-title>EVENTS</v-toolbar-title>
             </v-toolbar>
           </template>
           <template #item="{ item }">
@@ -25,12 +46,8 @@
                   {{ item.columns[header.key] }}
                 </div>
                 <div v-else>
-                  <v-btn
-                    small
-                    color="primary"
-                    @click="displayEventAvailability(item.raw)"
-                    >Create Availability</v-btn
-                  >
+                  <!-- @click="displayEventAvailability(item.raw)" -->
+                  <v-btn small color="primary">Create Availability</v-btn>
                 </div>
               </td>
             </tr>
@@ -39,6 +56,7 @@
       </v-col>
     </v-row>
   </v-container>
+
   <v-dialog v-model="showDialog" :style="{ width: '875px' }" class="mx-auto">
     <v-card>
       <v-card-title>
@@ -209,7 +227,9 @@
 <script>
 import EventDataService from "../../services/EventDataService";
 import Utils from "../../config/utils.js";
-// import AvailabilityDataService from "../../services/AvailabilityDataService";
+import AvailabilityDataService from "../../services/AvailabilityDataService";
+import SemesterDataService from "../../services/SemesterDataService";
+
 export default {
   name: "createAvailability",
   data: () => ({
@@ -218,41 +238,85 @@ export default {
       { title: "Event Date", key: "date" },
       { title: "Start Time", key: "startTime" },
       { title: "End Time", key: "endTime" },
-      { title: "Actions", key: "actions", sortable: false },
+      // { title: "Actions", key: "actions", sortable: false },
     ],
-    events: [],
     selectedEvent: null,
     user: {},
     showDialog: false,
-    userAvailability: [],
-    availabilitySlots: [],
-    availabilityStart: null,
-    availabilityStartArray: [],
-    availabilityEnd: null,
-    availabilityEndArray: [],
-    currentAvailability: [],
+
+    //Filter logic
+    //----------------------
+    // studentFilterArray: [],
+    // studentFilter: null,
+    selectedSemester: null,
+    semesters: [],
+    typeFilterArray: [],
+    typeFilter: null,
+    monthFilterArray: [],
+    monthFilter: null,
+    semesterEvents: [],
+    filteredEvents: [],
+    //---------------------
     availabilityHeader: [
       { title: "Start Time", key: "startTime", sortable: false },
       { title: "End Time", key: "endTime", sortable: false },
       { title: "Actions", sortable: false, allign: "end" },
     ],
-    dialogDelete: false,
-    editedAvail: null,
-    editedIndex: -1,
-    errorMessage: "",
-    dialogEdit: false,
-    editSelectedStart: null,
-    editEndArray: [],
-    editSelectedEnd: null,
-    editStartOriginal: null,
-    editEndOriginal: null,
-    editErrorMessage: "",
   }),
   methods: {
+    async retrieveAllSemesters() {
+      await SemesterDataService.getAll()
+        .then((response) => {
+          this.semesters = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+    async getCurrentSemester() {
+      this.currentDate = new Date();
+      let dateString = this.currentDate.toISOString().substring(0, 10);
+      await SemesterDataService.getCurrent(dateString)
+        .then((response) => {
+          this.selectedSemester = this.semesters.find(
+            (obj) => obj.id == response.data[0].id
+          );
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+    async semesterSearchUpdate(semester) {
+      await EventDataService.getSemesterEvents(semester) // change
+        .then((response) => {
+          this.filteredEvents = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
     async retrieveEventsDateAndAfter(date) {
       await EventDataService.getGTEDate(date)
         .then((response) => {
-          this.events = response.data;
+          this.filteredEvents = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+    async retrieveEventsDateAndBefore(date) {
+      await EventDataService.getLTEDate(date)
+        .then((response) => {
+          this.filteredEvents = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+    async retrieveEvents(date) {
+      await EventDataService.getAll(date)
+        .then((response) => {
+          this.filteredEvents = response.data;
         })
         .catch((e) => {
           console.log(e);
@@ -482,10 +546,12 @@ export default {
   },
   async mounted() {
     this.user = Utils.getStore("user");
+    await this.retrieveAllSemesters();
+    this.semesters.forEach((obj) => (obj.title = obj.year + " - " + obj.code));
     this.currentDate = new Date();
-    let dateString = this.currentDate.toISOString().substring(0, 10);
-    await this.retrieveEventsDateAndAfter(dateString);
-    await this.getAvailabilityForUser();
+
+    await this.getCurrentSemester();
+    await this.semesterSearchUpdate(this.selectedSemester.id);
   },
 };
 </script>
