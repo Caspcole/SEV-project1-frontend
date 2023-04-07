@@ -75,6 +75,7 @@
           <StudentEventSignUp
             v-if="this.$route.fullPath === '/studentEventFormSignUp'"
             :eventOb="eventOb"
+            @navToStudentViewEvents="changeToStudentHomePage"
           ></StudentEventSignUp>
           <StudentViewCritique
             v-if="this.$route.fullPath === '/studentCritiques'"
@@ -205,6 +206,9 @@ export default {
     studentSettings(route) {
       this.$router.push({ path: route });
       location.reload();
+    },
+    changeToStudentHomePage() {
+      this.$router.push({ path: "studentViewEvents" });
     },
   },
   watch: {

@@ -1,6 +1,6 @@
 <!-- Basically tutorialsList -->
 <template>
-  <div>
+  <v-container class="ma-5">
     <h2>Event Sign-Up</h2>
     <br />
     <p>
@@ -12,7 +12,7 @@
       <v-row>
         <v-col>
           <!-- Make it so only the events in the future are shown -->
-          <h3>Events</h3>
+          <h3>Upcoming Events</h3>
           <br />
           <v-card height="500" width="300" class="scrollable">
             <v-btn
@@ -52,7 +52,7 @@
         </v-col>
       </v-row>
     </v-container>
-  </div>
+  </v-container>
 </template>
 
 <script>
