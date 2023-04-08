@@ -414,6 +414,9 @@ export default {
         })
         .catch((e) => {
           console.log(e);
+          this.dialogMessage =
+            "There was an error when reserving your time slot. Please ask an administrator to check the event.";
+          this.dialogPopup = true;
         });
     },
 
