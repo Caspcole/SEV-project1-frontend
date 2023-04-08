@@ -402,7 +402,7 @@ export default {
       await this.createStudentTimeSlot();
 
       if (this.errorMessage == "") {
-        this.dialogMessage = "Sucessfully reserving your time slot.";
+        this.dialogMessage = "Sucessfully reserved your time slot.";
         this.dialogPopup = true;
       }
     },
