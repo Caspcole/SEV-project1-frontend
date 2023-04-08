@@ -70,7 +70,13 @@
           ></CreateCritique>
           <StudentEventList
             v-if="this.$route.fullPath === '/studentEventSignUps'"
+            @SignUpForEventObject="changeToEventFormSignUp"
           ></StudentEventList>
+          <StudentEventSignUp
+            v-if="this.$route.fullPath === '/studentEventFormSignUp'"
+            :eventOb="eventOb"
+            @navToStudentViewEvents="changeToStudentHomePage"
+          ></StudentEventSignUp>
           <StudentViewCritique
             v-if="this.$route.fullPath === '/studentCritiques'"
           ></StudentViewCritique>
@@ -108,6 +114,8 @@ import StudentHome from "../components/student/StudentHome.vue";
 import CreateCritique from "../components/faculty/CreateCritique.vue";
 import StudentEventList from "../components/student/StudentEventList.vue";
 import StudentViewCritique from "../components/student/StudentViewCritique.vue";
+
+import StudentEventSignUp from "../components/student/StudentEventSignUp.vue";
 import FacultyCritiqueView from "../components/faculty/CritiqueView.vue";
 import CreateAvailability from "../components/faculty/CreateAvailability.vue";
 import StudentRepertoire from "../components/student/StudentRepertoire.vue";
@@ -120,7 +128,8 @@ export default {
     //Student Component
     StudentSettings,
     StudentHome, //Landing Page for the Students
-    StudentEventList,
+    StudentEventList, //Student page to select event and time to sign up
+    StudentEventSignUp,
     CreateCritique,
     StudentViewCritique,
     //Faculty Component
@@ -140,6 +149,7 @@ export default {
     group: null,
     role: "",
     route: "",
+    eventOb: {},
     myItems: [
       {
         prependIcon: "mdi-account",
@@ -193,9 +203,16 @@ export default {
           console.log("error", error);
         });
     },
+    changeToEventFormSignUp(eventOb) {
+      this.eventOb = eventOb;
+      this.$router.push({ path: "studentEventFormSignUp" });
+    },
     studentSettings(route) {
       this.$router.push({ path: route });
       location.reload();
+    },
+    changeToStudentHomePage() {
+      this.$router.push({ path: "studentViewEvents" });
     },
   },
   watch: {

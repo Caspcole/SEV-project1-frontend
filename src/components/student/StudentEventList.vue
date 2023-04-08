@@ -1,11 +1,18 @@
 <!-- Basically tutorialsList -->
 <template>
-  <div>
+  <v-container class="ma-5">
+    <h2>Event Sign-Up</h2>
+    <br />
+    <p>
+      Please select the event to sign-up for, then select a time slot(s) for
+      that event.
+    </p>
+    <br />
     <v-container>
       <v-row>
         <v-col>
           <!-- Make it so only the events in the future are shown -->
-          <h3>Events</h3>
+          <h3>Upcoming Events</h3>
           <br />
           <v-card height="500" width="300" class="scrollable">
             <v-btn
@@ -31,26 +38,21 @@
               v-for="(time, index) in currentEventTimes"
               :key="index"
               v-model="selectedEventTimes"
-              :label="time.startTime"
+              v-on:change="updateSelectedEventTimes()"
+              :label="time.startTime.substring(0, 5)"
               :value="time"
             >
-              <!-- Use v-bind (: for short) to dynamically change attributes -->
             </v-checkbox>
           </v-card>
-
-          <!-- <p>{{ selectedEventTimes }}</p> -->
           <br />
-          <v-btn>Next</v-btn>
+
+          <!-- Have some logic to grey out the button if there are no time slots selected -->
+          <v-btn @click="SignUpForEventObject(returningObject)">Next</v-btn>
           <!-- Need some logic to get the type of instrument the student is using -->
         </v-col>
       </v-row>
-      <v-row>
-        <v-col>
-          <!-- make a button to pass to event signup page https://stackoverflow.com/questions/45484684/vue-js-pass-data-to-component-on-another-route -->
-        </v-col>
-      </v-row>
     </v-container>
-  </div>
+  </v-container>
 </template>
 
 <script>
@@ -63,23 +65,34 @@ export default {
     dialog: false,
     search: "",
     events: [],
+    selectedEvent: false,
     currentEvent: {},
+    returningObject: {},
     currentEventTimes: [],
     selectedEventTimes: [],
     currentDate: new Date(),
+    toSignUp: true,
   }),
+  emits: ["SignUpForEventObject"],
+  setup(props, { emit }) {
+    const SignUpForEventObject = (returningObject) => {
+      emit("SignUpForEventObject", returningObject);
+    };
+    return {
+      SignUpForEventObject,
+    };
+  },
   methods: {
     changeCurrentEvent(event) {
       this.currentEvent = event;
       this.determineEventTimes();
-      // console.log(this.currentEvent.id);
+      this.selectedEvent = true;
     },
 
     async retrieveEventsDateAndAfter(date) {
       await EventDataService.getGTEDate(date)
         .then((response) => {
           this.events = response.data;
-          // console.log(this.events);
         })
         .catch((e) => {
           console.log(e);
@@ -90,7 +103,6 @@ export default {
       await EventDataService.getAll()
         .then((response) => {
           this.events = response.data;
-          // console.log(this.events);
         })
         .catch((e) => {
           console.log(e);
@@ -102,7 +114,6 @@ export default {
       await EventTimeDataService.getByEvent(eventId)
         .then((response) => {
           this.currentEventTimes = response.data;
-          // console.log(this.currentEventTimes);
         })
         .catch((e) => {
           console.log(e);
@@ -116,12 +127,24 @@ export default {
       await this.retrieveEventTimes(this.currentEvent.id);
     },
 
+    updateSelectedEventTimes() {
+      this.returningObject = this.currentEvent;
+      this.returningObject.eventTimes = this.selectedEventTimes;
+
+      // Strip the ending seconds from the start and end times
+      for (let i = 0; i < this.returningObject.eventTimes.length; i++) {
+        this.returningObject.eventTimes[i].startTime =
+          this.returningObject.eventTimes[i].startTime.substring(0, 5);
+        this.returningObject.eventTimes[i].endTime =
+          this.returningObject.eventTimes[i].endTime.substring(0, 5);
+      }
+    },
+
     async retrieveCourses() {
       await CourseDataService.getAll()
         .then((response) => {
           this.courses = response.data;
           this.filteredCourses = this.courses;
-          // console.log(this.courses);
         })
         .catch((e) => {
           console.log(e);
