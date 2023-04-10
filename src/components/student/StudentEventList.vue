@@ -1,18 +1,22 @@
 <!-- Basically tutorialsList -->
 <template>
   <v-container class="ma-5">
-    <h2>Event Sign-Up</h2>
-    <br />
-    <p>
-      Please select the event to sign-up for, then select a time slot(s) for
-      that event.
-    </p>
+    <v-card>
+      <v-card-title class="d-flex justify-center">Event Sign-Up</v-card-title>
+      <v-card-text class="d-flex justify-center"
+        >Please select the event to sign-up for, then select a time slot(s) for
+        that event.
+      </v-card-text>
+    </v-card>
+
     <br />
     <v-container>
       <v-row>
         <v-col>
           <!-- Make it so only the events in the future are shown -->
-          <h3>Upcoming Events</h3>
+          <v-card width="300" class="d-flex justify-center">
+            <v-card-title>Upcoming Events</v-card-title>
+          </v-card>
           <br />
           <v-card height="500" width="300" class="scrollable">
             <v-btn
@@ -31,7 +35,11 @@
         <v-col>
           <!-- Make it so the event times can be scrolled through without scrolling through the entire page. 
           Next button would be under the time scrolling -->
-          <h3>Avaliable Times</h3>
+          <v-card>
+            <v-card-title class="d-flex justify-center"
+              >Available Times</v-card-title
+            >
+          </v-card>
           <br />
           <v-card height="500" class="scrollable">
             <v-checkbox

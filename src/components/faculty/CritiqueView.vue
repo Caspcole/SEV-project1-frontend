@@ -1,10 +1,14 @@
 <template>
-  <v-card>
-    <v-card-title> Event Critiques: </v-card-title>
-  </v-card>
+  <v-container>
+    <v-card>
+      <v-card-title class="d-flex justify-center">
+        Event Critiques
+      </v-card-title>
+    </v-card>
+  </v-container>
   <v-container>
     <v-row>
-      <v-col cols="3">
+      <v-col cols="2">
         <v-select
           v-model="selectedSemester"
           label="Semester"
@@ -12,6 +16,7 @@
           item-value="id"
           item-title="title"
           @update:modelValue="semesterSearchUpdate(selectedSemester)"
+          style="background-color: whitesmoke"
         ></v-select>
       </v-col>
     </v-row>

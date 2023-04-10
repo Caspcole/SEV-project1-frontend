@@ -1,7 +1,9 @@
 <template>
-  <v-card>
-    <v-card-title> Repertoire: </v-card-title>
-  </v-card>
+  <v-container>
+    <v-card>
+      <v-card-title class="d-flex justify-center"> Repertoire </v-card-title>
+    </v-card>
+  </v-container>
   <v-container>
     <v-btn color="primary" @click="displayDialog"> Add Piece </v-btn>
     <v-expansion-panels class="mt-10" variant="accordion">
@@ -80,9 +82,19 @@
   <v-dialog v-model="dialog" max-width="700px">
     <v-card>
       <v-card-title v-if="!isEdit">
-        Add a piece to your repertoire
+        <v-card>
+          <v-card-title class="d-flex justify-center"
+            >Add a piece to your repertoire</v-card-title
+          >
+        </v-card>
       </v-card-title>
-      <v-card-title v-else> Edit a repertoire piece </v-card-title>
+      <v-card-title v-else>
+        <v-card>
+          <v-card-title class="d-flex justify-center"
+            >Edit a repertoire piece
+          </v-card-title></v-card
+        ></v-card-title
+      >
       <v-card-text>
         <v-row class="ml-5">
           <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>

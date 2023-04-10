@@ -1,14 +1,20 @@
 <template>
-  <v-card>
-    <v-card-title> Event Availability: </v-card-title>
-  </v-card>
+  <v-container>
+    <v-card>
+      <v-card-title class="d-flex justify-center">
+        Event Availability
+      </v-card-title>
+    </v-card>
+  </v-container>
   <v-container>
     <v-row>
       <v-col>
         <v-data-table :headers="headers" :items="events" class="elevation-1">
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title>UPCOMING EVENTS</v-toolbar-title>
+              <v-toolbar-title class="d-flex justify-center"
+                >UPCOMING EVENTS</v-toolbar-title
+              >
             </v-toolbar>
           </template>
           <template #item="{ item }">
