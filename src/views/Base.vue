@@ -112,7 +112,7 @@ import StudentViewCritique from "../components/student/StudentViewCritique.vue";
 import FacultyCritiqueView from "../components/faculty/CritiqueView.vue";
 import CreateAvailability from "../components/faculty/CreateAvailability.vue";
 import StudentRepertoire from "../components/student/StudentRepertoire.vue";
-import AdminCreateEvent from "../components/AdminCreateEvent.vue";
+import AdminCreateEvent from "../components/admin/AdminCreateEvent.vue";
 
 export default {
   name: "Base",

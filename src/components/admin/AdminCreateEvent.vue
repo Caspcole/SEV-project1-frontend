@@ -62,8 +62,8 @@
 </template>
 
 <script>
-import SemesterDataService from "./../services/EventDataService.js";
-import EventDataService from "./../services/EventDataService.js";
+import SemesterDataService from "../../services/EventDataService.js";
+import EventDataService from "../../services/EventDataService.js";
 
 export default {
   name: "AdminCreateEvent",
