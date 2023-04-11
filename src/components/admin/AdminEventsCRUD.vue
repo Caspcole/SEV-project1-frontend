@@ -75,7 +75,47 @@
   <!-- Create dialog popup -->
   <v-dialog v-model="createDialog" :style="{ width: '875px' }" class="mx-auto">
     <v-card>
-      <v-card-title class="d-flex justify-center">Create Event</v-card-title>
+      <v-row>
+        <v-card-title class="d-flex justify-center">Create Event</v-card-title>
+      </v-row>
+      <v-card-text>
+        <v-row class="ml-5">
+          <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
+        </v-row>
+        <v-row>
+          <v-select
+            v-model="eventType"
+            label="Event Type"
+            :items="eventTypeArray"
+            :style="{ width: '40px' }"
+            return-object
+          ></v-select>
+          <v-select
+            v-model="eventStartTime"
+            label="Start Time"
+            :items="startTime"
+            :style="{ width: '40px' }"
+            return-object
+            @update:modelValue="startTimeUpdated()"
+          ></v-select>
+          <v-select
+            v-model="eventEndTime"
+            label="End Time"
+            :items="endTime"
+            :style="{ width: '40px' }"
+            return-object
+          ></v-select>
+          <v-select
+            v-model="createEventSemester"
+            label="Semester"
+            :items="eventCreateSemesters"
+            item-value="id"
+            item-title="title"
+          ></v-select>
+          <!-- Add a date selector somehow?? -->
+        </v-row>
+      </v-card-text>
+      <v-divider></v-divider>
     </v-card>
   </v-dialog>
 </template>
@@ -115,6 +155,8 @@ export default {
     errorMessage: "",
     createDialog: false,
     editDialog: false,
+
+    timeSlots: [],
   }),
   methods: {
     displayCreateEvent(event) {
@@ -182,50 +224,14 @@ export default {
           console.log(e);
         });
     },
-    async getAvailabilityForUser() {
-      await AvailabilityDataService.getByUser(this.user.userId)
-        .then((response) => {
-          this.userAvailability = response.data;
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    },
-    displayEventAvailability(event) {
-      this.errorMessage = "";
-      this.selectedEvent = event;
-      this.fillAvailabilityArrays();
-      this.currentAvailability = this.userAvailability.filter(
-        (obj) => obj.eventId == event.id
-      );
-      this.showDialog = true;
-    },
+
     formatTime(time) {
       return new Date("January 1, 2000 " + time).toLocaleTimeString("us-EN", {
         hour: "numeric",
         minute: "numeric",
       });
     },
-    fillAvailabilityArrays() {
-      this.availabilitySlots = [];
-      let tempTime = this.selectedEvent.startTime;
 
-      while (tempTime <= this.selectedEvent.endTime) {
-        this.availabilitySlots.push({
-          title: this.formatTime(tempTime),
-          value: tempTime,
-        });
-        tempTime = this.addDurationMinutes(tempTime);
-      }
-
-      this.availabilityEndArray = Array.from(this.availabilitySlots);
-      this.availabilityStartArray = Array.from(this.availabilitySlots);
-
-      this.availabilityEndArray.shift(); //removes the first timeslot from the end array
-      this.availabilityStartArray.pop(); //removes the last timeslot from the start array
-
-      this.availabilityStart = this.availabilityStartArray[0];
-    },
     addDurationMinutes(time) {
       let timeSplit = time.split(":");
       let hour = Number(timeSplit[0]);
