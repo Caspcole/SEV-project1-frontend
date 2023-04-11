@@ -1,9 +1,16 @@
 <template>
-  <v-card-title v-if="!showingCritiqueForm"> Student Timeslots </v-card-title>
-  <v-container v-if="!showingCritiqueForm" fluid class="bg-white">
-    <h3 class="center">Select Timeslot for Critique</h3>
-    <br />
-    <h3 class="center">{{ getCurrentDate() }}</h3>
+  <v-container>
+    <v-card>
+      <v-card-title v-if="!showingCritiqueForm" class="d-flex justify-center">
+        Student Timeslots
+      </v-card-title>
+    </v-card>
+  </v-container>
+  <v-container v-if="!showingCritiqueForm">
+    <v-card>
+      <v-card-title class="center">Select Timeslot for Critique</v-card-title>
+      <v-card-title class="center">{{ getCurrentDate() }}</v-card-title>
+    </v-card>
     <v-data-table :headers="headers" :items="timeslots" class="elevation-8">
       <template v-slot:item.actions="{ item }">
         <v-icon size="small" class="me-2" @click="handleClick(item)">
@@ -19,181 +26,191 @@
       showingExpandedForm == true &&
       popupTrigger == false
     "
-    fluid
-    class="bg-white"
   >
-    <v-card-title
-      v-if="
-        showingCritiqueForm &&
-        showingExpandedForm == true &&
-        popupTrigger == false
-      "
-    >
-      Expanded Critique Form
-    </v-card-title>
+    <v-container>
+      <v-card>
+        <v-card-title
+          v-if="
+            showingCritiqueForm &&
+            showingExpandedForm == true &&
+            popupTrigger == false
+          "
+          class="d-flex justify-center"
+        >
+          Expanded Critique Form
+        </v-card-title>
+      </v-card>
+    </v-container>
 
-    <h2 class="center">Create Event Critique</h2>
-    <br />
-    <div class="d-flex justify-center">
-      <v-btn variant="outlined" @click="showingExpandedForm = false"
-        >Select Quick Form</v-btn
-      >
-    </div>
-    <br />
+    <v-container>
+      <v-card>
+        <v-card-title class="center">Create Event Critique</v-card-title>
+        <div class="d-flex justify-center">
+          <v-btn variant="outlined" @click="showingExpandedForm = false"
+            >Select Quick Form</v-btn
+          >
+        </div>
+        <br />
+      </v-card>
+    </v-container>
 
-    <v-form>
-      <v-text-field
-        clearable
-        label="Deportment (poise, entrance/exit, bow)"
-        v-model="deportmentComment"
-        required
-      ></v-text-field>
+    <v-container>
+      <v-card>
+        <v-form>
+          <v-text-field
+            clearable
+            label="Deportment (poise, entrance/exit, bow)"
+            v-model="deportmentComment"
+            required
+          ></v-text-field>
 
-      <v-select
-        clearable
-        label="Deportment Grade"
-        v-model="deportmentGrade"
-        required
-        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
-      ></v-select>
+          <v-select
+            clearable
+            label="Deportment Grade"
+            v-model="deportmentGrade"
+            required
+            :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+          ></v-select>
 
-      <v-text-field
-        clearable
-        label="Tone (beauty, control/clarity, vibrato, warmth)"
-        v-model="toneComment"
-        required
-      >
-      </v-text-field>
+          <v-text-field
+            clearable
+            label="Tone (beauty, control/clarity, vibrato, warmth)"
+            v-model="toneComment"
+            required
+          >
+          </v-text-field>
 
-      <v-select
-        clearable
-        label="Tone Grade"
-        v-model="toneGrade"
-        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
-        required
-      ></v-select>
+          <v-select
+            clearable
+            label="Tone Grade"
+            v-model="toneGrade"
+            :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+            required
+          ></v-select>
 
-      <v-text-field
-        clearable
-        label="Accuracy/Intonation (correct notes with correct rhythm, tuning
+          <v-text-field
+            clearable
+            label="Accuracy/Intonation (correct notes with correct rhythm, tuning
         with keyboard and/or ensemble)"
-        v-model="accuracy_intonationComment"
-        required
-      ></v-text-field>
+            v-model="accuracy_intonationComment"
+            required
+          ></v-text-field>
 
-      <v-select
-        clearable
-        label="Accuracy/Intonation Grade"
-        v-model="accuracy_intonationGrade"
-        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
-        required
-      ></v-select>
+          <v-select
+            clearable
+            label="Accuracy/Intonation Grade"
+            v-model="accuracy_intonationGrade"
+            :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+            required
+          ></v-select>
 
-      <v-text-field
-        clearable
-        label="Technique (attacks, releases, flexibility, range, resonance, placement, support, agility)"
-        v-model="techniqueComment"
-        required
-      ></v-text-field>
+          <v-text-field
+            clearable
+            label="Technique (attacks, releases, flexibility, range, resonance, placement, support, agility)"
+            v-model="techniqueComment"
+            required
+          ></v-text-field>
 
-      <v-select
-        clearable
-        label="Technique Grade"
-        v-model="techniqueGrade"
-        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
-        required
-      ></v-select>
+          <v-select
+            clearable
+            label="Technique Grade"
+            v-model="techniqueGrade"
+            :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+            required
+          ></v-select>
 
-      <v-text-field
-        clearable
-        label="Interpretation & Musicianship (phrasing, tempo, dynamics
+          <v-text-field
+            clearable
+            label="Interpretation & Musicianship (phrasing, tempo, dynamics
         communication, rapport)"
-        v-model="interpretation_musicianshipComment"
-        required
-      ></v-text-field>
+            v-model="interpretation_musicianshipComment"
+            required
+          ></v-text-field>
 
-      <v-select
-        clearable
-        label="Interpretation & Musicianship Grade"
-        v-model="interpretation_musicianshipGrade"
-        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
-        required
-      ></v-select>
+          <v-select
+            clearable
+            label="Interpretation & Musicianship Grade"
+            v-model="interpretation_musicianshipGrade"
+            :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+            required
+          ></v-select>
 
-      <v-text-field
-        clearable
-        label="Balance & Blend (with accompanist or within ensemble)"
-        v-model="balance_blendComment"
-        required
-      ></v-text-field>
+          <v-text-field
+            clearable
+            label="Balance & Blend (with accompanist or within ensemble)"
+            v-model="balance_blendComment"
+            required
+          ></v-text-field>
 
-      <v-select
-        clearable
-        label="Balance & Blend Grade"
-        v-model="balance_blendGrade"
-        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
-        required
-      ></v-select>
+          <v-select
+            clearable
+            label="Balance & Blend Grade"
+            v-model="balance_blendGrade"
+            :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+            required
+          ></v-select>
 
-      <v-text-field
-        clearable
-        label="Diction/Articulation(vocal/instrumental)"
-        v-model="diction_articulationComment"
-        required
-      ></v-text-field>
+          <v-text-field
+            clearable
+            label="Diction/Articulation(vocal/instrumental)"
+            v-model="diction_articulationComment"
+            required
+          ></v-text-field>
 
-      <v-select
-        clearable
-        label="Diction/Articulation Grade"
-        v-model="diction_articulationGrade"
-        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
-        required
-      ></v-select>
+          <v-select
+            clearable
+            label="Diction/Articulation Grade"
+            v-model="diction_articulationGrade"
+            :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+            required
+          ></v-select>
 
-      <v-text-field
-        clearable
-        label="Performance & Suggestions (overall readiness to
+          <v-text-field
+            clearable
+            label="Performance & Suggestions (overall readiness to
         perform)"
-        v-model="overallPerformanceComment"
-        required
-      ></v-text-field>
+            v-model="overallPerformanceComment"
+            required
+          ></v-text-field>
 
-      <v-select
-        clearable
-        label="Overall Performance Grade"
-        v-model="overallPerformanceGrade"
-        :items="['A', 'B', 'C', 'D', 'F', '']"
-        required
-      ></v-select>
+          <v-select
+            clearable
+            label="Overall Performance Grade"
+            v-model="overallPerformanceGrade"
+            :items="['A', 'B', 'C', 'D', 'F', '']"
+            required
+          ></v-select>
 
-      <div>
-        <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
-      </div>
+          <div>
+            <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
+          </div>
 
-      <br />
-      <v-btn
-        variant="outlined"
-        style="margin-left: 25%; margin-bottom: 20px"
-        @click="
-          saveExpandedCritique()
-          // isOpen = true;
-        "
-        >Save</v-btn
-      >
-      <!-- <teleport to="body">
+          <br />
+          <v-btn
+            variant="outlined"
+            style="margin-left: 25%; margin-bottom: 20px"
+            @click="
+              saveExpandedCritique()
+              // isOpen = true;
+            "
+            >Save</v-btn
+          >
+          <!-- <teleport to="body">
         <div>
           <h3>Critique creation successful!</h3>
           <v-button @click="isOpen = false"></v-button>
         </div>
       </teleport> -->
-      <v-btn
-        variant="outlined"
-        style="margin-left: 25%; margin-bottom: 20px"
-        @click="cancelClick()"
-        >Cancel</v-btn
-      >
-      <br /><br />
-    </v-form>
+          <v-btn
+            variant="outlined"
+            style="margin-left: 25%; margin-bottom: 20px"
+            @click="cancelClick()"
+            >Cancel</v-btn
+          >
+          <br /><br />
+        </v-form>
+      </v-card>
+    </v-container>
   </v-container>
 
   <v-container
@@ -202,124 +219,140 @@
       showingExpandedForm == false &&
       popupTrigger == false
     "
-    fluid
-    class="bg-white"
   >
-    <v-card-title
-      v-if="
-        showingCritiqueForm &&
-        showingExpandedForm == false &&
-        popupTrigger == false
-      "
-    >
-      Quick Critique Form
-    </v-card-title>
-    <h2 class="center">Create Event Critique</h2>
-    <br />
-    <div class="d-flex justify-center">
-      <v-btn
-        variant="outlined"
-        style="margin-left: 50%; margin-right: 50%"
-        @click="showingExpandedForm = true"
-        >Select Expanded Form</v-btn
-      >
-    </div>
-    <br />
+    <v-container>
+      <v-card>
+        <v-card-title
+          v-if="
+            showingCritiqueForm &&
+            showingExpandedForm == false &&
+            popupTrigger == false
+          "
+          class="d-flex justify-center"
+        >
+          Quick Critique Form
+        </v-card-title>
+      </v-card>
+    </v-container>
+    <v-container>
+      <v-card>
+        <v-card-title class="center">Create Event Critique</v-card-title>
 
-    <v-form>
-      <v-select
-        clearable
-        label="Deportment Grade"
-        v-model="deportmentGrade"
-        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
-        required
-      ></v-select>
+        <div class="d-flex justify-center">
+          <v-btn
+            variant="outlined"
+            style="margin-left: 50%; margin-right: 50%"
+            @click="showingExpandedForm = true"
+            >Select Expanded Form</v-btn
+          >
+        </div>
+        <br />
+      </v-card>
+    </v-container>
 
-      <v-select
-        clearable
-        label="Tone Grade"
-        v-model="toneGrade"
-        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
-        required
-      ></v-select>
+    <v-container>
+      <v-card>
+        <v-form>
+          <v-select
+            clearable
+            label="Deportment Grade"
+            v-model="deportmentGrade"
+            :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+            required
+          ></v-select>
 
-      <v-select
-        clearable
-        label="Accuracy/Intonation Grade"
-        v-model="accuracy_intonationGrade"
-        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
-        required
-      ></v-select>
+          <v-select
+            clearable
+            label="Tone Grade"
+            v-model="toneGrade"
+            :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+            required
+          ></v-select>
 
-      <v-select
-        clearable
-        label="Technique Grade"
-        v-model="techniqueGrade"
-        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
-        required
-      ></v-select>
+          <v-select
+            clearable
+            label="Accuracy/Intonation Grade"
+            v-model="accuracy_intonationGrade"
+            :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+            required
+          ></v-select>
 
-      <v-select
-        clearable
-        label="Interpretation & Musicianship Grade"
-        v-model="interpretation_musicianshipGrade"
-        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
-        required
-      ></v-select>
+          <v-select
+            clearable
+            label="Technique Grade"
+            v-model="techniqueGrade"
+            :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+            required
+          ></v-select>
 
-      <v-select
-        clearable
-        label="Balance & Blend Grade"
-        v-model="balance_blendGrade"
-        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
-        required
-      ></v-select>
+          <v-select
+            clearable
+            label="Interpretation & Musicianship Grade"
+            v-model="interpretation_musicianshipGrade"
+            :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+            required
+          ></v-select>
 
-      <v-select
-        clearable
-        label="Diction/Articulation Grade"
-        v-model="diction_articulationGrade"
-        :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
-        required
-      ></v-select>
+          <v-select
+            clearable
+            label="Balance & Blend Grade"
+            v-model="balance_blendGrade"
+            :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+            required
+          ></v-select>
 
-      <v-text-field
-        clearable
-        label="Performance & Suggestions (overall readiness to
+          <v-select
+            clearable
+            label="Diction/Articulation Grade"
+            v-model="diction_articulationGrade"
+            :items="['Excellent', 'Good', 'Fair', 'Poor', '']"
+            required
+          ></v-select>
+
+          <v-text-field
+            clearable
+            label="Performance & Suggestions (overall readiness to
         perform)"
-        v-model="overallPerformanceComment"
-        required
-      ></v-text-field>
+            v-model="overallPerformanceComment"
+            required
+          ></v-text-field>
 
-      <v-select
-        clearable
-        label="Overall Performance Grade"
-        v-model="overallPerformanceGrade"
-        :items="['A', 'B', 'C', 'D', 'F', '']"
-        required
-      ></v-select>
+          <v-select
+            clearable
+            label="Overall Performance Grade"
+            v-model="overallPerformanceGrade"
+            :items="['A', 'B', 'C', 'D', 'F', '']"
+            required
+          ></v-select>
 
-      <br />
-      <div>
-        <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
-      </div>
-      <v-btn
-        variant="outlined"
-        style="margin-left: 25%; margin-right: 25%; margin-bottom: 20px"
-        @click="
-          saveQuickCritique()
-          // isOpen = true;
-        "
-        >Save</v-btn
-      >
-      <!-- <teleport to="body">
+          <br />
+          <div>
+            <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
+          </div>
+          <v-btn
+            variant="outlined"
+            style="margin-left: 25%; margin-right: 25%; margin-bottom: 20px"
+            @click="
+              saveQuickCritique()
+              // isOpen = true;
+            "
+            >Save</v-btn
+          >
+          <!-- <teleport to="body">
         <div>
           <h3>Critique creation successful!</h3>
           <v-button @click="isOpen = false"></v-button>
         </div>
       </teleport> -->
-      <v-btn variant="outlined" @click="cancelClick()">Cancel</v-btn>
-    </v-form>
+          <v-btn
+            style="margin-bottom: 20px; margin-left: 12.5%"
+            variant="outlined"
+            @click="cancelClick()"
+            >Cancel</v-btn
+          >
+        </v-form>
+      </v-card>
+    </v-container>
   </v-container>
 
   <v-container v-else-if="popupTrigger == true">

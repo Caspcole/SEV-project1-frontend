@@ -1,7 +1,9 @@
 <template>
   <div class="ma-5">
     <v-card class="pa-2 ma-2">
-      <h2>Event Sign-Up</h2>
+      <v-card>
+        <v-card-title class="d-flex justify-center">Event Sign-Up</v-card-title>
+      </v-card>
       <v-container>
         <v-row>
           <v-col>
@@ -51,7 +53,7 @@
                 item-title="fullName"
                 autocomplete="off"
                 @update:modelValue="
-                  updateAvaliableSongs(song.id, selectedComposers[song.id])
+                  updateAvailableSongs(song.id, selectedComposers[song.id])
                 "
                 :disabled="disabledStudentSongs[song.id]"
               >
@@ -355,7 +357,7 @@ export default {
       }
     },
 
-    async updateAvaliableSongs(studentSongId, composerId) {
+    async updateAvailableSongs(studentSongId, composerId) {
       await SongsDataService.getByComposerId(composerId)
         .then((response) => {
           this.composerSongs[studentSongId] = response.data;

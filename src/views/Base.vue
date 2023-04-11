@@ -55,7 +55,14 @@
       <v-col cols="2" class="bg-blue">
         <MainNav></MainNav>
       </v-col>
-      <v-col cols="10" class="bg-white">
+      <v-col
+        cols="10"
+        class="bg-image"
+        style="
+          background-image: url(../../public/choir-3.jpg);
+          background-repeat: repeat;
+        "
+      >
         <!-- Your components go here -->
         <div class="grid-container">
           <!-- Student Section -->

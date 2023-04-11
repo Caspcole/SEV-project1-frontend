@@ -1,64 +1,68 @@
 <template>
-  <v-card>
-    <v-card-title> Repertoire: </v-card-title>
-  </v-card>
+  <v-container>
+    <v-card>
+      <v-card-title class="d-flex justify-center"> Repertoire </v-card-title>
+    </v-card>
+  </v-container>
   <v-container>
     <v-btn color="primary" @click="displayDialog"> Add Piece </v-btn>
-    <v-expansion-panels class="mt-10" variant="accordion">
-      <v-expansion-panel v-for="semester in userSemesters">
-        <v-expansion-panel-title>
-          {{ "  " + semester.semesterTitle }}
-        </v-expansion-panel-title>
-        <v-expansion-panel-text>
-          <v-card
-            v-for="stuInstrument in semester.studentInstruments"
-            class="mt-5"
-            elevation="2"
-            color="orange-lighten-5"
-          >
-            <v-card-title>
-              {{ stuInstrument.instrument.name }}
-            </v-card-title>
-            <v-card-text>
-              <v-row>
-                <v-col v-for="song in stuInstrument.repertoire" cols="4">
-                  <v-card elevation="2">
-                    <v-card-text justify="center" class="pa-1 ma-1">
-                      <strong>
-                        {{ song.title }}
-                      </strong>
-                      <div>
-                        {{
-                          "By: " +
-                          song.composer.fName +
-                          " " +
-                          song.composer.lName
-                        }}
-                      </div>
-                    </v-card-text>
-                    <v-card-actions>
-                      <v-btn
-                        variant="plain"
-                        class="text-center"
-                        @click="deleteItem(semester, stuInstrument, song)"
-                      >
-                        Delete </v-btn
-                      ><v-btn
-                        variant="plain"
-                        class="text-center"
-                        @click="editItem(semester, stuInstrument, song)"
-                      >
-                        Edit
-                      </v-btn>
-                    </v-card-actions>
-                  </v-card>
-                </v-col>
-              </v-row>
-            </v-card-text>
-          </v-card>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
+    <v-card class="mt-10">
+      <v-expansion-panels variant="accordion">
+        <v-expansion-panel v-for="semester in userSemesters">
+          <v-expansion-panel-title>
+            {{ "  " + semester.semesterTitle }}
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <v-card
+              v-for="stuInstrument in semester.studentInstruments"
+              class="mt-5"
+              elevation="2"
+              color="orange-lighten-5"
+            >
+              <v-card-title>
+                {{ stuInstrument.instrument.name }}
+              </v-card-title>
+              <v-card-text>
+                <v-row>
+                  <v-col v-for="song in stuInstrument.repertoire" cols="4">
+                    <v-card elevation="2">
+                      <v-card-text justify="center" class="pa-1 ma-1">
+                        <strong>
+                          {{ song.title }}
+                        </strong>
+                        <div>
+                          {{
+                            "By: " +
+                            song.composer.fName +
+                            " " +
+                            song.composer.lName
+                          }}
+                        </div>
+                      </v-card-text>
+                      <v-card-actions>
+                        <v-btn
+                          variant="plain"
+                          class="text-center"
+                          @click="deleteItem(semester, stuInstrument, song)"
+                        >
+                          Delete </v-btn
+                        ><v-btn
+                          variant="plain"
+                          class="text-center"
+                          @click="editItem(semester, stuInstrument, song)"
+                        >
+                          Edit
+                        </v-btn>
+                      </v-card-actions>
+                    </v-card>
+                  </v-col>
+                </v-row>
+              </v-card-text>
+            </v-card>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
+    </v-card>
   </v-container>
   <v-dialog v-model="dialogDelete" max-width="500px">
     <v-card>
@@ -80,9 +84,19 @@
   <v-dialog v-model="dialog" max-width="700px">
     <v-card>
       <v-card-title v-if="!isEdit">
-        Add a piece to your repertoire
+        <v-card>
+          <v-card-title class="d-flex justify-center"
+            >Add a piece to your repertoire</v-card-title
+          >
+        </v-card>
       </v-card-title>
-      <v-card-title v-else> Edit a repertoire piece </v-card-title>
+      <v-card-title v-else>
+        <v-card>
+          <v-card-title class="d-flex justify-center"
+            >Edit a repertoire piece
+          </v-card-title></v-card
+        ></v-card-title
+      >
       <v-card-text>
         <v-row class="ml-5">
           <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>

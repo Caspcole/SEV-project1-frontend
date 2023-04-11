@@ -1,38 +1,46 @@
 <template>
-  <v-row align="start">
-    <v-col>
-      <v-card>
-        <v-card-title> Students Critiques: </v-card-title>
-      </v-card>
-    </v-col>
-  </v-row>
   <v-container>
-    <v-row>
-      <v-col cols="3">
-        <v-select
-          v-model="selectedSemester"
-          label="Semester"
-          :items="semesters"
-          item-value="id"
-          item-title="title"
-          return-object
-          @update:modelValue="semesterSearchUpdate(selectedSemester)"
-        ></v-select>
+    <v-row align="start">
+      <v-col>
+        <v-card>
+          <v-card-title class="d-flex justify-center">
+            Students Critiques
+          </v-card-title>
+        </v-card>
       </v-col>
     </v-row>
   </v-container>
-  <v-container fluid class="bg-white">
+  <v-container>
+    <v-row>
+      <v-col cols="3">
+        <v-card>
+          <v-select
+            v-model="selectedSemester"
+            label="Semester"
+            :items="semesters"
+            item-value="id"
+            item-title="title"
+            return-object
+            @update:modelValue="semesterSearchUpdate(selectedSemester)"
+            style="background-color: whitesmoke"
+          ></v-select>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+
+  <v-container>
     <v-card>
       <div
         v-if="selectedSemester != null && selectedSemester.code === 'SP'"
-        class="text-subtitle-1 mt-4 mb-2"
+        class="d-flex justify-center"
         @update:modelValue="semesterSearchUpdate(selectedSemester.eventDate)"
       >
         {{ "  " + "Spring " + selectedSemester.year }}
       </div>
       <div
         v-else-if="selectedSemester != null && selectedSemester.code === 'FA'"
-        class="text-subtitle-1 mt-4 mb-2"
+        class="d-flex justify-center"
         @update:modelValue="semesterSearchUpdate(selectedSemester.eventDate)"
       >
         {{ "  " + "Fall " + selectedSemester.year }}
