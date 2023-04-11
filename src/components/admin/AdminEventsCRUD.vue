@@ -19,6 +19,10 @@
           ></v-select>
         </v-card>
       </v-col>
+      <v-col> </v-col>
+      <v-col cols="2">
+        <v-btn color="primary"> Create Event</v-btn>
+      </v-col>
     </v-row>
   </v-container>
 
@@ -291,6 +295,7 @@ export default {
           console.log(e);
         });
     },
+    createEvent() {},
     async semesterSearchUpdate(semester) {
       await EventDataService.getSemesterEvents(semester) // change
         .then((response) => {
