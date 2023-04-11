@@ -20,17 +20,19 @@
         <v-row>
           <v-col>
             <h4>Instructor</h4>
-            <h5>{{ student.instructor }}</h5>
+            <h5>
+              {{ displayedInstructor() }}
+            </h5>
           </v-col>
           <v-col>
             <h4>Student Instrument</h4>
-            <h5>{{ student.instrument }}</h5>
+            <h5>{{ displayedInstrument() }}</h5>
           </v-col>
         </v-row>
         <v-row>
           <v-col>
             <h4>Accompanist</h4>
-            <h5>{{ student.accompanist }}</h5>
+            <h5>{{ displayedAccompanist() }}</h5>
           </v-col>
         </v-row>
       </v-container>
@@ -154,8 +156,10 @@ export default {
       selectedSongs: [],
       dialogPopup: false,
 
-      studentInstrumentId: 1, // this will be passed in from eventOb
-      instructorId: 1, // this will be passed in from eventOb
+      // studentInstrumentId: 0, // this will be passed in from eventOb
+      // instructorId: 0, // this will be passed in from eventOb
+      // instructor: null,
+      // accompanist: null,
       currentSemesterId: 0,
 
       studentSongs: [],
@@ -186,19 +190,19 @@ export default {
       );
     },
   },
-  async mounted() {
+  async created() {
     this.user = Utils.getStore("user");
+
+    console.log(this.eventOb.hasOwnProperty("studentInstrument"));
+    if (!this.eventOb.hasOwnProperty("studentInstrument")) {
+      this.dialogMessage = "There was an error when reserving your time slot.";
+      this.dialogPopup = true;
+    }
+
     await this.getComposers();
 
     await this.calculateSemester();
-    // await StudentInstrumentDataService.getByUser(this.user.userId)
-    //   .then((response) => {
-    //     this.studentInstrumentId = response.data.id;
-    //     console.log(this.studentInstrumentId);
-    //   })
-    //   .catch((e) => {
-    //     console.log(e);
-    //   });
+    // console.log(this.eventOb);
   },
   methods: {
     onSave() {
@@ -229,6 +233,39 @@ export default {
         } else {
           return true;
         }
+      }
+    },
+
+    displayedAccompanist() {
+      if (this.eventOb.hasOwnProperty("studentInstrument"))
+        return (
+          this.eventOb.studentInstrument.accompanist.user.fName +
+          " " +
+          this.eventOb.studentInstrument.accompanist.user.lName
+        );
+      else {
+        return "You have no accompanist.";
+      }
+    },
+
+    displayedInstructor() {
+      if (this.eventOb.hasOwnProperty("studentInstrument"))
+        return (
+          this.eventOb.studentInstrument.instructor.user.fName +
+          " " +
+          this.eventOb.studentInstrument.instructor.user.lName
+        );
+      else {
+        return "You have no accompanist.";
+      }
+    },
+
+    displayedInstrument() {
+      if (this.eventOb.hasOwnProperty("studentInstrument")) {
+        return this.eventOb.studentInstrument.instrument.name;
+      } else {
+        this.errorDialog();
+        return "No instrument.";
       }
     },
 
@@ -330,18 +367,11 @@ export default {
         });
     },
 
-    //   return (
-    //     itemText.toLowerCase().indexOf(queryText.toLowerCase()) !== -1 &&
-    //     queryText.length >= 2
-    //   );
-    // },
     validateSongs() {
-      console.log(this.studentSongs);
       if (this.studentSongs.length == 0) {
         this.errorMessage = "Please add a song in order to submit.";
       } else {
         this.studentSongs.forEach((song) => {
-          // console.log(song);
           if (song.composer == "") {
             this.errorMessage = "Please do not leave a composer blank.";
           } else if (song.piece == "") {
@@ -354,8 +384,8 @@ export default {
     async createStudentTimeSlot() {
       var studentTimeslotData = {
         eventTimeslotId: this.eventOb.eventTimes[0].eventId,
-        studentInstrumentId: this.studentInstrumentId, // filler while students aren't working
-        instructorId: this.instructorId,
+        studentInstrumentId: this.eventOb.studentInstrument.id, // filler while students aren't working
+        instructorId: this.eventOb.studentInstrument.instructor.id,
       };
 
       await StudentTimeslotDataService.create(studentTimeslotData)
@@ -386,7 +416,7 @@ export default {
     async saveToRepertoire() {
       this.studentSongs.forEach(async (piece) => {
         const data = {
-          studentInstrumentId: this.studentInstrumentId,
+          studentInstrumentId: this.eventOb.studentInstrument.id,
           songId: piece.piece,
           semesterId: this.currentSemesterId,
         };
@@ -420,6 +450,11 @@ export default {
             "There was an error when reserving your time slot. Please ask an administrator to check the event.";
           this.dialogPopup = true;
         });
+    },
+
+    errorDialog() {
+      this.dialogMessage = "There was an error when reserving your time slot.";
+      this.dialogPopup = true;
     },
 
     closeDialog() {
