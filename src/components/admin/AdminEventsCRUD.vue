@@ -7,15 +7,17 @@
   <v-container>
     <v-row>
       <v-col cols="2">
-        <v-select
-          v-model="selectedSemester"
-          label="Semester"
-          :items="semesters"
-          item-value="id"
-          item-title="title"
-          @update:modelValue="semesterSearchUpdate(selectedSemester)"
-          style="background-color: whitesmoke"
-        ></v-select>
+        <v-card>
+          <v-select
+            v-model="selectedSemester"
+            label="Semester"
+            :items="semesters"
+            item-value="id"
+            item-title="title"
+            @update:modelValue="semesterSearchUpdate(selectedSemester)"
+            style="background-color: whitesmoke"
+          ></v-select>
+        </v-card>
       </v-col>
     </v-row>
   </v-container>
@@ -23,37 +25,39 @@
   <v-container>
     <v-row>
       <v-col>
-        <v-data-table
-          :headers="headers"
-          :items="filteredEvents"
-          class="elevation-1"
-        >
-          <template v-slot:top>
-            <v-toolbar flat>
-              <v-toolbar-title>EVENTS</v-toolbar-title>
-            </v-toolbar>
-          </template>
-          <template #item="{ item }">
-            <tr>
-              <td v-for="(header, index) in headers" :key="index">
-                <div
-                  v-if="
-                    header.title == 'Start Time' || header.title == 'End Time'
-                  "
-                >
-                  {{ this.formatTime(item.columns[header.key]) }}
-                </div>
-                <div v-else-if="header.title != 'Actions'">
-                  {{ item.columns[header.key] }}
-                </div>
-                <div v-else>
-                  <!-- @click="displayEventAvailability(item.raw)" -->
-                  <v-btn small color="primary">Create Availability</v-btn>
-                </div>
-              </td>
-            </tr>
-          </template>
-        </v-data-table>
+        <v-card>
+          <v-data-table
+            :headers="headers"
+            :items="filteredEvents"
+            class="elevation-1"
+          >
+            <template v-slot:top>
+              <v-toolbar flat>
+                <v-toolbar-title>EVENTS</v-toolbar-title>
+              </v-toolbar>
+            </template>
+            <template #item="{ item }">
+              <tr>
+                <td v-for="(header, index) in headers" :key="index">
+                  <div
+                    v-if="
+                      header.title == 'Start Time' || header.title == 'End Time'
+                    "
+                  >
+                    {{ this.formatTime(item.columns[header.key]) }}
+                  </div>
+                  <div v-else-if="header.title != 'Actions'">
+                    {{ item.columns[header.key] }}
+                  </div>
+                  <div v-else>
+                    <!-- @click="displayEventAvailability(item.raw)" -->
+                    <v-btn small color="primary">Create Availability</v-btn>
+                  </div>
+                </td>
+              </tr>
+            </template>
+          </v-data-table>
+        </v-card>
       </v-col>
     </v-row>
   </v-container>

@@ -13,16 +13,18 @@
   <v-container>
     <v-row>
       <v-col cols="3">
-        <v-select
-          v-model="selectedSemester"
-          label="Semester"
-          :items="semesters"
-          item-value="id"
-          item-title="title"
-          return-object
-          @update:modelValue="semesterSearchUpdate(selectedSemester)"
-          style="background-color: whitesmoke"
-        ></v-select>
+        <v-card>
+          <v-select
+            v-model="selectedSemester"
+            label="Semester"
+            :items="semesters"
+            item-value="id"
+            item-title="title"
+            return-object
+            @update:modelValue="semesterSearchUpdate(selectedSemester)"
+            style="background-color: whitesmoke"
+          ></v-select>
+        </v-card>
       </v-col>
     </v-row>
   </v-container>

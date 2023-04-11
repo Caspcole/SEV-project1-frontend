@@ -9,39 +9,41 @@
   <v-container>
     <v-row>
       <v-col>
-        <v-data-table :headers="headers" :items="events" class="elevation-1">
-          <template v-slot:top>
-            <v-toolbar flat>
-              <v-toolbar-title class="d-flex justify-center"
-                >UPCOMING EVENTS</v-toolbar-title
-              >
-            </v-toolbar>
-          </template>
-          <template #item="{ item }">
-            <tr>
-              <td v-for="(header, index) in headers" :key="index">
-                <div
-                  v-if="
-                    header.title == 'Start Time' || header.title == 'End Time'
-                  "
+        <v-card>
+          <v-data-table :headers="headers" :items="events" class="elevation-1">
+            <template v-slot:top>
+              <v-toolbar flat>
+                <v-toolbar-title class="d-flex justify-center"
+                  >UPCOMING EVENTS</v-toolbar-title
                 >
-                  {{ this.formatTime(item.columns[header.key]) }}
-                </div>
-                <div v-else-if="header.title != 'Actions'">
-                  {{ item.columns[header.key] }}
-                </div>
-                <div v-else>
-                  <v-btn
-                    small
-                    color="primary"
-                    @click="displayEventAvailability(item.raw)"
-                    >Create Availability</v-btn
+              </v-toolbar>
+            </template>
+            <template #item="{ item }">
+              <tr>
+                <td v-for="(header, index) in headers" :key="index">
+                  <div
+                    v-if="
+                      header.title == 'Start Time' || header.title == 'End Time'
+                    "
                   >
-                </div>
-              </td>
-            </tr>
-          </template>
-        </v-data-table>
+                    {{ this.formatTime(item.columns[header.key]) }}
+                  </div>
+                  <div v-else-if="header.title != 'Actions'">
+                    {{ item.columns[header.key] }}
+                  </div>
+                  <div v-else>
+                    <v-btn
+                      small
+                      color="primary"
+                      @click="displayEventAvailability(item.raw)"
+                      >Create Availability</v-btn
+                    >
+                  </div>
+                </td>
+              </tr>
+            </template>
+          </v-data-table>
+        </v-card>
       </v-col>
     </v-row>
   </v-container>
