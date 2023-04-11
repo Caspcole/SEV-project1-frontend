@@ -11,6 +11,44 @@
     <v-container>
       <v-row>
         <v-col>
+          <v-select
+            clearable
+            v-model="selectedStudentInstrument"
+            label="Instrument"
+            :items="studentInstruments"
+            item-title="instrument.name"
+            return-object
+            :style="{ width: '250px' }"
+            @update:modelValue="updateReturningObject"
+          ></v-select>
+        </v-col>
+        <v-col>
+          <h4>Instructor for selected instrument:</h4>
+          <p>
+            {{
+              selectedStudentInstrument == null
+                ? "No instrument selected"
+                : selectedStudentInstrument.instructor.user.fName +
+                  " " +
+                  selectedStudentInstrument.instructor.user.lName
+            }}
+          </p>
+          <h4>Accompanist for selected instrument:</h4>
+          <p>
+            {{
+              selectedStudentInstrument == null
+                ? "No Accompanist"
+                : selectedStudentInstrument.accompanist.user.fName +
+                  " " +
+                  selectedStudentInstrument.accompanist.user.lName
+            }}
+          </p>
+        </v-col>
+      </v-row>
+    </v-container>
+    <v-container>
+      <v-row>
+        <v-col>
           <!-- Make it so only the events in the future are shown -->
           <h3>Upcoming Events</h3>
           <br />
@@ -47,7 +85,7 @@
           <br />
 
           <!-- Have some logic to grey out the button if there are no time slots selected -->
-          <v-btn @click="SignUpForEventObject(returningObject)">Next</v-btn>
+          <v-btn @click="nextPage">Next</v-btn>
           <!-- Need some logic to get the type of instrument the student is using -->
         </v-col>
       </v-row>
@@ -56,8 +94,10 @@
 </template>
 
 <script>
+import Utils from "../../config/utils.js";
 import EventDataService from "../../services/EventDataService";
 import EventTimeDataService from "../../services/EventTimeDataService";
+import StudentInstrumentDataService from "../../services/StudentInstrumentDataService";
 // change the name of EventTimeDataService to EventTimeslotDataService
 export default {
   name: "student-event-list",
@@ -72,6 +112,10 @@ export default {
     selectedEventTimes: [],
     currentDate: new Date(),
     toSignUp: true,
+    user: {},
+
+    studentInstruments: [],
+    selectedStudentInstrument: null,
   }),
   emits: ["SignUpForEventObject"],
   setup(props, { emit }) {
@@ -87,6 +131,14 @@ export default {
       this.currentEvent = event;
       this.determineEventTimes();
       this.selectedEvent = true;
+    },
+
+    updateReturningObject() {
+      if (this.selectedStudentInstrument) {
+        this.returningObject.studentInstrument = this.selectedStudentInstrument;
+      } else {
+        delete this.returningObject.studentInstrument;
+      }
     },
 
     async retrieveEventsDateAndAfter(date) {
@@ -129,6 +181,7 @@ export default {
 
     updateSelectedEventTimes() {
       this.returningObject = this.currentEvent;
+      this.updateReturningObject();
       this.returningObject.eventTimes = this.selectedEventTimes;
 
       // Strip the ending seconds from the start and end times
@@ -150,11 +203,45 @@ export default {
           console.log(e);
         });
     },
+
+    async retrieveStudentInstruments() {
+      await StudentInstrumentDataService.getInstrumentAndInstructorAndAccompanistByUserId(
+        this.user.userId
+      )
+        .then((response) => {
+          this.studentInstruments = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+
+    validation() {
+      var isValid = true;
+      if (!this.returningObject.hasOwnProperty("studentInstrument")) {
+        isValid = false;
+      } else if (!this.returningObject.hasOwnProperty("eventTimes")) {
+        isValid = false;
+      } else if (this.returningObject.eventTimes.length == 0) {
+        isValid = false;
+      }
+      console.log(isValid);
+      return isValid;
+    },
+
+    nextPage() {
+      if (this.validation()) {
+        this.SignUpForEventObject(this.returningObject);
+      }
+    },
   },
   async mounted() {
     this.currentDate = new Date();
     let dateString = this.currentDate.toISOString().substring(0, 10);
     await this.retrieveEventsDateAndAfter(dateString);
+
+    this.user = Utils.getStore("user");
+    await this.retrieveStudentInstruments();
   },
 };
 </script>
