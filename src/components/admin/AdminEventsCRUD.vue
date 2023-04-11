@@ -21,7 +21,7 @@
       </v-col>
       <v-col> </v-col>
       <v-col cols="2">
-        <v-btn color="primary" @click="displayCreateEvent(item.raw)">
+        <v-btn color="primary" @click="displayCreateEvent(item)">
           Create Event
         </v-btn>
       </v-col>
@@ -52,7 +52,7 @@
                   >
                     {{ this.formatTime(item.columns[header.key]) }}
                   </div>
-                  <div v-else-if="header.title != 'Actions'">
+                  <div v-else-if="header.title != 'Edit'">
                     {{ item.columns[header.key] }}
                   </div>
                   <div v-else>
@@ -72,171 +72,11 @@
     </v-row>
   </v-container>
 
-  <v-dialog v-model="showDialog" :style="{ width: '875px' }" class="mx-auto">
+  <!-- Create dialog popup -->
+  <v-dialog v-model="createDialog" :style="{ width: '875px' }" class="mx-auto">
     <v-card>
-      <v-card-title>
-        <v-row>
-          <v-col>
-            {{ "Event Type: " + this.selectedEvent.type }}
-          </v-col>
-          <v-spacer></v-spacer>
-          <v-col>
-            {{ "Event Date: " + this.selectedEvent.date }}
-          </v-col>
-          <v-spacer></v-spacer>
-          <v-col>
-            {{
-              "Times: (" +
-              this.formatTime(this.selectedEvent.startTime) +
-              " - " +
-              this.formatTime(this.selectedEvent.endTime) +
-              ")"
-            }}
-          </v-col>
-        </v-row>
-      </v-card-title>
-      <v-divider></v-divider>
-      <v-card-text>
-        <v-row class="ml-5">
-          <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
-        </v-row>
-        <v-row class="mt-4 ml-5">
-          <v-select
-            v-model="availabilityStart"
-            label="Start Time"
-            :items="availabilityStartArray"
-            :style="{ width: '40px' }"
-            return-object
-            @update:modelValue="startTimeUpdated()"
-          ></v-select>
-          <v-select
-            class="ml-15"
-            v-model="availabilityEnd"
-            label="End Time"
-            :items="availabilityEndArray"
-            :style="{ width: '40px' }"
-            return-object
-          ></v-select>
-          <v-spacer></v-spacer>
-        </v-row>
-        <v-row class="ml-5">
-          <v-btn color="primary" @click="createAvailability()"
-            >Create Availability</v-btn
-          >
-          <v-spacer></v-spacer>
-        </v-row>
-        <v-data-table
-          class="mt-15 mb-5 elevation-1"
-          :items="currentAvailability"
-          :headers="availabilityHeader"
-          :sort-by="[{ key: 'startTime', order: 'dsc' }]"
-        >
-          <template #top>
-            <v-toolbar flat>
-              <v-toolbar-title> AVAILABILITY </v-toolbar-title>
-              <div v-if="currentAvailability.length == 0" class="mr-4">
-                <v-spacer></v-spacer>
-                You currently have no availability for this event.
-              </div>
-            </v-toolbar>
-          </template>
-          <template #item="{ item }">
-            <tr>
-              <td v-for="(header, index) in availabilityHeader" :key="index">
-                <div
-                  v-if="
-                    header.title == 'Start Time' || header.title == 'End Time'
-                  "
-                >
-                  {{ this.formatTime(item.columns[header.key]) }}
-                </div>
-                <div v-else>
-                  <v-icon size="small" class="me-2" @click="editItem(item.raw)">
-                    mdi-pencil
-                  </v-icon>
-                  <v-icon size="small" @click="deleteItem(item.raw)">
-                    mdi-delete
-                  </v-icon>
-                </div>
-              </td>
-            </tr>
-          </template>
-        </v-data-table>
-      </v-card-text>
-      <v-card-actions>
-        <v-btn color="blue-darken-1" variant="text" @click="showDialog = false"
-          >Close</v-btn
-        >
-      </v-card-actions>
+      <v-card-title class="d-flex justify-center">Create Event</v-card-title>
     </v-card>
-    <v-dialog v-model="dialogDelete" max-width="500px">
-      <v-card>
-        <v-card-title class="text-h5"
-          >Are you sure you want to delete this item?</v-card-title
-        >
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue-darken-1" variant="text" @click="closeDelete"
-            >Cancel</v-btn
-          >
-          <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm"
-            >OK</v-btn
-          >
-          <v-spacer></v-spacer>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-    <v-dialog v-model="dialogEdit" max-width="500px">
-      <v-card>
-        <v-card-text>
-          <v-row class="ml-5">
-            <strong class="text-red-lighten-1">{{
-              this.editErrorMessage
-            }}</strong>
-          </v-row>
-          <v-row class="mt-4 ml-5">
-            <v-col cols="6"
-              >{{ "Start Time-" + this.editStartOriginal }}
-            </v-col>
-            <v-col cols="6">
-              {{ "End Time-" + this.editEndOriginal }}
-            </v-col>
-          </v-row>
-          <v-row class="mt-4 ml-5">
-            <v-col cols="6">
-              <v-select
-                v-model="editSelectedStart"
-                label="Start Time"
-                :items="availabilityStartArray"
-                return-object
-                :style="{ width: '160px' }"
-                @update:modelValue="editStartChange()"
-              ></v-select>
-            </v-col>
-            <v-col cols="6">
-              <v-select
-                class="mr-15"
-                v-model="editSelectedEnd"
-                label="End Time"
-                :items="editEndArray"
-                return-object
-                :style="{ width: '160px' }"
-              ></v-select>
-            </v-col>
-          </v-row>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue-darken-1" variant="text" @click="closeEdit"
-            >Cancel</v-btn
-          >
-          <v-btn color="blue-darken-1" variant="text" @click="editItemConfirm"
-            >SAVE</v-btn
-          >
-          <v-spacer></v-spacer>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-dialog>
 </template>
 <script>
@@ -253,7 +93,7 @@ export default {
       { title: "Event Date", key: "date" },
       { title: "Start Time", key: "startTime" },
       { title: "End Time", key: "endTime" },
-      { title: "Actions", key: "actions", sortable: false },
+      { title: "Edit", key: "actions", sortable: false },
     ],
     selectedEvent: null,
     user: {},
@@ -277,6 +117,12 @@ export default {
     editDialog: false,
   }),
   methods: {
+    displayCreateEvent(event) {
+      this.errorMessage = "";
+      this.selectedEvent = event;
+
+      this.createDialog = true;
+    },
     async retrieveAllSemesters() {
       await SemesterDataService.getAll()
         .then((response) => {
