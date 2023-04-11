@@ -1,5 +1,13 @@
 <!-- Basically tutorialsList -->
 <template>
+  <v-dialog v-model="displayError" width="450px" class="text-center">
+    <v-card>
+      <v-card-text> "{{ errorMessage }}" </v-card-text>
+      <v-card-actions>
+        <v-btn color="primary" block @click="closeDialog">Close Dialog</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
   <v-container class="ma-5">
     <h2>Event Sign-Up</h2>
     <br />
@@ -7,6 +15,8 @@
       Please select the event to sign-up for, then select a time slot(s) for
       that event.
     </p>
+
+    <!-- <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong> -->
     <br />
     <v-container>
       <v-row>
@@ -113,6 +123,8 @@ export default {
     currentDate: new Date(),
     toSignUp: true,
     user: {},
+    errorMessage: "",
+    displayError: false,
 
     studentInstruments: [],
     selectedStudentInstrument: null,
@@ -131,6 +143,11 @@ export default {
       this.currentEvent = event;
       this.determineEventTimes();
       this.selectedEvent = true;
+    },
+
+    closeDialog() {
+      this.errorMessage = "";
+      this.displayError = false;
     },
 
     updateReturningObject() {
@@ -218,14 +235,23 @@ export default {
 
     validation() {
       var isValid = true;
+      console.log(this.returningObject);
       if (!this.returningObject.hasOwnProperty("studentInstrument")) {
-        isValid = false;
+        isValid = this.notValid();
+        this.errorMessage = "Please select an instrument.";
       } else if (!this.returningObject.hasOwnProperty("eventTimes")) {
-        isValid = false;
+        isValid = this.notValid();
+        this.errorMessage = "Please select an event and time slot.";
       } else if (this.returningObject.eventTimes.length == 0) {
-        isValid = false;
+        isValid = this.notValid();
+        this.errorMessage = "Please select an event time slot.";
       }
       return isValid;
+    },
+
+    notValid() {
+      this.displayError = true;
+      return false;
     },
 
     nextPage() {
