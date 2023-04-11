@@ -320,7 +320,7 @@ export default {
       }
     },
 
-    async updateAvaableSongs(studentSongId, composerId) {
+    async updateAvailableSongs(studentSongId, composerId) {
       await SongsDataService.getByComposerId(composerId)
         .then((response) => {
           this.composerSongs[studentSongId] = response.data;

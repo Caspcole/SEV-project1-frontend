@@ -60,7 +60,7 @@
         class="bg-image"
         style="
           background-image: url(../../public/choir-3.jpg);
-          background-repeat: repeat-y;
+          background-repeat: repeat;
         "
       >
         <!-- Your components go here -->
