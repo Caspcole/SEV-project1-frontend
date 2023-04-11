@@ -73,11 +73,11 @@
   </v-container>
 
   <!-- Create dialog popup -->
-  <v-dialog v-model="createDialog" :style="{ width: '875px' }" class="mx-auto">
+  <v-dialog v-model="createDialog" :style="{ width: '1000px' }" class="mx-auto">
     <v-card>
-      <v-row>
+      <v-card>
         <v-card-title class="d-flex justify-center">Create Event</v-card-title>
-      </v-row>
+      </v-card>
       <v-card-text>
         <v-row class="ml-5">
           <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
