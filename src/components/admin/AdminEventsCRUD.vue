@@ -21,7 +21,9 @@
       </v-col>
       <v-col> </v-col>
       <v-col cols="2">
-        <v-btn color="primary"> Create Event</v-btn>
+        <v-btn color="primary" @click="displayCreateEvent(item.raw)">
+          Create Event
+        </v-btn>
       </v-col>
     </v-row>
   </v-container>
@@ -54,8 +56,12 @@
                     {{ item.columns[header.key] }}
                   </div>
                   <div v-else>
-                    <!-- @click="displayEventAvailability(item.raw)" -->
-                    <v-btn small color="primary">Create Availability</v-btn>
+                    <v-btn
+                      small
+                      color="primary"
+                      @click="displayEditEvent(item.raw)"
+                      >Edit Event</v-btn
+                    >
                   </div>
                 </td>
               </tr>
@@ -247,7 +253,7 @@ export default {
       { title: "Event Date", key: "date" },
       { title: "Start Time", key: "startTime" },
       { title: "End Time", key: "endTime" },
-      // { title: "Actions", key: "actions", sortable: false },
+      { title: "Actions", key: "actions", sortable: false },
     ],
     selectedEvent: null,
     user: {},
@@ -265,12 +271,10 @@ export default {
     monthFilter: null,
     semesterEvents: [],
     filteredEvents: [],
-    //---------------------
-    availabilityHeader: [
-      { title: "Start Time", key: "startTime", sortable: false },
-      { title: "End Time", key: "endTime", sortable: false },
-      { title: "Actions", sortable: false, allign: "end" },
-    ],
+
+    errorMessage: "",
+    createDialog: false,
+    editDialog: false,
   }),
   methods: {
     async retrieveAllSemesters() {
