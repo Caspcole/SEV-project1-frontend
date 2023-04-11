@@ -37,7 +37,7 @@
           <p>
             {{
               selectedStudentInstrument == null
-                ? "No Accompanist"
+                ? "No accompanist"
                 : selectedStudentInstrument.accompanist.user.fName +
                   " " +
                   selectedStudentInstrument.accompanist.user.lName
