@@ -225,7 +225,6 @@ export default {
       } else if (this.returningObject.eventTimes.length == 0) {
         isValid = false;
       }
-      console.log(isValid);
       return isValid;
     },
 

@@ -366,12 +366,10 @@ export default {
     },
 
     validateSongs() {
-      console.log(this.studentSongs);
       if (this.studentSongs.length == 0) {
         this.errorMessage = "Please add a song in order to submit.";
       } else {
         this.studentSongs.forEach((song) => {
-          // console.log(song);
           if (song.composer == "") {
             this.errorMessage = "Please do not leave a composer blank.";
           } else if (song.piece == "") {
