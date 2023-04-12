@@ -193,7 +193,6 @@ export default {
   async created() {
     this.user = Utils.getStore("user");
 
-    console.log(this.eventOb.hasOwnProperty("studentInstrument"));
     if (!this.eventOb.hasOwnProperty("studentInstrument")) {
       this.dialogMessage = "There was an error when reserving your time slot.";
       this.dialogPopup = true;
@@ -202,7 +201,6 @@ export default {
     await this.getComposers();
 
     await this.calculateSemester();
-    // console.log(this.eventOb);
   },
   methods: {
     onSave() {
@@ -382,35 +380,38 @@ export default {
     },
 
     async createStudentTimeSlot() {
-      var studentTimeslotData = {
-        eventTimeslotId: this.eventOb.eventTimes[0].eventId,
-        studentInstrumentId: this.eventOb.studentInstrument.id, // filler while students aren't working
-        instructorId: this.eventOb.studentInstrument.instructor.id,
-      };
+      // save every eventTimeslot selected
+      for (var i = 0; i < this.eventOb.eventTimes.length; i++) {
+        var studentTimeslotData = {
+          eventTimeslotId: this.eventOb.eventTimes[i].id,
+          studentInstrumentId: this.eventOb.studentInstrument.id, // filler while students aren't working
+          instructorId: this.eventOb.studentInstrument.instructor.id,
+        };
 
-      await StudentTimeslotDataService.create(studentTimeslotData)
-        .then((response) => {
-          var createdStudentTimeslotId = response.data.id;
+        await StudentTimeslotDataService.create(studentTimeslotData)
+          .then((response) => {
+            var createdStudentTimeslotId = response.data.id;
 
-          this.studentSongs.forEach(async (piece) => {
-            var timeslotSongData = {
-              timeslotId: createdStudentTimeslotId,
-              songId: piece.piece,
-            };
+            this.studentSongs.forEach(async (piece) => {
+              var timeslotSongData = {
+                timeslotId: createdStudentTimeslotId,
+                songId: piece.piece,
+              };
 
-            await TimeslotSongsDataService.create(timeslotSongData)
-              .then((response) => {})
-              .catch((e) => {
-                this.message = e.response.data.message;
-              });
+              await TimeslotSongsDataService.create(timeslotSongData)
+                .then((response) => {})
+                .catch((e) => {
+                  this.message = e.response.data.message;
+                });
+            });
+          })
+          .catch((e) => {
+            this.message = e.response.data.message;
+            this.errorMessage =
+              "There was an error with reserving your time slot\n" +
+              `${this.message}`;
           });
-        })
-        .catch((e) => {
-          this.message = e.response.data.message;
-          this.errorMessage =
-            "There was an error with reserving your time slot\n" +
-            `${this.message}`;
-        });
+      }
     },
 
     async saveToRepertoire() {

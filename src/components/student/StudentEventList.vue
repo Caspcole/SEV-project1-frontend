@@ -17,44 +17,46 @@
       </v-card-text>
     </v-card>
     <br />
-    <v-container>
-      <v-row>
-        <v-col>
-          <v-select
-            clearable
-            v-model="selectedStudentInstrument"
-            label="Instrument"
-            :items="studentInstruments"
-            item-title="instrument.name"
-            return-object
-            :style="{ width: '250px' }"
-            @update:modelValue="updateReturningObject"
-          ></v-select>
-        </v-col>
-        <v-col>
-          <h4>Instructor for selected instrument:</h4>
-          <p>
-            {{
-              selectedStudentInstrument == null
-                ? "No instrument selected"
-                : selectedStudentInstrument.instructor.user.fName +
-                  " " +
-                  selectedStudentInstrument.instructor.user.lName
-            }}
-          </p>
-          <h4>Accompanist for selected instrument:</h4>
-          <p>
-            {{
-              selectedStudentInstrument == null
-                ? "No accompanist"
-                : selectedStudentInstrument.accompanist.user.fName +
-                  " " +
-                  selectedStudentInstrument.accompanist.user.lName
-            }}
-          </p>
-        </v-col>
-      </v-row>
-    </v-container>
+    <v-card>
+      <v-container>
+        <v-row>
+          <v-col>
+            <v-select
+              clearable
+              v-model="selectedStudentInstrument"
+              label="Instrument"
+              :items="studentInstruments"
+              item-title="instrument.name"
+              return-object
+              :style="{ width: '250px' }"
+              @update:modelValue="updateReturningObject"
+            ></v-select>
+          </v-col>
+          <v-col>
+            <h4>Instructor for selected instrument:</h4>
+            <p>
+              {{
+                selectedStudentInstrument == null
+                  ? "No instrument selected"
+                  : selectedStudentInstrument.instructor.user.fName +
+                    " " +
+                    selectedStudentInstrument.instructor.user.lName
+              }}
+            </p>
+            <h4>Accompanist for selected instrument:</h4>
+            <p>
+              {{
+                selectedStudentInstrument == null
+                  ? "No accompanist"
+                  : selectedStudentInstrument.accompanist.user.fName +
+                    " " +
+                    selectedStudentInstrument.accompanist.user.lName
+              }}
+            </p>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-card>
     <v-container>
       <v-row>
         <v-col>
@@ -92,8 +94,13 @@
               :key="index"
               v-model="selectedEventTimes"
               v-on:change="updateSelectedEventTimes()"
-              :label="time.startTime.substring(0, 5)"
+              :label="
+                time.studentTimeslots.length > 0
+                  ? `${time.startTime.substring(0, 5)} Taken`
+                  : time.startTime.substring(0, 5)
+              "
               :value="time"
+              v-bind:disabled="time.studentTimeslots.length > 0"
             >
             </v-checkbox>
           </v-card>
@@ -185,7 +192,9 @@ export default {
       // Narrow down to events in the future
     },
     async retrieveEventTimes(eventId) {
-      await EventTimeDataService.getByEvent(eventId)
+      await EventTimeDataService.getEventTimeslotsAndStudentTimeslotsByEvent(
+        eventId
+      )
         .then((response) => {
           this.currentEventTimes = response.data;
         })
@@ -240,7 +249,6 @@ export default {
 
     validation() {
       var isValid = true;
-      console.log(this.returningObject);
       if (!this.returningObject.hasOwnProperty("studentInstrument")) {
         isValid = this.notValid();
         this.errorMessage = "Please select an instrument.";
