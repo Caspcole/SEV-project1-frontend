@@ -86,10 +86,17 @@
           <v-select
             v-model="eventType"
             label="Event Type"
-            :items="eventTypeArray"
+            :items="[
+              'Jury',
+              'Recital Hearing',
+              'Capstone Hearing',
+              'Scholarship Hearing',
+            ]"
             :style="{ width: '40px' }"
+            clearable
             return-object
           ></v-select>
+          <v-spacer></v-spacer>
           <v-select
             v-model="eventStartTime"
             label="Start Time"
@@ -98,6 +105,7 @@
             return-object
             @update:modelValue="startTimeUpdated()"
           ></v-select>
+          <v-spacer></v-spacer>
           <v-select
             v-model="eventEndTime"
             label="End Time"
@@ -105,12 +113,15 @@
             :style="{ width: '40px' }"
             return-object
           ></v-select>
+          <v-spacer></v-spacer>
           <v-select
             v-model="createEventSemester"
             label="Semester"
             :items="eventCreateSemesters"
             item-value="id"
             item-title="title"
+            @update:modelValue="eventCreateSemesters()"
+            return-object
           ></v-select>
           <!-- Add a date selector somehow?? -->
         </v-row>
@@ -157,6 +168,15 @@ export default {
     editDialog: false,
 
     timeSlots: [],
+    eventType: null,
+    eventTypeArray: [],
+    eventStartTime: null,
+    startTime: [],
+    eventEndTime: null,
+    endTime: [],
+    createEventSemester: null,
+    eventCreateSemesters: [],
+    eventSemester: [],
   }),
   methods: {
     displayCreateEvent(event) {
@@ -197,10 +217,19 @@ export default {
           console.log(e);
         });
     },
+    async eventSemesterSelection() {
+      await SemesterDataService.getAll()
+        .then((response) => {
+          this.semesterEvents = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
     async retrieveEventsDateAndAfter(date) {
       await EventDataService.getGTEDate(date)
         .then((response) => {
-          this.filteredEvents = response.data;
+          this.eventSemester = response.data;
         })
         .catch((e) => {
           console.log(e);
@@ -414,10 +443,12 @@ export default {
     this.user = Utils.getStore("user");
     await this.retrieveAllSemesters();
     this.semesters.forEach((obj) => (obj.title = obj.year + " - " + obj.code));
+
     this.currentDate = new Date();
 
     await this.getCurrentSemester();
     await this.semesterSearchUpdate(this.selectedSemester.id);
+    // await this.eventSemesterSelection();
   },
 };
 </script>
