@@ -74,15 +74,18 @@
   </v-container>
 
   <!-- Create dialog popup -->
-  <v-dialog v-model="createDialog" :style="{ width: '1000px' }" class="mx-auto">
+  <v-dialog
+    v-model="createDialog"
+    :style="{ width: '1000px' }"
+    class="mx-auto"
+    @click:outside="clearCreate()"
+  >
     <v-card>
       <v-card>
         <v-card-title class="d-flex justify-center">Create Event</v-card-title>
       </v-card>
       <v-card-text>
-        <v-row class="ml-5">
-          <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
-        </v-row>
+        <v-row class="ml-5"> </v-row>
         <v-row>
           <v-select
             v-model="eventType"
@@ -104,6 +107,7 @@
             :items="startTime"
             :style="{ width: '40px' }"
             return-object
+            clearable
             @update:modelValue="startTimeUpdated()"
           ></v-select>
           <v-divider class="mx-4" inset vertical></v-divider>
@@ -112,6 +116,7 @@
             label="End Time"
             :items="endTime"
             :style="{ width: '40px' }"
+            clearable
             return-object
           ></v-select>
           <v-divider class="mx-4" inset vertical></v-divider>
@@ -122,9 +127,9 @@
             item-value="id"
             item-title="title"
             @update:modelValue="eventSemesterSelection()"
+            clearable
             return-object
           ></v-select>
-          <!-- Add a date selector somehow?? -->
         </v-row>
         <v-divider></v-divider>
         <v-row>
@@ -144,7 +149,13 @@
           </v-col>
         </v-row>
         <v-row>
-          <v-col></v-col>
+          <v-col>
+            <div class="d-flex justify-center">
+              <strong class="text-red-lighten-1">{{
+                this.errorMessage
+              }}</strong>
+            </div>
+          </v-col>
         </v-row>
         <v-row>
           <v-col class="d-flex justify-center">
@@ -165,7 +176,6 @@
 <script>
 import EventDataService from "../../services/EventDataService";
 import Utils from "../../config/utils.js";
-import AvailabilityDataService from "../../services/AvailabilityDataService";
 import SemesterDataService from "../../services/SemesterDataService";
 
 export default {
@@ -184,8 +194,6 @@ export default {
 
     //Filter logic
     //----------------------
-    // studentFilterArray: [],
-    // studentFilter: null,
     selectedSemester: null,
     semesters: [],
     typeFilterArray: [],
@@ -213,6 +221,14 @@ export default {
     pickedDate: null,
   }),
   methods: {
+    clearCreate() {
+      this.eventType = null;
+      this.eventStartTime = null;
+      this.eventEndTime = null;
+      this.createEventSemester = null;
+      this.pickedDate = null;
+    },
+
     fillTimeArrays() {
       this.timeSlots = [];
       let tempTime = "08:00:00";
@@ -230,8 +246,6 @@ export default {
 
       this.endTime.shift(); //removes the first timeslot from the end array
       this.startTime.pop(); //removes the last timeslot from the start array
-
-      this.eventStartTime = this.timeSlots[0];
     },
 
     displayCreateEvent() {
@@ -240,6 +254,7 @@ export default {
 
       this.createDialog = true;
     },
+
     async retrieveAllSemesters() {
       await SemesterDataService.getAll()
         .then((response) => {
@@ -250,6 +265,7 @@ export default {
           console.log(e);
         });
     },
+
     async getCurrentSemester() {
       this.currentDate = new Date();
       let dateString = this.currentDate.toISOString().substring(0, 10);
@@ -263,7 +279,57 @@ export default {
           console.log(e);
         });
     },
-    createEvent() {},
+
+    validateEvent() {
+      var result = true;
+
+      if (this.eventType == null) {
+        result = false;
+        this.errorMessage = "Error: Please select an Event Type";
+      } else if (this.eventStartTime == null) {
+        result = false;
+        this.errorMessage = "Error: Please select a Start Time";
+      } else if (this.eventEndTime == null) {
+        result = false;
+        this.errorMessage = "Error: Please select an End Time";
+      } else if (this.selectedSemester == null) {
+        result = false;
+        this.errorMessage = "Error: Please select a Semester";
+      } else if (this.pickedDate == null) {
+        result = false;
+        this.errorMessage = "Error: Please select a Date";
+      }
+
+      return result;
+    },
+    async createEvent() {
+      if (!this.validateEvent()) {
+        return;
+      }
+
+      let eventData = {
+        type: this.eventType,
+        date: this.pickedDate,
+        startTime: this.eventStartTime.value,
+        endTime: this.eventEndTime.value,
+        isVisible: "1",
+        canMergeSlots: "0",
+        slotDuration: "10",
+        semesterId: this.selectedSemester.id,
+      };
+
+      await EventDataService.create(eventData)
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((e) => {
+          console.log(e);
+          console.log(eventData);
+        });
+
+      this.clearCreate();
+      this.createDialog = false;
+    },
     async semesterSearchUpdate(semester) {
       await EventDataService.getSemesterEvents(semester) // change
         .then((response) => {
@@ -316,6 +382,7 @@ export default {
         ":00"
       );
     },
+
     startTimeUpdated() {
       this.endTime = [];
       this.endTime = this.timeSlots.filter(
@@ -329,6 +396,7 @@ export default {
       }
     },
   },
+
   async mounted() {
     this.user = Utils.getStore("user");
     await this.retrieveAllSemesters();
