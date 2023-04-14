@@ -125,6 +125,37 @@
           ></v-select>
           <!-- Add a date selector somehow?? -->
         </v-row>
+        <v-divider></v-divider>
+        <v-row>
+          <v-col></v-col>
+        </v-row>
+        <v-row>
+          <v-col></v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="4"> </v-col>
+          <v-col cols="4">
+            <v-text-field
+              type="date"
+              clearable="true"
+              v-model="pickedDate"
+            ></v-text-field>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col></v-col>
+        </v-row>
+        <v-row>
+          <v-col class="d-flex justify-center">
+            <v-btn
+              class="d-flex justify-center"
+              color="primary"
+              @click="createEvent()"
+            >
+              Submit
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-card-text>
       <v-divider></v-divider>
     </v-card>
@@ -177,6 +208,8 @@ export default {
     createEventSemester: null,
     eventCreateSemesters: [],
     eventSemester: [],
+
+    pickedDate: null,
   }),
   methods: {
     fillTimeArrays() {
@@ -248,24 +281,6 @@ export default {
           console.log(e);
         });
     },
-    async retrieveEventsDateAndAfter(date) {
-      await EventDataService.getGTEDate(date)
-        .then((response) => {
-          this.eventSemester = response.data;
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    },
-    async retrieveEventsDateAndBefore(date) {
-      await EventDataService.getLTEDate(date)
-        .then((response) => {
-          this.filteredEvents = response.data;
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    },
     async retrieveEvents(date) {
       await EventDataService.getAll(date)
         .then((response) => {
@@ -312,126 +327,6 @@ export default {
         this.eventEndTime = null;
       }
     },
-    checkForOverlap(entry) {
-      var result = false;
-      if (entry.id == undefined) {
-        this.currentAvailability.forEach((obj) => {
-          if (!result) {
-            if (
-              (entry.startTime <= obj.startTime &&
-                entry.endTime > obj.startTime) ||
-              (entry.startTime > obj.startTime && entry.startTime < obj.endTime)
-            ) {
-              result = true;
-            }
-          }
-        });
-      } else {
-        this.currentAvailability.forEach((obj) => {
-          if (!result) {
-            if (
-              (entry.startTime <= obj.startTime &&
-                entry.endTime > obj.startTime) ||
-              (entry.startTime > obj.startTime && entry.startTime < obj.endTime)
-            ) {
-              if (obj.id != entry.id) {
-                result = true;
-              }
-            }
-          }
-        });
-      }
-      return result;
-    },
-    deleteItem(item) {
-      this.editedIndex = this.currentAvailability.indexOf(item);
-      this.editedAvail = item;
-      this.dialogDelete = true;
-    },
-    deleteItemConfirm() {
-      AvailabilityDataService.remove(
-        this.currentAvailability[this.editedIndex].id
-      ).catch((error) => {
-        console.log(error);
-      });
-      this.userAvailability.splice(
-        this.userAvailability.indexOf(
-          this.currentAvailability[this.editedIndex]
-        ),
-        1
-      );
-      this.currentAvailability.splice(this.editedIndex, 1);
-      this.closeDelete();
-    },
-    closeDelete() {
-      this.dialogDelete = false;
-      this.$nextTick(() => {
-        this.editedAvail = null;
-        this.editedIndex = -1;
-      });
-    },
-    editItem(item) {
-      this.editedIndex = this.currentAvailability.indexOf(item);
-      this.editedAvail = item;
-      this.editSelectedStart = this.availabilitySlots.find(
-        (obj) => obj.value == this.editedAvail.startTime
-      );
-      this.editSelectedEnd = this.availabilitySlots.find(
-        (obj) => obj.value == this.editedAvail.endTime
-      );
-
-      this.editStartOriginal = this.editSelectedStart.title;
-      this.editEndOriginal = this.editSelectedEnd.title;
-
-      this.editStartChange();
-      this.dialogEdit = true;
-    },
-    editStartChange() {
-      this.editEndArray = this.availabilitySlots.filter(
-        (obj) => obj.value >= this.editSelectedStart.value
-      );
-
-      this.editEndArray.shift(); //removes the first timeslot from the end array
-
-      if (!this.editEndArray.includes(this.editSelectedEnd)) {
-        this.editSelectedEnd = null;
-      }
-    },
-    editItemConfirm() {
-      if (this.editSelectedEnd == undefined) {
-        this.editErrorMessage = "Please select an End Time";
-        return;
-      }
-      const index = this.userAvailability.indexOf(
-        this.currentAvailability[this.editedIndex]
-      );
-      const data = {
-        id: this.editedAvail.id,
-        startTime: this.editSelectedStart.value,
-        endTime: this.editSelectedEnd.value,
-      };
-      if (this.checkForOverlap(data)) {
-        this.editErrorMessage =
-          "That time would overlap with an existing time. Please try again";
-      } else {
-        AvailabilityDataService.update(data).catch((error) => {
-          console.log(error);
-        });
-        this.currentAvailability[this.editedIndex].startTime = data.startTime;
-        this.currentAvailability[this.editedIndex].endTime = data.endTime;
-        this.userAvailability[index].startTime = data.startTime;
-        this.userAvailability[index].endTime = data.endTime;
-
-        this.closeEdit();
-      }
-    },
-    closeEdit() {
-      this.editErrorMessage = "";
-      this.dialogEdit = false;
-      this.$nextTick(() => {
-        this.editedAvail = null;
-      });
-    },
   },
   async mounted() {
     this.user = Utils.getStore("user");
@@ -442,7 +337,6 @@ export default {
 
     await this.getCurrentSemester();
     await this.semesterSearchUpdate(this.selectedSemester.id);
-    // await this.eventSemesterSelection();
   },
 };
 </script>
