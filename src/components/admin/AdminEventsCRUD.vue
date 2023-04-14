@@ -56,11 +56,12 @@
                     {{ item.columns[header.key] }}
                   </div>
                   <div v-else>
-                    <v-btn
-                      small
+                    <v-icon
+                      size="small"
+                      class="me-2"
                       color="primary"
                       @click="displayEditEvent(item.raw)"
-                      >Edit Event</v-btn
+                      >mdi-pencil</v-icon
                     >
                   </div>
                 </td>
