@@ -225,7 +225,7 @@ export default {
     displayComposers: [],
     selectedComposer: null,
     composerSearch: null,
-    hasSearched: false,
+    hasSearchedComposer: false,
     songs: [],
     selectedSong: null,
     errorMessage: "",
@@ -237,6 +237,7 @@ export default {
     selectedStudent: null,
     studentSearch: null,
     displayStudents: [],
+    hasSearchedStudent: false,
   }),
   methods: {
     async fillSemesters(studentId) {
@@ -318,22 +319,11 @@ export default {
         });
     },
 
-    // finish updating this function
-    // this should get the repertoire songs
     async studentUpdated() {
-      this.selectedSong = null;
-      this.songs = [];
       if (this.selectedStudent != null) {
         await this.fillSemesters(this.selectedStudent.id);
         await this.fillRepertoire(this.selectedStudent.id);
         await this.retrieveStudentInstruments(this.selectedStudent.id);
-        // await SongDataService.getByComposerId(this.selectedComposer.id)
-        //   .then((response) => {
-        //     this.songs = response.data;
-        //   })
-        //   .catch((e) => {
-        //     console.log(e);
-        //   });
       }
     },
 
@@ -362,8 +352,8 @@ export default {
         console.log(e);
       });
 
-      this.fillSemesters();
-      this.fillRepertoire();
+      this.fillSemesters(this.selectedStudent.id);
+      this.fillRepertoire(this.selectedStudent.id);
       this.closeDialog();
     },
     closeDialog() {
@@ -424,7 +414,12 @@ export default {
       }
       return result;
     },
-    querySelections(value) {
+    queryComposerSelections(value) {
+      this.displayComposers = this.composers.filter((composer) => {
+        return composer.title.toLowerCase().indexOf(value.toLowerCase()) > -1;
+      });
+    },
+    queryStudentSelections(value) {
       this.displayStudents = this.students.filter((student) => {
         return student.title.toLowerCase().indexOf(value.toLowerCase()) > -1;
       });
@@ -465,8 +460,8 @@ export default {
           console.log(error);
         }
       );
-      this.fillSemesters();
-      this.fillRepertoire();
+      this.fillSemesters(this.selectedStudent.id);
+      this.fillRepertoire(this.selectedStudent.id);
 
       this.closeDelete();
     },
@@ -525,34 +520,34 @@ export default {
         console.log(e);
       });
 
-      this.fillSemesters();
-      this.fillRepertoire();
+      this.fillSemesters(this.selectedStudent.id);
+      this.fillRepertoire(this.selectedStudent.id);
       this.closeDialog();
     },
   },
   watch: {
     composerSearch(val) {
       if (val && val.length > 1) {
-        this.hasSearched = true;
-        this.querySelections(val);
+        this.hasSearchedComposer = true;
+        this.queryComposerSelections(val);
       } else {
-        this.hasSearched = false;
+        this.hasSearchedComposer = false;
         this.displayComposers = [];
       }
     },
     studentSearch(val) {
       if (val && val.length > 1) {
-        this.hasSearched = true;
-        this.querySelections(val);
+        this.hasSearchedStudent = true;
+        this.queryStudentSelections(val);
       } else {
-        this.hasSearched = false;
+        this.hasSearchedStudent = false;
         this.displayStudents = [];
       }
     },
   },
   computed: {
     noComposerDataText() {
-      if (this.hasSearched) {
+      if (this.hasSearchedComposer) {
         return "No composers found";
       } else {
         return "Start typing to search for composers";
@@ -567,7 +562,7 @@ export default {
     },
 
     noStudentDataText() {
-      if (this.hasSearched) {
+      if (this.hasSearchedStudent) {
         return "No students found";
       } else {
         return "Start typing to search for students";
@@ -580,7 +575,7 @@ export default {
     await this.fillStudents();
 
     // await this.fillSemesters();
-    // this.fillComposers();
+    this.fillComposers();
     this.retrieveAllSemesters();
     // this.retrieveStudentInstruments();
     // this.fillRepertoire();
