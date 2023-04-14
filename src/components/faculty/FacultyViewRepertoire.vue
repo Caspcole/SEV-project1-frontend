@@ -7,7 +7,18 @@
     </v-card>
   </v-container>
   <v-container>
-    <v-btn color="primary" @click="displayDialog"> Add Piece </v-btn>
+    <v-autocomplete
+      clearable
+      v-model="selectedStudent"
+      v-model:search="studentSearch"
+      label="Student"
+      :items="displayStudents"
+      return-object
+      :style="{ width: '250px' }"
+      :no-data-text="noStudentDataText"
+      @update:modelValue="studentUpdated()"
+    ></v-autocomplete>
+    <!-- <v-btn color="primary" @click="displayDialog"> Add Piece </v-btn> -->
     <v-card class="mt-10">
       <v-expansion-panels variant="accordion">
         <v-expansion-panel v-for="semester in userSemesters">
@@ -191,6 +202,7 @@ import ComposerDataService from "../../services/ComposerDataService.js";
 import SongDataService from "../../services/SongDataService.js";
 import SemesterDataService from "../../services/SemesterDataService.js";
 import StudentInstrumentDataService from "../../services/StudentInstrumentDataService.js";
+import UserDataService from "../../services/UserDataService";
 export default {
   name: "studentRepertoireView",
   data: () => ({
@@ -213,10 +225,15 @@ export default {
     editedRepertoire: null,
     dialogDelete: false,
     isEdit: false,
+
+    students: [],
+    selectedStudent: null,
+    studentSearch: null,
+    displayStudents: [],
   }),
   methods: {
-    async fillSemesters() {
-      RepertoireDataService.getSemesterByUser(this.user.userId)
+    async fillSemesters(studentId) {
+      RepertoireDataService.getSemesterByUser(studentId)
         .then((response) => {
           this.userSemesters = response.data;
           this.userSemesters.forEach((obj) => {
@@ -246,10 +263,11 @@ export default {
           console.log(e);
         });
     },
-    fillRepertoire() {
-      RepertoireDataService.getByUser(this.user.userId)
+    fillRepertoire(studentId) {
+      RepertoireDataService.getByUser(studentId)
         .then((response) => {
           this.repertoire = response.data;
+          console.log(this.repertoire);
         })
         .catch((e) => {
           console.log(e);
@@ -280,6 +298,40 @@ export default {
           });
       }
     },
+
+    async fillStudents() {
+      UserDataService.getAllStudents()
+        .then((response) => {
+          this.students = response.data;
+          this.students.forEach((student) => {
+            student.title = student.fName + " " + student.lName;
+          });
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+
+    // finish updating this function
+    // this should get the repertoire songs
+    async studentUpdated() {
+      this.selectedSong = null;
+      this.songs = [];
+      if (this.selectedStudent != null) {
+        console.log(this.selectedSemester);
+        await this.fillSemesters(this.selectedStudent.id);
+        await this.fillRepertoire(this.selectedStudent.id);
+        await this.retrieveStudentInstruments(this.selectedStudent.id);
+        // await SongDataService.getByComposerId(this.selectedComposer.id)
+        //   .then((response) => {
+        //     this.songs = response.data;
+        //   })
+        //   .catch((e) => {
+        //     console.log(e);
+        //   });
+      }
+    },
+
     displayDialog() {
       this.errorMessage = "";
       this.selectedStudentInstrument = null;
@@ -368,8 +420,8 @@ export default {
       return result;
     },
     querySelections(value) {
-      this.displayComposers = this.composers.filter((composer) => {
-        return composer.title.toLowerCase().indexOf(value.toLowerCase()) > -1;
+      this.displayStudents = this.students.filter((student) => {
+        return student.title.toLowerCase().indexOf(value.toLowerCase()) > -1;
       });
     },
     async retrieveAllSemesters() {
@@ -384,10 +436,11 @@ export default {
           console.log(e);
         });
     },
-    async retrieveStudentInstruments() {
-      await StudentInstrumentDataService.getByUser(this.user.userId)
+    async retrieveStudentInstruments(studentId) {
+      await StudentInstrumentDataService.getByUser(studentId)
         .then((response) => {
           this.studentInstruments = response.data;
+          console.log(this.studentInstruments);
         })
         .catch((e) => {
           console.log(e);
@@ -483,6 +536,15 @@ export default {
         this.displayComposers = [];
       }
     },
+    studentSearch(val) {
+      if (val && val.length > 1) {
+        this.hasSearched = true;
+        this.querySelections(val);
+      } else {
+        this.hasSearched = false;
+        this.displayStudents = [];
+      }
+    },
   },
   computed: {
     noComposerDataText() {
@@ -499,14 +561,25 @@ export default {
         return "No composer selected";
       }
     },
+
+    noStudentDataText() {
+      if (this.hasSearched) {
+        return "No students found";
+      } else {
+        return "Start typing to search for students";
+      }
+    },
   },
   async mounted() {
     this.user = Utils.getStore("user");
-    await this.fillSemesters();
-    this.fillComposers();
+
+    await this.fillStudents();
+
+    // await this.fillSemesters();
+    // this.fillComposers();
     this.retrieveAllSemesters();
-    this.retrieveStudentInstruments();
-    this.fillRepertoire();
+    // this.retrieveStudentInstruments();
+    // this.fillRepertoire();
   },
 };
 </script>
