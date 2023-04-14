@@ -7,6 +7,7 @@
     </v-card>
   </v-container>
   <v-container>
+    <p class="ma-2">Please select a student to view or edit their Repertoire</p>
     <v-autocomplete
       clearable
       v-model="selectedStudent"
@@ -18,7 +19,13 @@
       :no-data-text="noStudentDataText"
       @update:modelValue="studentUpdated()"
     ></v-autocomplete>
-    <!-- <v-btn color="primary" @click="displayDialog"> Add Piece </v-btn> -->
+    <v-btn
+      color="primary"
+      @click="displayDialog"
+      v-if="userSemesters.length > 0"
+    >
+      Add Piece
+    </v-btn>
     <v-card class="mt-10">
       <v-expansion-panels variant="accordion">
         <v-expansion-panel v-for="semester in userSemesters">
@@ -267,7 +274,6 @@ export default {
       RepertoireDataService.getByUser(studentId)
         .then((response) => {
           this.repertoire = response.data;
-          console.log(this.repertoire);
         })
         .catch((e) => {
           console.log(e);
@@ -318,7 +324,6 @@ export default {
       this.selectedSong = null;
       this.songs = [];
       if (this.selectedStudent != null) {
-        console.log(this.selectedSemester);
         await this.fillSemesters(this.selectedStudent.id);
         await this.fillRepertoire(this.selectedStudent.id);
         await this.retrieveStudentInstruments(this.selectedStudent.id);
@@ -440,7 +445,6 @@ export default {
       await StudentInstrumentDataService.getByUser(studentId)
         .then((response) => {
           this.studentInstruments = response.data;
-          console.log(this.studentInstruments);
         })
         .catch((e) => {
           console.log(e);
