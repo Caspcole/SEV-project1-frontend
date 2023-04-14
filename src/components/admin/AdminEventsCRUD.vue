@@ -96,7 +96,7 @@
             clearable
             return-object
           ></v-select>
-          <v-spacer></v-spacer>
+          <v-divider class="mx-4" inset vertical></v-divider>
           <v-select
             v-model="eventStartTime"
             label="Start Time"
@@ -105,7 +105,7 @@
             return-object
             @update:modelValue="startTimeUpdated()"
           ></v-select>
-          <v-spacer></v-spacer>
+          <v-divider class="mx-4" inset vertical></v-divider>
           <v-select
             v-model="eventEndTime"
             label="End Time"
@@ -113,14 +113,14 @@
             :style="{ width: '40px' }"
             return-object
           ></v-select>
-          <v-spacer></v-spacer>
+          <v-divider class="mx-4" inset vertical></v-divider>
           <v-select
             v-model="createEventSemester"
             label="Semester"
             :items="eventCreateSemesters"
             item-value="id"
             item-title="title"
-            @update:modelValue="eventCreateSemesters()"
+            @update:modelValue="eventSemesterSelection()"
             return-object
           ></v-select>
           <!-- Add a date selector somehow?? -->
@@ -179,9 +179,30 @@ export default {
     eventSemester: [],
   }),
   methods: {
-    displayCreateEvent(event) {
+    fillTimeArrays() {
+      this.timeSlots = [];
+      let tempTime = "08:00:00";
+
+      while (tempTime <= "17:00:00") {
+        this.timeSlots.push({
+          title: this.formatTime(tempTime),
+          value: tempTime,
+        });
+        tempTime = this.addDurationMinutes(tempTime);
+      }
+
+      this.endTime = Array.from(this.timeSlots);
+      this.startTime = Array.from(this.timeSlots);
+
+      this.endTime.shift(); //removes the first timeslot from the end array
+      this.startTime.pop(); //removes the last timeslot from the start array
+
+      this.eventStartTime = this.timeSlots[0];
+    },
+
+    displayCreateEvent() {
       this.errorMessage = "";
-      this.selectedEvent = event;
+      this.fillTimeArrays();
 
       this.createDialog = true;
     },
@@ -189,6 +210,7 @@ export default {
       await SemesterDataService.getAll()
         .then((response) => {
           this.semesters = response.data;
+          this.eventCreateSemesters = response.data;
         })
         .catch((e) => {
           console.log(e);
@@ -264,8 +286,7 @@ export default {
     addDurationMinutes(time) {
       let timeSplit = time.split(":");
       let hour = Number(timeSplit[0]);
-      let minute =
-        Number(timeSplit[1]) + Number(this.selectedEvent.slotDuration);
+      let minute = Number(timeSplit[1]) + Number(10);
 
       if (minute >= "60") {
         hour++;
@@ -280,42 +301,15 @@ export default {
       );
     },
     startTimeUpdated() {
-      this.availabilityEndArray = [];
-      this.availabilityEndArray = this.availabilitySlots.filter(
-        (obj) => obj.value >= this.availabilityStart.value
+      this.endTime = [];
+      this.endTime = this.timeSlots.filter(
+        (obj) => obj.value >= this.eventStartTime.value
       );
 
-      this.availabilityEndArray.shift(); //removes the first timeslot from the end array
+      this.endTime.shift(); //removes the first timeslot from the end array
 
-      if (!this.availabilityEndArray.includes(this.availabilityEnd)) {
-        this.availabilityEnd = null;
-      }
-    },
-    createAvailability() {
-      if (this.availabilityEnd == undefined) {
-        this.errorMessage = "Please select an End Time";
-        return;
-      }
-      const data = {
-        date: this.selectedEvent.date,
-        startTime: this.availabilityStart.value,
-        endTime: this.availabilityEnd.value,
-        userId: this.user.userId,
-        eventId: this.selectedEvent.id,
-      };
-      if (!this.checkForOverlap(data)) {
-        AvailabilityDataService.create(data)
-          .then((response) => {
-            this.errorMessage = "";
-            this.currentAvailability.push(response.data);
-            this.userAvailability.push(response.data);
-          })
-          .catch((e) => {
-            console.log(e);
-          });
-      } else {
-        this.errorMessage =
-          "That time would overlap with an existing time. Please try again";
+      if (!this.endTime.includes(this.eventEndTime)) {
+        this.eventEndTime = null;
       }
     },
     checkForOverlap(entry) {
