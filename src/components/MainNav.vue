@@ -68,6 +68,7 @@ export default defineComponent({
             { link: "View Student Critiques", route: "facultyViewCritiques" },
             { link: "Create Event Critique", route: "facultyCreateCritiques" },
             { link: "Event Availability", route: "createAvailability" },
+            { link: "View Repertoires", route: "facultyViewRepertoire" },
           ],
         },
         {
