@@ -512,6 +512,7 @@ export default {
         semesterId: this.editEventSemester.id,
       };
 
+      //update needs fixing by id
       await EventDataService.update(eventData)
         .then((response) => {
           console.log(response);
