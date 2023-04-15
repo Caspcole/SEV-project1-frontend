@@ -172,11 +172,100 @@
       <v-divider></v-divider>
     </v-card>
   </v-dialog>
+  <v-dialog v-model="editDialog" :style="{ width: '1000px' }" class="mx-auto">
+    <v-card>
+      <v-card>
+        <v-card-title class="d-flex justify-center">Edit Event</v-card-title>
+      </v-card>
+      <v-card-text>
+        <v-row class="ml-5"> </v-row>
+        <v-row>
+          <v-select
+            v-model="editEventType"
+            label="Event Type"
+            :items="[
+              'Jury',
+              'Recital Hearing',
+              'Capstone Hearing',
+              'Scholarship Hearing',
+            ]"
+            :style="{ width: '40px' }"
+            clearable
+            return-object
+          ></v-select>
+          <v-divider class="mx-4" inset vertical></v-divider>
+          <v-select
+            v-model="editEventStartTime"
+            label="Start Time"
+            :items="editStartTime"
+            :style="{ width: '40px' }"
+            return-object
+            clearable
+          ></v-select>
+          <v-divider class="mx-4" inset vertical></v-divider>
+          <v-select
+            v-model="editEventEndTime"
+            label="End Time"
+            :items="editEndTime"
+            :style="{ width: '40px' }"
+            clearable
+            return-object
+          ></v-select>
+          <v-divider class="mx-4" inset vertical></v-divider>
+          <v-select
+            v-model="editEventSemester"
+            label="Semester"
+            :items="editEventSemesters"
+            item-value="id"
+            item-title="title"
+            @update:modelValue="eventSemesterSelection()"
+            clearable
+            return-object
+          ></v-select>
+        </v-row>
+        <v-divider></v-divider>
+        <v-row>
+          <v-col></v-col>
+        </v-row>
+        <v-row>
+          <v-col></v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="4"> </v-col>
+          <v-col cols="4">
+            <v-text-field
+              type="date"
+              clearable="true"
+              v-model="editDate"
+            ></v-text-field>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+            <div class="d-flex justify-center">
+              <strong class="text-red-lighten-1">{{
+                this.errorMessage
+              }}</strong>
+            </div>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col class="d-flex justify-center">
+            <v-btn class="d-flex justify-center" color="primary">
+              Update
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-card-text>
+      <v-divider></v-divider>
+    </v-card>
+  </v-dialog>
 </template>
 <script>
 import EventDataService from "../../services/EventDataService";
 import Utils from "../../config/utils.js";
 import SemesterDataService from "../../services/SemesterDataService";
+import ResponseLike from "responselike";
 
 export default {
   name: "createAvailability",
@@ -217,8 +306,20 @@ export default {
     createEventSemester: null,
     eventCreateSemesters: [],
     eventSemester: [],
-
     pickedDate: null,
+
+    editTimeSlots: [],
+    editEventType: null,
+    editEventTypeArray: [],
+    editEventStartTime: null,
+    editStartTime: [],
+    editEndTime: [],
+    editEventEndTime: null,
+    editEventSemester: null,
+    eventEditSemesters: [],
+    editEventSemesters: [],
+    editDate: null,
+    selectedEditItem: null,
   }),
   methods: {
     clearCreate() {
@@ -248,6 +349,25 @@ export default {
       this.startTime.pop(); //removes the last timeslot from the start array
     },
 
+    editFillTimeArrays(item) {
+      this.editTimeSlots = [];
+      let tempTime = item.startTime;
+
+      while (tempTime <= item.endTime) {
+        this.editTimeSlots.push({
+          title: this.formatTime(tempTime),
+          value: tempTime,
+        });
+        tempTime = this.addDurationMinutes(tempTime);
+      }
+
+      this.editEndTime = Array.from(this.editTimeSlots);
+      this.editStartTime = Array.from(this.editTimeSlots);
+
+      this.editEndTime.shift(); //removes the first timeslot from the end array
+      this.editStartTime.pop(); //removes the last timeslot from the start array
+    },
+
     displayCreateEvent() {
       this.errorMessage = "";
       this.fillTimeArrays();
@@ -255,6 +375,16 @@ export default {
       this.createDialog = true;
     },
 
+    displayEditEvent(item) {
+      this.errorMessage = "";
+      this.editEventType = item.type;
+      this.editFillTimeArrays(item);
+      this.editEventStartTime = this.formatTime(item.startTime);
+      this.editEventEndTime = this.formatTime(item.endTime);
+      this.editEventSemester = item.semesterId;
+
+      this.editDialog = true;
+    },
     async retrieveAllSemesters() {
       await SemesterDataService.getAll()
         .then((response) => {
@@ -328,6 +458,7 @@ export default {
         });
 
       this.clearCreate();
+      this.errorMessage = "";
       this.createDialog = false;
     },
     async semesterSearchUpdate(semester) {
@@ -393,6 +524,19 @@ export default {
 
       if (!this.endTime.includes(this.eventEndTime)) {
         this.eventEndTime = null;
+      }
+    },
+
+    editStartTimeUpdated() {
+      this.editEndTime = [];
+      this.editEndTime = this.editTimeSlots.filter(
+        (obj) => obj.value >= this.editEventStartTime.value
+      );
+
+      this.editEndTime.shift(); //removes the first timeslot from the end array
+
+      if (!this.editEndTime.includes(this.editEventEndTime)) {
+        this.editEventEndTime = null;
       }
     },
   },
