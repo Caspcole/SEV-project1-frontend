@@ -7,25 +7,32 @@
     </v-card>
   </v-container>
   <v-container>
-    <p class="ma-2">Please select a student to view or edit their Repertoire</p>
-    <v-autocomplete
-      clearable
-      v-model="selectedStudent"
-      v-model:search="studentSearch"
-      label="Student"
-      :items="displayStudents"
-      return-object
-      :style="{ width: '250px' }"
-      :no-data-text="noStudentDataText"
-      @update:modelValue="studentUpdated()"
-    ></v-autocomplete>
-    <v-btn
-      color="primary"
-      @click="displayDialog"
-      v-if="userSemesters.length > 0"
-    >
-      Add Piece
-    </v-btn>
+    <v-card max-width="400">
+      <v-card-text>
+        <p class="ma-2">
+          Please select a student to view or edit their Repertoire
+        </p>
+        <v-autocomplete
+          clearable
+          v-model="selectedStudent"
+          v-model:search="studentSearch"
+          label="Student"
+          :items="displayStudents"
+          return-object
+          :style="{ width: '250px' }"
+          :no-data-text="noStudentDataText"
+          @update:modelValue="studentUpdated()"
+        ></v-autocomplete>
+        <v-btn
+          color="primary"
+          @click="displayDialog"
+          v-if="userSemesters.length > 0"
+        >
+          Add Piece
+        </v-btn>
+      </v-card-text>
+    </v-card>
+
     <v-card class="mt-10">
       <v-expansion-panels variant="accordion">
         <v-expansion-panel v-for="semester in userSemesters">
@@ -513,8 +520,6 @@ export default {
         semesterId:
           this.selectedSemester == null ? null : this.selectedSemester.id,
       };
-
-      console.log(data);
 
       await RepertoireDataService.update(data).catch((e) => {
         console.log(e);
