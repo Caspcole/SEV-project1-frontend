@@ -19,6 +19,12 @@
           ></v-select>
         </v-card>
       </v-col>
+      <v-col> </v-col>
+      <v-col cols="2">
+        <v-btn color="primary" @click="displayCreateEvent(item)">
+          Create Event
+        </v-btn>
+      </v-col>
     </v-row>
   </v-container>
 
@@ -46,12 +52,17 @@
                   >
                     {{ this.formatTime(item.columns[header.key]) }}
                   </div>
-                  <div v-else-if="header.title != 'Actions'">
+                  <div v-else-if="header.title != 'Edit'">
                     {{ item.columns[header.key] }}
                   </div>
                   <div v-else>
-                    <!-- @click="displayEventAvailability(item.raw)" -->
-                    <v-btn small color="primary">Create Availability</v-btn>
+                    <v-icon
+                      size="small"
+                      class="me-2"
+                      color="primary"
+                      @click="displayEditEvent(item.raw)"
+                      >mdi-pencil</v-icon
+                    >
                   </div>
                 </td>
               </tr>
@@ -62,177 +73,109 @@
     </v-row>
   </v-container>
 
-  <v-dialog v-model="showDialog" :style="{ width: '875px' }" class="mx-auto">
+  <!-- Create dialog popup -->
+  <v-dialog
+    v-model="createDialog"
+    :style="{ width: '1000px' }"
+    class="mx-auto"
+    @click:outside="clearCreate()"
+  >
     <v-card>
-      <v-card-title>
-        <v-row>
-          <v-col>
-            {{ "Event Type: " + this.selectedEvent.type }}
-          </v-col>
-          <v-spacer></v-spacer>
-          <v-col>
-            {{ "Event Date: " + this.selectedEvent.date }}
-          </v-col>
-          <v-spacer></v-spacer>
-          <v-col>
-            {{
-              "Times: (" +
-              this.formatTime(this.selectedEvent.startTime) +
-              " - " +
-              this.formatTime(this.selectedEvent.endTime) +
-              ")"
-            }}
-          </v-col>
-        </v-row>
-      </v-card-title>
-      <v-divider></v-divider>
+      <v-card>
+        <v-card-title class="d-flex justify-center">Create Event</v-card-title>
+      </v-card>
       <v-card-text>
-        <v-row class="ml-5">
-          <strong class="text-red-lighten-1">{{ this.errorMessage }}</strong>
-        </v-row>
-        <v-row class="mt-4 ml-5">
+        <v-row class="ml-5"> </v-row>
+        <v-row>
           <v-select
-            v-model="availabilityStart"
+            v-model="eventType"
+            label="Event Type"
+            :items="[
+              'Jury',
+              'Recital Hearing',
+              'Capstone Hearing',
+              'Scholarship Hearing',
+            ]"
+            :style="{ width: '40px' }"
+            clearable
+            return-object
+          ></v-select>
+          <v-divider class="mx-4" inset vertical></v-divider>
+          <v-select
+            v-model="eventStartTime"
             label="Start Time"
-            :items="availabilityStartArray"
+            :items="startTime"
             :style="{ width: '40px' }"
             return-object
+            clearable
             @update:modelValue="startTimeUpdated()"
           ></v-select>
+          <v-divider class="mx-4" inset vertical></v-divider>
           <v-select
-            class="ml-15"
-            v-model="availabilityEnd"
+            v-model="eventEndTime"
             label="End Time"
-            :items="availabilityEndArray"
+            :items="endTime"
             :style="{ width: '40px' }"
+            clearable
             return-object
           ></v-select>
-          <v-spacer></v-spacer>
+          <v-divider class="mx-4" inset vertical></v-divider>
+          <v-select
+            v-model="createEventSemester"
+            label="Semester"
+            :items="eventCreateSemesters"
+            item-value="id"
+            item-title="title"
+            @update:modelValue="eventSemesterSelection()"
+            clearable
+            return-object
+          ></v-select>
         </v-row>
-        <v-row class="ml-5">
-          <v-btn color="primary" @click="createAvailability()"
-            >Create Availability</v-btn
-          >
-          <v-spacer></v-spacer>
+        <v-divider></v-divider>
+        <v-row>
+          <v-col></v-col>
         </v-row>
-        <v-data-table
-          class="mt-15 mb-5 elevation-1"
-          :items="currentAvailability"
-          :headers="availabilityHeader"
-          :sort-by="[{ key: 'startTime', order: 'dsc' }]"
-        >
-          <template #top>
-            <v-toolbar flat>
-              <v-toolbar-title> AVAILABILITY </v-toolbar-title>
-              <div v-if="currentAvailability.length == 0" class="mr-4">
-                <v-spacer></v-spacer>
-                You currently have no availability for this event.
-              </div>
-            </v-toolbar>
-          </template>
-          <template #item="{ item }">
-            <tr>
-              <td v-for="(header, index) in availabilityHeader" :key="index">
-                <div
-                  v-if="
-                    header.title == 'Start Time' || header.title == 'End Time'
-                  "
-                >
-                  {{ this.formatTime(item.columns[header.key]) }}
-                </div>
-                <div v-else>
-                  <v-icon size="small" class="me-2" @click="editItem(item.raw)">
-                    mdi-pencil
-                  </v-icon>
-                  <v-icon size="small" @click="deleteItem(item.raw)">
-                    mdi-delete
-                  </v-icon>
-                </div>
-              </td>
-            </tr>
-          </template>
-        </v-data-table>
+        <v-row>
+          <v-col></v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="4"> </v-col>
+          <v-col cols="4">
+            <v-text-field
+              type="date"
+              clearable="true"
+              v-model="pickedDate"
+            ></v-text-field>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+            <div class="d-flex justify-center">
+              <strong class="text-red-lighten-1">{{
+                this.errorMessage
+              }}</strong>
+            </div>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col class="d-flex justify-center">
+            <v-btn
+              class="d-flex justify-center"
+              color="primary"
+              @click="createEvent()"
+            >
+              Submit
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-card-text>
-      <v-card-actions>
-        <v-btn color="blue-darken-1" variant="text" @click="showDialog = false"
-          >Close</v-btn
-        >
-      </v-card-actions>
+      <v-divider></v-divider>
     </v-card>
-    <v-dialog v-model="dialogDelete" max-width="500px">
-      <v-card>
-        <v-card-title class="text-h5"
-          >Are you sure you want to delete this item?</v-card-title
-        >
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue-darken-1" variant="text" @click="closeDelete"
-            >Cancel</v-btn
-          >
-          <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm"
-            >OK</v-btn
-          >
-          <v-spacer></v-spacer>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-    <v-dialog v-model="dialogEdit" max-width="500px">
-      <v-card>
-        <v-card-text>
-          <v-row class="ml-5">
-            <strong class="text-red-lighten-1">{{
-              this.editErrorMessage
-            }}</strong>
-          </v-row>
-          <v-row class="mt-4 ml-5">
-            <v-col cols="6"
-              >{{ "Start Time-" + this.editStartOriginal }}
-            </v-col>
-            <v-col cols="6">
-              {{ "End Time-" + this.editEndOriginal }}
-            </v-col>
-          </v-row>
-          <v-row class="mt-4 ml-5">
-            <v-col cols="6">
-              <v-select
-                v-model="editSelectedStart"
-                label="Start Time"
-                :items="availabilityStartArray"
-                return-object
-                :style="{ width: '160px' }"
-                @update:modelValue="editStartChange()"
-              ></v-select>
-            </v-col>
-            <v-col cols="6">
-              <v-select
-                class="mr-15"
-                v-model="editSelectedEnd"
-                label="End Time"
-                :items="editEndArray"
-                return-object
-                :style="{ width: '160px' }"
-              ></v-select>
-            </v-col>
-          </v-row>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue-darken-1" variant="text" @click="closeEdit"
-            >Cancel</v-btn
-          >
-          <v-btn color="blue-darken-1" variant="text" @click="editItemConfirm"
-            >SAVE</v-btn
-          >
-          <v-spacer></v-spacer>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-dialog>
 </template>
 <script>
 import EventDataService from "../../services/EventDataService";
 import Utils from "../../config/utils.js";
-import AvailabilityDataService from "../../services/AvailabilityDataService";
 import SemesterDataService from "../../services/SemesterDataService";
 
 export default {
@@ -243,7 +186,7 @@ export default {
       { title: "Event Date", key: "date" },
       { title: "Start Time", key: "startTime" },
       { title: "End Time", key: "endTime" },
-      // { title: "Actions", key: "actions", sortable: false },
+      { title: "Edit", key: "actions", sortable: false },
     ],
     selectedEvent: null,
     user: {},
@@ -251,8 +194,6 @@ export default {
 
     //Filter logic
     //----------------------
-    // studentFilterArray: [],
-    // studentFilter: null,
     selectedSemester: null,
     semesters: [],
     typeFilterArray: [],
@@ -261,23 +202,70 @@ export default {
     monthFilter: null,
     semesterEvents: [],
     filteredEvents: [],
-    //---------------------
-    availabilityHeader: [
-      { title: "Start Time", key: "startTime", sortable: false },
-      { title: "End Time", key: "endTime", sortable: false },
-      { title: "Actions", sortable: false, allign: "end" },
-    ],
+
+    errorMessage: "",
+    createDialog: false,
+    editDialog: false,
+
+    timeSlots: [],
+    eventType: null,
+    eventTypeArray: [],
+    eventStartTime: null,
+    startTime: [],
+    eventEndTime: null,
+    endTime: [],
+    createEventSemester: null,
+    eventCreateSemesters: [],
+    eventSemester: [],
+
+    pickedDate: null,
   }),
   methods: {
+    clearCreate() {
+      this.eventType = null;
+      this.eventStartTime = null;
+      this.eventEndTime = null;
+      this.createEventSemester = null;
+      this.pickedDate = null;
+    },
+
+    fillTimeArrays() {
+      this.timeSlots = [];
+      let tempTime = "08:00:00";
+
+      while (tempTime <= "17:00:00") {
+        this.timeSlots.push({
+          title: this.formatTime(tempTime),
+          value: tempTime,
+        });
+        tempTime = this.addDurationMinutes(tempTime);
+      }
+
+      this.endTime = Array.from(this.timeSlots);
+      this.startTime = Array.from(this.timeSlots);
+
+      this.endTime.shift(); //removes the first timeslot from the end array
+      this.startTime.pop(); //removes the last timeslot from the start array
+    },
+
+    displayCreateEvent() {
+      this.errorMessage = "";
+      this.fillTimeArrays();
+
+      this.createDialog = true;
+    },
+
     async retrieveAllSemesters() {
       await SemesterDataService.getAll()
         .then((response) => {
           this.semesters = response.data;
+          this.eventCreateSemesters = response.data;
         })
         .catch((e) => {
           console.log(e);
         });
     },
+
     async getCurrentSemester() {
       this.currentDate = new Date();
       let dateString = this.currentDate.toISOString().substring(0, 10);
@@ -291,6 +279,57 @@ export default {
           console.log(e);
         });
     },
+
+    validateEvent() {
+      var result = true;
+
+      if (this.eventType == null) {
+        result = false;
+        this.errorMessage = "Error: Please select an Event Type";
+      } else if (this.eventStartTime == null) {
+        result = false;
+        this.errorMessage = "Error: Please select a Start Time";
+      } else if (this.eventEndTime == null) {
+        result = false;
+        this.errorMessage = "Error: Please select an End Time";
+      } else if (this.selectedSemester == null) {
+        result = false;
+        this.errorMessage = "Error: Please select a Semester";
+      } else if (this.pickedDate == null) {
+        result = false;
+        this.errorMessage = "Error: Please select a Date";
+      }
+
+      return result;
+    },
+    async createEvent() {
+      if (!this.validateEvent()) {
+        return;
+      }
+
+      let eventData = {
+        type: this.eventType,
+        date: this.pickedDate,
+        startTime: this.eventStartTime.value,
+        endTime: this.eventEndTime.value,
+        isVisible: "1",
+        canMergeSlots: "0",
+        slotDuration: "10",
+        semesterId: this.selectedSemester.id,
+      };
+
+      await EventDataService.create(eventData)
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((e) => {
+          console.log(e);
+          console.log(eventData);
+        });
+
+      this.clearCreate();
+      this.createDialog = false;
+    },
     async semesterSearchUpdate(semester) {
       await EventDataService.getSemesterEvents(semester) // change
         .then((response) => {
@@ -300,19 +339,10 @@ export default {
           console.log(e);
         });
     },
-    async retrieveEventsDateAndAfter(date) {
-      await EventDataService.getGTEDate(date)
+    async eventSemesterSelection() {
+      await SemesterDataService.getAll()
         .then((response) => {
-          this.filteredEvents = response.data;
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    },
-    async retrieveEventsDateAndBefore(date) {
-      await EventDataService.getLTEDate(date)
-        .then((response) => {
-          this.filteredEvents = response.data;
+          this.semesterEvents = response.data;
         })
         .catch((e) => {
           console.log(e);
@@ -327,55 +357,18 @@ export default {
           console.log(e);
         });
     },
-    async getAvailabilityForUser() {
-      await AvailabilityDataService.getByUser(this.user.userId)
-        .then((response) => {
-          this.userAvailability = response.data;
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    },
-    displayEventAvailability(event) {
-      this.errorMessage = "";
-      this.selectedEvent = event;
-      this.fillAvailabilityArrays();
-      this.currentAvailability = this.userAvailability.filter(
-        (obj) => obj.eventId == event.id
-      );
-      this.showDialog = true;
-    },
+
     formatTime(time) {
       return new Date("January 1, 2000 " + time).toLocaleTimeString("us-EN", {
         hour: "numeric",
         minute: "numeric",
       });
     },
-    fillAvailabilityArrays() {
-      this.availabilitySlots = [];
-      let tempTime = this.selectedEvent.startTime;
 
-      while (tempTime <= this.selectedEvent.endTime) {
-        this.availabilitySlots.push({
-          title: this.formatTime(tempTime),
-          value: tempTime,
-        });
-        tempTime = this.addDurationMinutes(tempTime);
-      }
-
-      this.availabilityEndArray = Array.from(this.availabilitySlots);
-      this.availabilityStartArray = Array.from(this.availabilitySlots);
-
-      this.availabilityEndArray.shift(); //removes the first timeslot from the end array
-      this.availabilityStartArray.pop(); //removes the last timeslot from the start array
-
-      this.availabilityStart = this.availabilityStartArray[0];
-    },
     addDurationMinutes(time) {
       let timeSplit = time.split(":");
       let hour = Number(timeSplit[0]);
-      let minute =
-        Number(timeSplit[1]) + Number(this.selectedEvent.slotDuration);
+      let minute = Number(timeSplit[1]) + Number(10);
 
       if (minute >= "60") {
         hour++;
@@ -389,170 +382,26 @@ export default {
         ":00"
       );
     },
+
     startTimeUpdated() {
-      this.availabilityEndArray = [];
-      this.availabilityEndArray = this.availabilitySlots.filter(
-        (obj) => obj.value >= this.availabilityStart.value
+      this.endTime = [];
+      this.endTime = this.timeSlots.filter(
+        (obj) => obj.value >= this.eventStartTime.value
       );
 
-      this.availabilityEndArray.shift(); //removes the first timeslot from the end array
+      this.endTime.shift(); //removes the first timeslot from the end array
 
-      if (!this.availabilityEndArray.includes(this.availabilityEnd)) {
-        this.availabilityEnd = null;
+      if (!this.endTime.includes(this.eventEndTime)) {
+        this.eventEndTime = null;
       }
-    },
-    createAvailability() {
-      if (this.availabilityEnd == undefined) {
-        this.errorMessage = "Please select an End Time";
-        return;
-      }
-      const data = {
-        date: this.selectedEvent.date,
-        startTime: this.availabilityStart.value,
-        endTime: this.availabilityEnd.value,
-        userId: this.user.userId,
-        eventId: this.selectedEvent.id,
-      };
-      if (!this.checkForOverlap(data)) {
-        AvailabilityDataService.create(data)
-          .then((response) => {
-            this.errorMessage = "";
-            this.currentAvailability.push(response.data);
-            this.userAvailability.push(response.data);
-          })
-          .catch((e) => {
-            console.log(e);
-          });
-      } else {
-        this.errorMessage =
-          "That time would overlap with an existing time. Please try again";
-      }
-    },
-    checkForOverlap(entry) {
-      var result = false;
-      if (entry.id == undefined) {
-        this.currentAvailability.forEach((obj) => {
-          if (!result) {
-            if (
-              (entry.startTime <= obj.startTime &&
-                entry.endTime > obj.startTime) ||
-              (entry.startTime > obj.startTime && entry.startTime < obj.endTime)
-            ) {
-              result = true;
-            }
-          }
-        });
-      } else {
-        this.currentAvailability.forEach((obj) => {
-          if (!result) {
-            if (
-              (entry.startTime <= obj.startTime &&
-                entry.endTime > obj.startTime) ||
-              (entry.startTime > obj.startTime && entry.startTime < obj.endTime)
-            ) {
-              if (obj.id != entry.id) {
-                result = true;
-              }
-            }
-          }
-        });
-      }
-      return result;
-    },
-    deleteItem(item) {
-      this.editedIndex = this.currentAvailability.indexOf(item);
-      this.editedAvail = item;
-      this.dialogDelete = true;
-    },
-    deleteItemConfirm() {
-      AvailabilityDataService.remove(
-        this.currentAvailability[this.editedIndex].id
-      ).catch((error) => {
-        console.log(error);
-      });
-      this.userAvailability.splice(
-        this.userAvailability.indexOf(
-          this.currentAvailability[this.editedIndex]
-        ),
-        1
-      );
-      this.currentAvailability.splice(this.editedIndex, 1);
-      this.closeDelete();
-    },
-    closeDelete() {
-      this.dialogDelete = false;
-      this.$nextTick(() => {
-        this.editedAvail = null;
-        this.editedIndex = -1;
-      });
-    },
-    editItem(item) {
-      this.editedIndex = this.currentAvailability.indexOf(item);
-      this.editedAvail = item;
-      this.editSelectedStart = this.availabilitySlots.find(
-        (obj) => obj.value == this.editedAvail.startTime
-      );
-      this.editSelectedEnd = this.availabilitySlots.find(
-        (obj) => obj.value == this.editedAvail.endTime
-      );
-
-      this.editStartOriginal = this.editSelectedStart.title;
-      this.editEndOriginal = this.editSelectedEnd.title;
-
-      this.editStartChange();
-      this.dialogEdit = true;
-    },
-    editStartChange() {
-      this.editEndArray = this.availabilitySlots.filter(
-        (obj) => obj.value >= this.editSelectedStart.value
-      );
-
-      this.editEndArray.shift(); //removes the first timeslot from the end array
-
-      if (!this.editEndArray.includes(this.editSelectedEnd)) {
-        this.editSelectedEnd = null;
-      }
-    },
-    editItemConfirm() {
-      if (this.editSelectedEnd == undefined) {
-        this.editErrorMessage = "Please select an End Time";
-        return;
-      }
-      const index = this.userAvailability.indexOf(
-        this.currentAvailability[this.editedIndex]
-      );
-      const data = {
-        id: this.editedAvail.id,
-        startTime: this.editSelectedStart.value,
-        endTime: this.editSelectedEnd.value,
-      };
-      if (this.checkForOverlap(data)) {
-        this.editErrorMessage =
-          "That time would overlap with an existing time. Please try again";
-      } else {
-        AvailabilityDataService.update(data).catch((error) => {
-          console.log(error);
-        });
-        this.currentAvailability[this.editedIndex].startTime = data.startTime;
-        this.currentAvailability[this.editedIndex].endTime = data.endTime;
-        this.userAvailability[index].startTime = data.startTime;
-        this.userAvailability[index].endTime = data.endTime;
-
-        this.closeEdit();
-      }
-    },
-    closeEdit() {
-      this.editErrorMessage = "";
-      this.dialogEdit = false;
-      this.$nextTick(() => {
-        this.editedAvail = null;
-      });
     },
   },
+
   async mounted() {
     this.user = Utils.getStore("user");
     await this.retrieveAllSemesters();
     this.semesters.forEach((obj) => (obj.title = obj.year + " - " + obj.code));
+
     this.currentDate = new Date();
 
     await this.getCurrentSemester();
