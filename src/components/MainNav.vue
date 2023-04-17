@@ -2,17 +2,17 @@
   <v-container fluid class="fill-height bg-primary">
     <v-row class="fill-height pa-0 ma-0" justify="center">
       <v-col class="pa-0 ma-0">
-        <v-expansion-panels variant="accordion" multiple>
+        <v-expansion-panels variant="accordion" multiple v-model="isExpanded">
           <v-expansion-panel
             bg-color="primary"
             prominent
             class="elevation-0 pa-0 ma-0"
-            v-for="(menu, index) in menus"
+            v-for="(menu, index) in roleMenus"
             :key="index"
             :value="index"
             :title="menu.title"
           >
-            <v-expansion-panel-text class="pa-0 ma-0">
+            <v-expansion-panel-text :open="true" class="pa-0 ma-0">
               <v-container class="pa-0 ma-0">
                 <v-row
                   v-for="(link, index) in menu.links"
@@ -43,6 +43,8 @@
 
 <script>
 import { defineComponent } from "vue";
+import Utils from "../config/utils.js";
+import UserDataService from "../services/UserDataService";
 export default defineComponent({
   name: "MainNav",
   props: {},
@@ -51,6 +53,11 @@ export default defineComponent({
     return {
       drawer: false,
       selectedItem: "",
+      user: {},
+      userWithRoles: {},
+      userRoles: [],
+      isExpanded: [],
+      roleMenus: [],
       menus: [
         {
           title: "Student",
@@ -82,20 +89,39 @@ export default defineComponent({
       ],
     };
   },
-  // emits: ["changeComp"],
-  // setup(props, { emit }) {
-  //   const changeComp = (route) => {
-  //     this.$router.push({ path: route });
-  //   };
-  //   return {
-  //     changeComp,
-  //   };
-  // },
   methods: {
     changeComp(route) {
       console.log(route);
       this.$router.push({ path: route });
     },
+    async getUserRoles() {
+      await UserDataService.getUserRoles(this.user.userId)
+        .then((response) => {
+          // the data is sent back in an array. There should only be one object, hence the hard-code
+          this.userWithRoles = response.data[0];
+          this.userWithRoles.userRoles.forEach((role) => {
+            this.userRoles.push(role.role);
+          });
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+    determineRoles() {
+      for (let i = 0; i < this.menus.length; i++) {
+        if (this.userRoles.includes(this.userRoles[i])) {
+          this.isExpanded.push(i);
+          this.roleMenus.push(this.menus[i]);
+        }
+        console.log(this.isExpanded);
+      }
+    },
+  },
+  async created() {
+    this.user = Utils.getStore("user");
+
+    await this.getUserRoles();
+    this.determineRoles();
   },
 });
 </script>
