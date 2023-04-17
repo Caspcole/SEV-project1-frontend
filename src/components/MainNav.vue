@@ -12,7 +12,7 @@
             :value="index"
             :title="menu.title"
           >
-            <v-expansion-panel-text :open="true" class="pa-0 ma-0">
+            <v-expansion-panel-text class="pa-0 ma-0">
               <v-container class="pa-0 ma-0">
                 <v-row
                   v-for="(link, index) in menu.links"
@@ -68,6 +68,7 @@ export default defineComponent({
             { link: "View Your Critiques", route: "studentCritiques" },
             { link: "Event Recordings", route: "studentRecordings" },
           ],
+          id: 0,
         },
         {
           title: "Faculty",
@@ -77,14 +78,17 @@ export default defineComponent({
             { link: "Event Availability", route: "createAvailability" },
             { link: "View Repertoires", route: "facultyViewRepertoire" },
           ],
+          id: 1,
         },
         {
           title: "Accompanist",
           links: [{ link: "Event Availability", route: "createAvailability" }],
+          id: 2,
         },
         {
           title: "Admin",
           links: [{ link: "Events", route: "adminEventsCRUD" }],
+          id: 3,
         },
       ],
     };
@@ -109,11 +113,10 @@ export default defineComponent({
     },
     determineRoles() {
       for (let i = 0; i < this.menus.length; i++) {
-        if (this.userRoles.includes(this.userRoles[i])) {
-          this.isExpanded.push(i);
+        if (this.userRoles.includes(this.menus[i].title.toLowerCase())) {
           this.roleMenus.push(this.menus[i]);
+          this.isExpanded.push(this.roleMenus.length - 1);
         }
-        console.log(this.isExpanded);
       }
     },
   },
