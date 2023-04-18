@@ -143,7 +143,7 @@
           <v-col cols="4">
             <v-text-field
               type="date"
-              clearable="true"
+              clearable
               v-model="pickedDate"
             ></v-text-field>
           </v-col>
@@ -236,7 +236,7 @@
           <v-col cols="4">
             <v-text-field
               type="date"
-              clearable="true"
+              clearable
               v-model="editDate"
             ></v-text-field>
           </v-col>
@@ -270,7 +270,6 @@
 import EventDataService from "../../services/EventDataService";
 import Utils from "../../config/utils.js";
 import SemesterDataService from "../../services/SemesterDataService";
-import { createIfStatement } from "@vue/compiler-core";
 
 export default {
   name: "createAvailability",
@@ -282,7 +281,7 @@ export default {
       { title: "End Time", key: "endTime" },
       { title: "Edit", key: "actions", sortable: false },
     ],
-    selectedEvent: null,
+    selectedEventId: null,
     user: {},
     showDialog: false,
 
@@ -387,6 +386,7 @@ export default {
     },
 
     displayEditEvent(item) {
+      this.selectedEventId = item.id;
       this.errorMessage = "";
       this.editEventType = item.type;
       this.editFillTimeArrays(item);
@@ -484,9 +484,7 @@ export default {
       };
 
       await EventDataService.create(eventData)
-        .then((response) => {
-          console.log(response);
-        })
+        .then((response) => {})
         .catch((e) => {
           console.log(e);
           console.log(eventData);
@@ -502,6 +500,7 @@ export default {
       }
 
       let eventData = {
+        id: this.selectedEventId,
         type: this.editEventType,
         date: this.editDate,
         startTime: this.editEventStartTime.value,
@@ -512,17 +511,13 @@ export default {
         semesterId: this.editEventSemester.id,
       };
 
-      //update needs fixing by id
       await EventDataService.update(eventData)
-        .then((response) => {
-          console.log(response);
-        })
+        .then((response) => {})
         .catch((e) => {
           console.log(e);
           console.log(eventData);
         });
 
-      console.log(eventData);
       this.clearEdit();
       this.errorMessage = "";
       this.editDialog = false;

@@ -18,7 +18,7 @@ class EventDataService {
   }
 
   update(data) {
-    return http.put(this.baseUrl, data);
+    return http.put(this.baseUrl + data.id, data);
   }
   createCritique(data) {
     return http.post(this.baseUrl, data);
