@@ -209,7 +209,6 @@
             label="End Time"
             :items="editEndTime"
             :style="{ width: '40px' }"
-            clearable
             return-object
           ></v-select>
           <v-divider class="mx-4" inset vertical></v-divider>
@@ -220,7 +219,6 @@
             item-value="id"
             item-title="title"
             @update:modelValue="eventSemesterSelection()"
-            clearable
             return-object
           ></v-select>
         </v-row>
@@ -281,13 +279,13 @@ export default {
       { title: "End Time", key: "endTime" },
       { title: "Edit", key: "actions", sortable: false },
     ],
-    selectedEventId: null,
     user: {},
     showDialog: false,
 
     //Filter logic
     //----------------------
     selectedSemester: null,
+    editSelectedSemester: null,
     semesters: [],
     typeFilterArray: [],
     typeFilter: null,
@@ -392,8 +390,15 @@ export default {
       this.editFillTimeArrays(item);
       this.editEventStartTime = this.formatTime(item.startTime);
       this.editEventEndTime = this.formatTime(item.endTime);
+      console.log(item.id);
       //hardcoded for sanity sake, figure out how to change dynamically. Do research on find().
-      this.editEventSemester = this.eventEditSemesters[0];
+      this.editEventSemester = this.eventEditSemesters.find(
+        (obj) => obj.semesterId == item.semesterId
+      );
+      console.log(this.editEventSemester);
+      // this.eventEditSemesters.find(
+      //   (obj) => obj.id == item.semester
+      // );
       this.editDate = item.date;
       this.editDialog = true;
     },
@@ -521,10 +526,11 @@ export default {
       this.clearEdit();
       this.errorMessage = "";
       this.editDialog = false;
+      window.location.reload();
     },
 
     async semesterSearchUpdate(semester) {
-      await EventDataService.getSemesterEvents(semester) // change
+      await EventDataService.getSemesterEvents(semester)
         .then((response) => {
           this.filteredEvents = response.data;
         })
