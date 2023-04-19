@@ -350,9 +350,9 @@ export default {
 
     editFillTimeArrays(item) {
       this.editTimeSlots = [];
-      let tempTime = item.startTime;
+      let tempTime = "08:00:00";
 
-      while (tempTime <= item.endTime) {
+      while (tempTime <= "17:00:00") {
         this.editTimeSlots.push({
           title: this.formatTime(tempTime),
           value: tempTime,
