@@ -67,6 +67,10 @@ export default defineComponent({
             { link: "Event Sign-Ups", route: "studentEventSignUps" },
             { link: "View Your Critiques", route: "studentCritiques" },
             { link: "Event Recordings", route: "studentRecordings" },
+            {
+              link: "Vocal Levels",
+              route: "studentViewVocalLevelRequirements",
+            },
           ],
           id: 0,
         },
