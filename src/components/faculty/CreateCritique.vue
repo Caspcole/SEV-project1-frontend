@@ -1,11 +1,11 @@
 <template>
-  <v-container v-model="selectingEventTitle">
+  <v-container v-if="selectingEventTitle">
     <v-card>
       <v-card-title class="d-flex justify-center"> Select Event </v-card-title>
     </v-card>
   </v-container>
 
-  <v-container v-model="selectingEventSemester">
+  <v-container v-if="selectingEventSemester">
     <v-row>
       <v-col cols="3">
         <v-card>
@@ -24,7 +24,7 @@
     </v-row>
   </v-container>
 
-  <v-container v-model="selectingEvent">
+  <v-container v-if="selectingEvent">
     <v-row>
       <v-col>
         <v-card>
@@ -66,14 +66,14 @@
     </v-row>
   </v-container>
 
-  <v-container v-model="showStudentTimeslotsTitle">
+  <v-container v-if="showStudentTimeslotsTitle">
     <v-card>
       <v-card-title class="d-flex justify-center">
         Student Timeslots
       </v-card-title>
     </v-card>
   </v-container>
-  <v-container v-model="showStudentTimeslots">
+  <v-container v-if="showStudentTimeslots">
     <v-card>
       <v-card-title class="center">Select Timeslot for Critique</v-card-title>
       <v-card-title class="center">{{ getCurrentDate() }}</v-card-title>
@@ -1082,7 +1082,7 @@ export default {
     this.currentDate = new Date();
 
     await this.getCurrentSemester();
-    this.selectCurrentSemester = this.getCurrentSemester;
+    this.selectCurrentSemester.push(this.selectedSemester);
     await this.semesterSearchUpdate(this.selectedSemester.id);
 
     // const currentDate = "2023-03-31";
