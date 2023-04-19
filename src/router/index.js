@@ -92,6 +92,12 @@ const router = createRouter({
       name: "adminEventsCRUD",
       alias: "/adminEventsCRUD",
     },
+    {
+      path: "/base",
+      component: Base,
+      name: "facultyViewRepertoire",
+      alias: "/facultyViewRepertoire",
+    },
   ],
 });
 
