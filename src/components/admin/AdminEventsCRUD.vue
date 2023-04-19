@@ -210,16 +210,7 @@
             :items="editEndTime"
             :style="{ width: '40px' }"
             return-object
-          ></v-select>
-          <v-divider class="mx-4" inset vertical></v-divider>
-          <v-select
-            v-model="editEventSemester"
-            label="Semester"
-            :items="eventEditSemesters"
-            item-value="id"
-            item-title="title"
-            @update:modelValue="eventSemesterSelection()"
-            return-object
+            clearable
           ></v-select>
         </v-row>
         <v-divider></v-divider>
@@ -390,15 +381,9 @@ export default {
       this.editFillTimeArrays(item);
       this.editEventStartTime = this.formatTime(item.startTime);
       this.editEventEndTime = this.formatTime(item.endTime);
-      console.log(item.id);
-      //hardcoded for sanity sake, figure out how to change dynamically. Do research on find().
       this.editEventSemester = this.eventEditSemesters.find(
         (obj) => obj.semesterId == item.semesterId
       );
-      console.log(this.editEventSemester);
-      // this.eventEditSemesters.find(
-      //   (obj) => obj.id == item.semester
-      // );
       this.editDate = item.date;
       this.editDialog = true;
     },
@@ -513,7 +498,7 @@ export default {
         isVisible: "1",
         canMergeSlots: "0",
         slotDuration: "10",
-        semesterId: this.editEventSemester.id,
+        semesterId: this.selectedSemester.id,
       };
 
       await EventDataService.update(eventData)
