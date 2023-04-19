@@ -1,4 +1,67 @@
 <template>
+  <v-container v-model="selectingEventTitle">
+    <v-card>
+      <v-card-title class="d-flex justify-center"> Select Event </v-card-title>
+    </v-card>
+  </v-container>
+
+  <v-container>
+    <v-row>
+      <v-col cols="3">
+        <v-card>
+          <v-select
+            v-model="selectedSemester"
+            label="Semester"
+            :items="selectCurrentSemester"
+            item-value="id"
+            item-title="title"
+            @update:modelValue="semesterSearchUpdate(selectedSemester)"
+            style="background-color: whitesmoke"
+          ></v-select>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+  <v-container v-model="selectingEvent">
+    <v-row>
+      <v-col>
+        <v-card>
+          <v-data-table
+            :headers="headers"
+            :items="semesterEvents"
+            class="elevation-1"
+          >
+            <template v-slot:top>
+              <v-toolbar flat>
+                <v-toolbar-title>EVENTS</v-toolbar-title>
+              </v-toolbar>
+            </template>
+            <template #item="{ item }">
+              <tr>
+                <td v-for="(header, index) in headers" :key="index">
+                  <div
+                    v-if="
+                      header.title == 'Start Time' || header.title == 'End Time'
+                    "
+                  >
+                    {{ this.formatTime(item.columns[header.key]) }}
+                  </div>
+                  <div v-else-if="header.title != 'Select'">
+                    {{ item.columns[header.key] }}
+                  </div>
+                  <div v-else>
+                    <v-btn small color="primary">Select</v-btn>
+                    >
+                  </div>
+                </td>
+              </tr>
+            </template>
+          </v-data-table>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+
   <v-container>
     <v-card>
       <v-card-title v-if="!showingCritiqueForm" class="d-flex justify-center">
@@ -332,18 +395,9 @@
           <v-btn
             variant="outlined"
             style="margin-left: 25%; margin-right: 25%; margin-bottom: 20px"
-            @click="
-              saveQuickCritique()
-              // isOpen = true;
-            "
+            @click="saveQuickCritique()"
             >Save</v-btn
           >
-          <!-- <teleport to="body">
-        <div>
-          <h3>Critique creation successful!</h3>
-          <v-button @click="isOpen = false"></v-button>
-        </div>
-      </teleport> -->
           <v-btn
             style="margin-bottom: 20px; margin-left: 12.5%"
             variant="outlined"
@@ -355,25 +409,13 @@
     </v-container>
   </v-container>
 
-  <v-container v-else-if="popupTrigger == true">
-    <div>
-      <h2 class="center" style="padding-top: 25%">
+  <v-dialog v-model="popupTrigger">
+    <v-card>
+      <v-card-text class="center" style="padding-top: 25%">
         Critique created successfully!
-      </h2>
-      <div class="d-flex justify-center" style="padding-top: 10px">
-        <v-btn
-          class="popup-close"
-          variant="outlined"
-          @click="
-            popupTrigger = false;
-            this.showingCritiqueForm = false;
-          "
-        >
-          Close
-        </v-btn>
-      </div>
-    </div>
-  </v-container>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
@@ -381,6 +423,7 @@ import EventDataService from "../../services/EventDataService";
 import CritiqueDataService from "../../services/CritiqueDataService";
 import UserRoleDataService from "../../services/UserRoleDataService";
 import JurorTimeslotDataService from "../../services/JurorTimeslotDataService";
+import SemesterDataService from "../../services/SemesterDataService";
 import Utils from "../../config/utils.js";
 import { ref } from "vue";
 
@@ -414,6 +457,20 @@ export default {
     overallPerformanceGrade: "",
     errorMessage: "",
 
+    selectingEventTitle: true,
+    selectingEvent: true,
+    semesterEvents: [],
+    selectCurrentSemester: [],
+    selectedSemester: null,
+
+    selectingEventHeaders: [
+      { title: "Event Type", key: "type" },
+      { title: "Event Date", key: "date" },
+      { title: "Start Time", key: "startTime" },
+      { title: "End Time", key: "endTime" },
+      { title: "Select", key: "actions", sortable: false },
+    ],
+
     headers: [
       {
         title: "Event Type",
@@ -440,7 +497,7 @@ export default {
         key: "students[0].instrumentType",
       },
       {
-        title: "Create",
+        title: "Select",
         key: "actions",
         sortable: false,
       },
@@ -512,6 +569,49 @@ export default {
       this.clearFields();
       //change form state and go back to the studentTimeslots
       this.showingCritiqueForm = false;
+    },
+
+    async getCurrentSemester() {
+      this.currentDate = new Date();
+      let dateString = this.currentDate.toISOString().substring(0, 10);
+      await SemesterDataService.getCurrent(dateString)
+        .then((response) => {
+          this.selectedSemester = this.selectCurrentSemester.find(
+            (obj) => obj.id == response.data[0].id
+          );
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+
+    formatTime(time) {
+      return new Date("January 1, 2000 " + time).toLocaleTimeString("us-EN", {
+        hour: "numeric",
+        minute: "numeric",
+      });
+    },
+
+    async semesterSearchUpdate(semester) {
+      await EventDataService.getSemesterEvents(semester)
+        .then((response) => {
+          this.semesterEvents = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+
+    async retrieveAllSemesters() {
+      await SemesterDataService.getAll()
+        .then((response) => {
+          this.semesters = response.data;
+          this.eventCreateSemesters = response.data;
+          this.eventEditSemesters = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
     },
 
     async saveQuickCritique() {
@@ -958,6 +1058,16 @@ export default {
     },
   },
   async mounted() {
+    await this.retrieveAllSemesters();
+    this.selectCurrentSemester.forEach(
+      (obj) => (obj.title = obj.year + " - " + obj.code)
+    );
+
+    this.currentDate = new Date();
+
+    await this.getCurrentSemester();
+    await this.semesterSearchUpdate(this.selectedSemester.id);
+
     // const currentDate = "2023-03-31";
     const currentDate = this.getComparisonDate();
     // await this.retrieveTodaysTimeslots("2023-03-31");
