@@ -606,8 +606,6 @@ export default {
       await SemesterDataService.getAll()
         .then((response) => {
           this.semesters = response.data;
-          this.eventCreateSemesters = response.data;
-          this.eventEditSemesters = response.data;
         })
         .catch((e) => {
           console.log(e);
