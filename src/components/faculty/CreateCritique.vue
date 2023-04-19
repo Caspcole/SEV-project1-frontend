@@ -5,7 +5,7 @@
     </v-card>
   </v-container>
 
-  <v-container>
+  <v-container v-model="selectingEventSemester">
     <v-row>
       <v-col cols="3">
         <v-card>
@@ -17,18 +17,20 @@
             item-title="title"
             @update:modelValue="semesterSearchUpdate(selectedSemester)"
             style="background-color: whitesmoke"
+            disabled
           ></v-select>
         </v-card>
       </v-col>
     </v-row>
   </v-container>
+
   <v-container v-model="selectingEvent">
     <v-row>
       <v-col>
         <v-card>
           <v-data-table
-            :headers="headers"
-            :items="semesterEvents"
+            :headers="selectingEventHeaders"
+            :items="filteredEvents"
             class="elevation-1"
           >
             <template v-slot:top>
@@ -38,7 +40,10 @@
             </template>
             <template #item="{ item }">
               <tr>
-                <td v-for="(header, index) in headers" :key="index">
+                <td
+                  v-for="(header, index) in selectingEventHeaders"
+                  :key="index"
+                >
                   <div
                     v-if="
                       header.title == 'Start Time' || header.title == 'End Time'
@@ -51,7 +56,6 @@
                   </div>
                   <div v-else>
                     <v-btn small color="primary">Select</v-btn>
-                    >
                   </div>
                 </td>
               </tr>
@@ -62,14 +66,14 @@
     </v-row>
   </v-container>
 
-  <v-container>
+  <v-container v-model="showStudentTimeslotsTitle">
     <v-card>
-      <v-card-title v-if="!showingCritiqueForm" class="d-flex justify-center">
+      <v-card-title class="d-flex justify-center">
         Student Timeslots
       </v-card-title>
     </v-card>
   </v-container>
-  <v-container v-if="!showingCritiqueForm">
+  <v-container v-model="showStudentTimeslots">
     <v-card>
       <v-card-title class="center">Select Timeslot for Critique</v-card-title>
       <v-card-title class="center">{{ getCurrentDate() }}</v-card-title>
@@ -84,7 +88,7 @@
   </v-container>
 
   <v-container
-    v-else-if="
+    v-if="
       showingCritiqueForm &&
       showingExpandedForm == true &&
       popupTrigger == false
@@ -459,9 +463,14 @@ export default {
 
     selectingEventTitle: true,
     selectingEvent: true,
-    semesterEvents: [],
+    selectingEventSemester: true,
+
+    filteredEvents: [],
+    semesters: [],
     selectCurrentSemester: [],
     selectedSemester: null,
+    showStudentTimeslots: false,
+    showStudentTimeslotsTitle: false,
 
     selectingEventHeaders: [
       { title: "Event Type", key: "type" },
@@ -576,7 +585,7 @@ export default {
       let dateString = this.currentDate.toISOString().substring(0, 10);
       await SemesterDataService.getCurrent(dateString)
         .then((response) => {
-          this.selectedSemester = this.selectCurrentSemester.find(
+          this.selectedSemester = this.semesters.find(
             (obj) => obj.id == response.data[0].id
           );
         })
@@ -595,7 +604,7 @@ export default {
     async semesterSearchUpdate(semester) {
       await EventDataService.getSemesterEvents(semester)
         .then((response) => {
-          this.semesterEvents = response.data;
+          this.filteredEvents = response.data;
         })
         .catch((e) => {
           console.log(e);
@@ -606,6 +615,16 @@ export default {
       await SemesterDataService.getAll()
         .then((response) => {
           this.semesters = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+
+    async retrieveEvents(date) {
+      await EventDataService.getAll(date)
+        .then((response) => {
+          this.filteredEvents = response.data;
         })
         .catch((e) => {
           console.log(e);
@@ -1056,21 +1075,20 @@ export default {
     },
   },
   async mounted() {
+    this.user = Utils.getStore("user");
     await this.retrieveAllSemesters();
-    this.selectCurrentSemester.forEach(
-      (obj) => (obj.title = obj.year + " - " + obj.code)
-    );
+    this.semesters.forEach((obj) => (obj.title = obj.year + " - " + obj.code));
 
     this.currentDate = new Date();
 
     await this.getCurrentSemester();
+    this.selectCurrentSemester = this.getCurrentSemester;
     await this.semesterSearchUpdate(this.selectedSemester.id);
 
     // const currentDate = "2023-03-31";
-    const currentDate = this.getComparisonDate();
+    // const currentDate = this.getComparisonDate();
     // await this.retrieveTodaysTimeslots("2023-03-31");
-    await this.retrieveTodaysTimeslots(this.getComparisonDate());
-    this.user = Utils.getStore("user");
+    // await this.retrieveTodaysTimeslots(this.getComparisonDate());
     console.log(this.user);
   },
 };

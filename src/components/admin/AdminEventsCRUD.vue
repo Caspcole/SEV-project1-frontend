@@ -535,15 +535,15 @@ export default {
         });
     },
 
-    async retrieveEvents(date) {
-      await EventDataService.getAll(date)
-        .then((response) => {
-          this.filteredEvents = response.data;
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    },
+    // async retrieveEvents(date) {
+    //   await EventDataService.getAll(date)
+    //     .then((response) => {
+    //       this.filteredEvents = response.data;
+    //     })
+    //     .catch((e) => {
+    //       console.log(e);
+    //     });
+    // },
 
     formatTime(time) {
       return new Date("January 1, 2000 " + time).toLocaleTimeString("us-EN", {
