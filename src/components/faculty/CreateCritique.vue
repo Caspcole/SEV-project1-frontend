@@ -406,11 +406,13 @@
     </v-container>
   </v-container>
 
-  <v-dialog v-model="popupTrigger">
+  <v-dialog
+    v-model="popupTrigger"
+    :style="{ width: '400px' }"
+    @click:outside="createConfirmationClick()"
+  >
     <v-card>
-      <v-card-text class="center" style="padding-top: 25%">
-        Critique created successfully!
-      </v-card-text>
+      <v-card-text class="center"> Critique created successfully! </v-card-text>
     </v-card>
   </v-dialog>
 </template>
@@ -422,7 +424,7 @@ import UserRoleDataService from "../../services/UserRoleDataService";
 import JurorTimeslotDataService from "../../services/JurorTimeslotDataService";
 import SemesterDataService from "../../services/SemesterDataService";
 import Utils from "../../config/utils.js";
-import { ref } from "vue";
+import { ref, resolveTransitionHooks } from "vue";
 
 const isOpen = ref(false);
 export default {
@@ -510,19 +512,16 @@ export default {
   }),
   methods: {
     async retrieveTodaysTimeslots(date) {
-      console.log(date);
       await EventDataService.getStudentTimeslotsForDate(date)
         .then((response) => {
-          console.log(response.data);
           for (let i = 0; i < response.data.length; i++) {
             let event = response.data[i];
             for (let j = 0; j < event.timeslots.length; j++) {
               let timeslot = event.timeslots[j];
               timeslot.eventType = event.eventType;
-              timeslot.instrumentName = timeslot.students[0].instrumentName;
-              timeslot.instrumentType = timeslot.students[0].instrumentType;
+              timeslot.instrumentName = timeslot.students[j].instrumentName;
+              timeslot.instrumentType = timeslot.students[j].instrumentType;
               this.timeslots.push(timeslot);
-              console.log(timeslot);
             }
           }
         })
@@ -540,7 +539,6 @@ export default {
     },
 
     formatDate(date) {
-      console.log(date);
       const formattedDate = new Date(date);
       const day = String(formattedDate.getDate() + 1).padStart(2, "0");
       const month = String(formattedDate.getMonth() + 1).padStart(2, "0");
@@ -550,8 +548,9 @@ export default {
 
     handleClick(item) {
       this.selectedTimeslot = item.raw;
-      console.log(this.selectedTimeslot);
       this.showingCritiqueForm = true;
+      this.showStudentTimeslots = false;
+      this.showStudentTimeslotsTitle = false;
     },
 
     selectClick(item) {
@@ -563,7 +562,6 @@ export default {
       this.selectingEventTitle = false;
       this.todaysDate = item.date;
       this.retrieveTodaysTimeslots(this.todaysDate);
-      console.log(this.todaysDate);
     },
 
     clearFields() {
@@ -598,7 +596,12 @@ export default {
       //set all fields to blank state
       this.clearFields();
       //change form state and go back to the studentTimeslots
-      this.showingCritiqueForm = false;
+      window.location.reload();
+    },
+
+    createConfirmationClick() {
+      this.clearFields();
+      window.location.reload();
     },
 
     async getCurrentSemester() {
@@ -654,8 +657,6 @@ export default {
 
     async saveQuickCritique() {
       var facultyId, jurorTimeslotId;
-      console.log(this.deportmentGrade);
-      console.log(this.selectedTimeslot);
       //individually sets each critique line variable JSON
 
       //if all req fields have data
@@ -820,7 +821,6 @@ export default {
 
       this.errorMessage = "";
       this.popupTrigger = true;
-      // this.showingCritiqueForm = false;
     },
 
     validateQuickForm() {
@@ -920,8 +920,6 @@ export default {
     },
     async saveExpandedCritique() {
       var facultyId, jurorTimeslotId;
-      console.log(this.deportmentGrade);
-      console.log(this.selectedTimeslot);
 
       if (!this.validateExpandedForm()) {
         return;
@@ -1105,11 +1103,6 @@ export default {
     await this.getCurrentSemester();
     this.selectCurrentSemester.push(this.selectedSemester);
     await this.semesterSearchUpdate(this.selectedSemester.id);
-
-    // const currentDate = "2023-03-31";
-    // const currentDate = this.getComparisonDate();
-    // await this.retrieveTodaysTimeslots("2023-03-31");
-    // await this.retrieveTodaysTimeslots(this.getComparisonDate());
     console.log(this.user);
   },
 };
