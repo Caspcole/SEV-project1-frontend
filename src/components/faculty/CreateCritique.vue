@@ -493,13 +493,13 @@ export default {
         title: "Instrument",
         align: "start",
         sortable: true,
-        key: "students[0].instrumentName",
+        key: "instrumentName",
       },
       {
         title: "Type",
         align: "start",
         sortable: true,
-        key: "students[0].instrumentType",
+        key: "instrumentType",
       },
       {
         title: "Select",
@@ -519,6 +519,8 @@ export default {
             for (let j = 0; j < event.timeslots.length; j++) {
               let timeslot = event.timeslots[j];
               timeslot.eventType = event.eventType;
+              timeslot.instrumentName = timeslot.students[0].instrumentName;
+              timeslot.instrumentType = timeslot.students[0].instrumentType;
               this.timeslots.push(timeslot);
               console.log(timeslot);
             }
