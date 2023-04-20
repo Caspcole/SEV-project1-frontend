@@ -55,7 +55,9 @@
                     {{ item.columns[header.key] }}
                   </div>
                   <div v-else>
-                    <v-btn small color="primary">Select</v-btn>
+                    <v-btn small color="primary" @click="selectClick(item.raw)"
+                      >Select</v-btn
+                    >
                   </div>
                 </td>
               </tr>
@@ -76,7 +78,7 @@
   <v-container v-if="showStudentTimeslots">
     <v-card>
       <v-card-title class="center">Select Timeslot for Critique</v-card-title>
-      <v-card-title class="center">{{ getCurrentDate() }}</v-card-title>
+      <v-card-title class="center">{{ formatDate(todaysDate) }}</v-card-title>
     </v-card>
     <v-data-table :headers="headers" :items="timeslots" class="elevation-8">
       <template v-slot:item.actions="{ item }">
@@ -471,6 +473,8 @@ export default {
     selectedSemester: null,
     showStudentTimeslots: false,
     showStudentTimeslotsTitle: false,
+    selectDayEvent: null,
+    todaysDate: null,
 
     selectingEventHeaders: [
       { title: "Event Type", key: "type" },
@@ -514,9 +518,10 @@ export default {
   }),
   methods: {
     async retrieveTodaysTimeslots(date) {
+      console.log(date);
       await EventDataService.getStudentTimeslotsForDate(date)
         .then((response) => {
-          console.log(response.data.raw);
+          console.log(response.data);
           for (let i = 0; i < response.data.length; i++) {
             let event = response.data[i];
             for (let j = 0; j < event.timeslots.length; j++) {
@@ -539,10 +544,31 @@ export default {
       return `${month}/${day}/${year}`;
     },
 
+    formatDate(date) {
+      console.log(date);
+      const formattedDate = new Date(date);
+      const day = String(formattedDate.getDate() + 1).padStart(2, "0");
+      const month = String(formattedDate.getMonth() + 1).padStart(2, "0");
+      const year = formattedDate.getFullYear();
+      return `${month}/${day}/${year}`;
+    },
+
     handleClick(item) {
       this.selectedTimeslot = item.raw;
       console.log(this.selectedTimeslot);
       this.showingCritiqueForm = true;
+    },
+
+    selectClick(item) {
+      this.selectDayEvent = item;
+      this.showStudentTimeslots = true;
+      this.showStudentTimeslotsTitle = true;
+      this.selectingEvent = false;
+      this.selectingEventSemester = false;
+      this.selectingEventTitle = false;
+      this.todaysDate = item.date;
+      this.retrieveTodaysTimeslots(this.todaysDate);
+      console.log(this.todaysDate);
     },
 
     clearFields() {

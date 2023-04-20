@@ -77,7 +77,6 @@
   <v-dialog
     v-model="createDialog"
     :style="{ width: '1000px' }"
-    class="mx-auto"
     @click:outside="clearCreate()"
   >
     <v-card>
@@ -172,7 +171,7 @@
       <v-divider></v-divider>
     </v-card>
   </v-dialog>
-  <v-dialog v-model="editDialog" :style="{ width: '1000px' }" class="mx-auto">
+  <v-dialog v-model="editDialog" :style="{ width: '1000px' }">
     <v-card>
       <v-card>
         <v-card-title class="d-flex justify-center">Edit Event</v-card-title>
