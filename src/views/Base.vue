@@ -105,6 +105,13 @@
           <StudentRepertoire
             v-if="this.$route.fullPath === '/studentRepertoire'"
           ></StudentRepertoire>
+          <FacultyViewRepertoire
+            v-if="this.$route.fullPath === '/facultyViewRepertoire'"
+          ></FacultyViewRepertoire>
+          <StudentVocalLevels
+            v-if="this.$route.fullPath === '/studentViewVocalLevelRequirements'"
+          >
+          </StudentVocalLevels>
         </div>
       </v-col>
     </v-row>
@@ -124,12 +131,14 @@ import StudentHome from "../components/student/StudentHome.vue";
 import CreateCritique from "../components/faculty/CreateCritique.vue";
 import StudentEventList from "../components/student/StudentEventList.vue";
 import StudentViewCritique from "../components/student/StudentViewCritique.vue";
+import StudentVocalLevels from "../components/student/StudentVocalLevels.vue";
 
 import StudentEventSignUp from "../components/student/StudentEventSignUp.vue";
 import FacultyCritiqueView from "../components/faculty/CritiqueView.vue";
 import CreateAvailability from "../components/faculty/CreateAvailability.vue";
 import StudentRepertoire from "../components/student/StudentRepertoire.vue";
 import AdminEventsCRUD from "../components/admin/AdminEventsCRUD.vue";
+import FacultyViewRepertoire from "../components/faculty/FacultyViewRepertoire.vue";
 export default {
   name: "Base",
   components: {
@@ -140,10 +149,12 @@ export default {
     StudentHome, //Landing Page for the Students
     StudentEventList, //Student page to select event and time to sign up
     StudentEventSignUp,
+    StudentVocalLevels, // view the static vocal level requirements
     CreateCritique,
     StudentViewCritique,
     //Faculty Component
     FacultyCritiqueView,
+    FacultyViewRepertoire,
     //Accompanist Component
     //Admin Component
     CreateAvailability,

@@ -1,5 +1,13 @@
 <!-- Basically tutorialsList -->
 <template>
+  <v-dialog v-model="displayError" width="450px" class="text-center">
+    <v-card>
+      <v-card-text> "{{ errorMessage }}" </v-card-text>
+      <v-card-actions>
+        <v-btn color="primary" block @click="closeDialog">Close Dialog</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
   <v-container class="ma-5">
     <v-card>
       <v-card-title class="d-flex justify-center">Event Sign-Up</v-card-title>
@@ -8,8 +16,47 @@
         that event.
       </v-card-text>
     </v-card>
-
     <br />
+    <v-card>
+      <v-container>
+        <v-row>
+          <v-col>
+            <v-select
+              clearable
+              v-model="selectedStudentInstrument"
+              label="Instrument"
+              :items="studentInstruments"
+              item-title="instrument.name"
+              return-object
+              :style="{ width: '250px' }"
+              @update:modelValue="updateReturningObject"
+            ></v-select>
+          </v-col>
+          <v-col>
+            <h4>Instructor for selected instrument:</h4>
+            <p>
+              {{
+                selectedStudentInstrument == null
+                  ? "No instrument selected"
+                  : selectedStudentInstrument.instructor.user.fName +
+                    " " +
+                    selectedStudentInstrument.instructor.user.lName
+              }}
+            </p>
+            <h4>Accompanist for selected instrument:</h4>
+            <p>
+              {{
+                selectedStudentInstrument == null
+                  ? "No accompanist"
+                  : selectedStudentInstrument.accompanist.user.fName +
+                    " " +
+                    selectedStudentInstrument.accompanist.user.lName
+              }}
+            </p>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-card>
     <v-container>
       <v-row>
         <v-col>
@@ -47,15 +94,20 @@
               :key="index"
               v-model="selectedEventTimes"
               v-on:change="updateSelectedEventTimes()"
-              :label="time.startTime.substring(0, 5)"
+              :label="
+                time.studentTimeslots.length > 0
+                  ? `${time.startTime.substring(0, 5)} Taken`
+                  : time.startTime.substring(0, 5)
+              "
               :value="time"
+              v-bind:disabled="time.studentTimeslots.length > 0"
             >
             </v-checkbox>
           </v-card>
           <br />
 
           <!-- Have some logic to grey out the button if there are no time slots selected -->
-          <v-btn @click="SignUpForEventObject(returningObject)">Next</v-btn>
+          <v-btn @click="nextPage">Next</v-btn>
           <!-- Need some logic to get the type of instrument the student is using -->
         </v-col>
       </v-row>
@@ -64,8 +116,10 @@
 </template>
 
 <script>
+import Utils from "../../config/utils.js";
 import EventDataService from "../../services/EventDataService";
 import EventTimeDataService from "../../services/EventTimeDataService";
+import StudentInstrumentDataService from "../../services/StudentInstrumentDataService";
 // change the name of EventTimeDataService to EventTimeslotDataService
 export default {
   name: "student-event-list",
@@ -80,6 +134,12 @@ export default {
     selectedEventTimes: [],
     currentDate: new Date(),
     toSignUp: true,
+    user: {},
+    errorMessage: "",
+    displayError: false,
+
+    studentInstruments: [],
+    selectedStudentInstrument: null,
   }),
   emits: ["SignUpForEventObject"],
   setup(props, { emit }) {
@@ -95,6 +155,19 @@ export default {
       this.currentEvent = event;
       this.determineEventTimes();
       this.selectedEvent = true;
+    },
+
+    closeDialog() {
+      this.errorMessage = "";
+      this.displayError = false;
+    },
+
+    updateReturningObject() {
+      if (this.selectedStudentInstrument) {
+        this.returningObject.studentInstrument = this.selectedStudentInstrument;
+      } else {
+        delete this.returningObject.studentInstrument;
+      }
     },
 
     async retrieveEventsDateAndAfter(date) {
@@ -119,7 +192,9 @@ export default {
       // Narrow down to events in the future
     },
     async retrieveEventTimes(eventId) {
-      await EventTimeDataService.getByEvent(eventId)
+      await EventTimeDataService.getEventTimeslotsAndStudentTimeslotsByEvent(
+        eventId
+      )
         .then((response) => {
           this.currentEventTimes = response.data;
         })
@@ -137,6 +212,7 @@ export default {
 
     updateSelectedEventTimes() {
       this.returningObject = this.currentEvent;
+      this.updateReturningObject();
       this.returningObject.eventTimes = this.selectedEventTimes;
 
       // Strip the ending seconds from the start and end times
@@ -158,11 +234,52 @@ export default {
           console.log(e);
         });
     },
+
+    async retrieveStudentInstruments() {
+      await StudentInstrumentDataService.getInstrumentAndInstructorAndAccompanistByUserId(
+        this.user.userId
+      )
+        .then((response) => {
+          this.studentInstruments = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+
+    validation() {
+      var isValid = true;
+      if (!this.returningObject.hasOwnProperty("studentInstrument")) {
+        isValid = this.notValid();
+        this.errorMessage = "Please select an instrument.";
+      } else if (!this.returningObject.hasOwnProperty("eventTimes")) {
+        isValid = this.notValid();
+        this.errorMessage = "Please select an event and time slot.";
+      } else if (this.returningObject.eventTimes.length == 0) {
+        isValid = this.notValid();
+        this.errorMessage = "Please select an event time slot.";
+      }
+      return isValid;
+    },
+
+    notValid() {
+      this.displayError = true;
+      return false;
+    },
+
+    nextPage() {
+      if (this.validation()) {
+        this.SignUpForEventObject(this.returningObject);
+      }
+    },
   },
   async mounted() {
     this.currentDate = new Date();
     let dateString = this.currentDate.toISOString().substring(0, 10);
     await this.retrieveEventsDateAndAfter(dateString);
+
+    this.user = Utils.getStore("user");
+    await this.retrieveStudentInstruments();
   },
 };
 </script>

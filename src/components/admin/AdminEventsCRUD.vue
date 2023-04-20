@@ -493,7 +493,7 @@ export default {
         type: this.editEventType,
         date: this.editDate,
         startTime: this.editEventStartTime.value,
-        endTime: this.editEventEndTime,
+        endTime: this.editEventEndTime.value,
         isVisible: "1",
         canMergeSlots: "0",
         slotDuration: "10",

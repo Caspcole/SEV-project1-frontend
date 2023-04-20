@@ -13,5 +13,9 @@ class EventTimeDataService {
   getByEvent(id) {
     return http.get(this.baseUrl + `event/${id}`);
   }
+
+  getEventTimeslotsAndStudentTimeslotsByEvent(id) {
+    return http.get(this.baseUrl + `event/${id}/studentTimeslot`);
+  }
 }
 export default new EventTimeDataService();
