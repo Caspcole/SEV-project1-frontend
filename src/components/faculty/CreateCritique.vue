@@ -439,6 +439,7 @@ export default {
   data: () => ({
     user: {},
     itemsPerPage: 10,
+    students: [],
     timeslots: [],
     selectedTimeslot: null,
     selectedCritique: null,
