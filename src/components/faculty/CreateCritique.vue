@@ -258,18 +258,9 @@
           <v-btn
             variant="outlined"
             style="margin-left: 25%; margin-bottom: 20px"
-            @click="
-              saveExpandedCritique()
-              // isOpen = true;
-            "
+            @click="saveExpandedCritique()"
             >Save</v-btn
           >
-          <!-- <teleport to="body">
-        <div>
-          <h3>Critique creation successful!</h3>
-          <v-button @click="isOpen = false"></v-button>
-        </div>
-      </teleport> -->
           <v-btn
             variant="outlined"
             style="margin-left: 25%; margin-bottom: 20px"
@@ -529,6 +520,7 @@ export default {
               let timeslot = event.timeslots[j];
               timeslot.eventType = event.eventType;
               this.timeslots.push(timeslot);
+              console.log(timeslot);
             }
           }
         })
