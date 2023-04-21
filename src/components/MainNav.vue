@@ -58,7 +58,6 @@ export default defineComponent({
       userRoles: [],
       isExpanded: [],
       roleMenus: [],
-      userWithRoles: {},
       menus: [
         {
           title: "Student",
