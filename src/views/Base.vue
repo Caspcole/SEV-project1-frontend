@@ -60,10 +60,7 @@
         class="bg-image"
         style="
           background-image: url(../../public/choir-3.jpg);
-          background-repeat: no-repeat;
-          background-attachment: fixed;
-          background-position: center center;
-          background-size: cover;
+          background-repeat: repeat;
         "
       >
         <!-- Your components go here -->
@@ -108,10 +105,6 @@
           <FacultyViewRepertoire
             v-if="this.$route.fullPath === '/facultyViewRepertoire'"
           ></FacultyViewRepertoire>
-          <StudentVocalLevels
-            v-if="this.$route.fullPath === '/studentViewVocalLevelRequirements'"
-          >
-          </StudentVocalLevels>
         </div>
       </v-col>
     </v-row>
@@ -131,7 +124,6 @@ import StudentHome from "../components/student/StudentHome.vue";
 import CreateCritique from "../components/faculty/CreateCritique.vue";
 import StudentEventList from "../components/student/StudentEventList.vue";
 import StudentViewCritique from "../components/student/StudentViewCritique.vue";
-import StudentVocalLevels from "../components/student/StudentVocalLevels.vue";
 
 import StudentEventSignUp from "../components/student/StudentEventSignUp.vue";
 import FacultyCritiqueView from "../components/faculty/CritiqueView.vue";
@@ -149,7 +141,6 @@ export default {
     StudentHome, //Landing Page for the Students
     StudentEventList, //Student page to select event and time to sign up
     StudentEventSignUp,
-    StudentVocalLevels, // view the static vocal level requirements
     CreateCritique,
     StudentViewCritique,
     //Faculty Component
