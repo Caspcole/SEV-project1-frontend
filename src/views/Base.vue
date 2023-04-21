@@ -59,9 +59,9 @@
         <!-- Your components go here -->
         <div class="grid-container">
           <!-- Student Section -->
-          <StudentHome
-            v-if="this.$route.fullPath === '/studentBase'"
-          ></StudentHome>
+          <StudentViewEvents
+            v-if="this.$route.fullPath === '/studentViewEvents'"
+          ></StudentViewEvents>
           <StudentSettings
             v-if="this.$route.fullPath === '/studentSettings'"
           ></StudentSettings>
@@ -102,7 +102,7 @@ import AuthServices from "../services/authServices.js";
 import StudentSettings from "../components/student/StudentSettings.vue";
 // Import all components and insert into homepage
 import MainNav from "../components/MainNav.vue";
-import StudentHome from "../components/student/StudentHome.vue";
+import StudentViewEvents from "../components/student/StudentViewEvents.vue";
 import CreateCritique from "../components/faculty/CreateCritique.vue";
 import StudentEventList from "../components/student/StudentEventList.vue";
 import StudentViewCritique from "../components/student/StudentViewCritique.vue";
@@ -116,7 +116,7 @@ export default {
     MainNav, //Left navigation panel
     //Student Component
     StudentSettings,
-    StudentHome, //Landing Page for the Students
+    StudentViewEvents, //Landing Page for the Students
     StudentEventList,
     CreateCritique,
     StudentViewCritique,
