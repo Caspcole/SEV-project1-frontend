@@ -162,6 +162,13 @@ export default {
       this.displayError = false;
     },
 
+    updateStudentInstrument() {
+      this.updateReturningObject();
+      this.currentEvent = {};
+      this.currentEventTimes = [];
+    },
+
+
     updateReturningObject() {
       if (this.selectedStudentInstrument) {
         this.returningObject.studentInstrument = this.selectedStudentInstrument;
