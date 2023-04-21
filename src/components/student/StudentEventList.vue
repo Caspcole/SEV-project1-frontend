@@ -141,7 +141,8 @@ export default {
     studentInstruments: [],
     selectedStudentInstrument: null,
 
-    availabilities: {},
+    instructorAvailability: { temp: true },
+    accompanistAvailability: { temp: true },
   }),
   emits: ["SignUpForEventObject"],
   setup(props, { emit }) {
@@ -179,34 +180,40 @@ export default {
 
       if (
         time.studentTimeslots.length == 0 &&
-        "id" in this.instructorAvailability &&
-        "id" in this.accompanistAvailability
+        this.instructorAvailability &&
+        this.accompanistAvailability
       ) {
         if (
-          time.startTime
-            .substring(0, 5)
-            .localeCompare(
-              this.instructorAvailability.startTime.substring(0, 5)
-            ) >= 0 &&
-          time.startTime
-            .substring(0, 5)
-            .localeCompare(
-              this.instructorAvailability.endTime.substring(0, 5)
-            ) <= 0 &&
-          time.startTime
-            .substring(0, 5)
-            .localeCompare(
-              this.accompanistAvailability.startTime.substring(0, 5)
-            ) >= 0 &&
-          time.startTime
-            .substring(0, 5)
-            .localeCompare(
-              this.accompanistAvailability.endTime.substring(0, 5)
-            ) <= 0
+          "id" in this.instructorAvailability &&
+          "id" in this.accompanistAvailability
         ) {
-          isDisabled = false;
+          if (
+            time.startTime
+              .substring(0, 5)
+              .localeCompare(
+                this.instructorAvailability.startTime.substring(0, 5)
+              ) >= 0 &&
+            time.startTime
+              .substring(0, 5)
+              .localeCompare(
+                this.instructorAvailability.endTime.substring(0, 5)
+              ) <= 0 &&
+            time.startTime
+              .substring(0, 5)
+              .localeCompare(
+                this.accompanistAvailability.startTime.substring(0, 5)
+              ) >= 0 &&
+            time.startTime
+              .substring(0, 5)
+              .localeCompare(
+                this.accompanistAvailability.endTime.substring(0, 5)
+              ) <= 0
+          ) {
+            isDisabled = false;
+          }
         }
       }
+
       return isDisabled;
     },
 
@@ -216,36 +223,42 @@ export default {
       if (time.studentTimeslots.length > 0) {
         returnString = returnString + " Taken";
       }
-      if ("id" in this.instructorAvailability) {
-        if (
-          time.startTime
-            .substring(0, 5)
-            .localeCompare(
-              this.instructorAvailability.startTime.substring(0, 5)
-            ) >= 0 &&
-          time.startTime
-            .substring(0, 5)
-            .localeCompare(
-              this.instructorAvailability.endTime.substring(0, 5)
-            ) <= 0
-        ) {
-          returnString = returnString + ", Instr. available";
+
+      if (this.instructorAvailability) {
+        if ("id" in this.instructorAvailability) {
+          if (
+            time.startTime
+              .substring(0, 5)
+              .localeCompare(
+                this.instructorAvailability.startTime.substring(0, 5)
+              ) >= 0 &&
+            time.startTime
+              .substring(0, 5)
+              .localeCompare(
+                this.instructorAvailability.endTime.substring(0, 5)
+              ) <= 0
+          ) {
+            returnString = returnString + ", Instr. available";
+          }
         }
       }
-      if ("id" in this.accompanistAvailability) {
-        if (
-          time.startTime
-            .substring(0, 5)
-            .localeCompare(
-              this.accompanistAvailability.startTime.substring(0, 5)
-            ) >= 0 &&
-          time.startTime
-            .substring(0, 5)
-            .localeCompare(
-              this.accompanistAvailability.endTime.substring(0, 5)
-            ) <= 0
-        ) {
-          returnString = returnString + ", Accomp. available";
+
+      if (this.accompanistAvailability) {
+        if ("id" in this.accompanistAvailability) {
+          if (
+            time.startTime
+              .substring(0, 5)
+              .localeCompare(
+                this.accompanistAvailability.startTime.substring(0, 5)
+              ) >= 0 &&
+            time.startTime
+              .substring(0, 5)
+              .localeCompare(
+                this.accompanistAvailability.endTime.substring(0, 5)
+              ) <= 0
+          ) {
+            returnString = returnString + ", Accomp. available";
+          }
         }
       }
 
