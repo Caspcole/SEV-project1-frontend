@@ -310,7 +310,6 @@ export default {
       this.updateReturningObject();
       this.currentEvent = {};
       this.currentEventTimes = [];
-      console.log(this.selectedStudentInstrument);
     },
 
     updateReturningObject() {
