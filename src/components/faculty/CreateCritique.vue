@@ -87,6 +87,10 @@
         </v-icon>
       </template>
     </v-data-table>
+    <v-col></v-col>
+    <div class="d-flex justify-center">
+      <v-btn small color="primary" @click="backToEvents()">Back</v-btn>
+    </div>
   </v-container>
 
   <v-container
@@ -562,6 +566,14 @@ export default {
       this.selectingEventTitle = false;
       this.todaysDate = item.date;
       this.retrieveTodaysTimeslots(this.todaysDate);
+    },
+
+    backToEvents() {
+      this.showStudentTimeslots = false;
+      this.showStudentTimeslotsTitle = false;
+      this.selectingEvent = true;
+      this.selectingEventSemester = true;
+      this.selectingEventTitle = true;
     },
 
     clearFields() {
