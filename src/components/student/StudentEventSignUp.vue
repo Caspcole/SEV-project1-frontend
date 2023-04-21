@@ -417,23 +417,21 @@ export default {
     },
 
     async saveToRepertoire() {
-      await getStudentRepertoire();
-      let isInRepertoire = false;
+      await this.getStudentRepertoire();
 
       this.studentSongs.forEach(async (piece) => {
+        let isInRepertoire = false;
         if (this.studentRepertoire.length > 0) {
           for (
             let i = 0;
             i < this.studentRepertoire.length && !isInRepertoire;
             i++
           ) {
-            if (this.studentRepertoire[i].songId.indexOf(piece.piece)) {
-              console.log("is in repertoire");
+            if (this.studentRepertoire[i].songId == piece.piece) {
               isInRepertoire = true;
             }
           }
           if (!isInRepertoire) {
-            console.log("not in repertoire");
             const data = {
               studentInstrumentId: this.eventOb.studentInstrument.id,
               songId: piece.piece,
@@ -447,7 +445,6 @@ export default {
             });
           }
         } else {
-          console.log("repertoire empty");
           const data = {
             studentInstrumentId: this.eventOb.studentInstrument.id,
             songId: piece.piece,
