@@ -60,7 +60,10 @@
         class="bg-image"
         style="
           background-image: url(../../public/choir-3.jpg);
-          background-repeat: repeat;
+          background-repeat: no-repeat;
+          background-attachment: fixed;
+          background-position: center center;
+          background-size: cover;
         "
       >
         <!-- Your components go here -->
