@@ -1,11 +1,38 @@
 <template>
   <v-container>
     <v-card>
-      <v-card-title class="d-flex justify-center"> Repertoire </v-card-title>
+      <v-card-title class="d-flex justify-center">
+        View a Repertoire
+      </v-card-title>
     </v-card>
   </v-container>
   <v-container>
-    <v-btn color="primary" @click="displayDialog"> Add Piece </v-btn>
+    <v-card max-width="400">
+      <v-card-text>
+        <p class="ma-2">
+          Please select a student to view or edit their Repertoire
+        </p>
+        <v-autocomplete
+          clearable
+          v-model="selectedStudent"
+          v-model:search="studentSearch"
+          label="Student"
+          :items="displayStudents"
+          return-object
+          :style="{ width: '250px' }"
+          :no-data-text="noStudentDataText"
+          @update:modelValue="studentUpdated()"
+        ></v-autocomplete>
+        <v-btn
+          color="primary"
+          @click="displayDialog"
+          v-if="userSemesters.length > 0"
+        >
+          Add Piece
+        </v-btn>
+      </v-card-text>
+    </v-card>
+
     <v-card class="mt-10">
       <v-expansion-panels variant="accordion">
         <v-expansion-panel v-for="semester in userSemesters">
@@ -184,11 +211,12 @@
 </template>
 <script>
 import Utils from "../../config/utils.js";
-import RepertoireDataService from "../../services/RepertoireDataService";
-import ComposerDataService from "../../services/ComposerDataService";
-import SongDataService from "../../services/SongDataService";
-import SemesterDataService from "../../services/SemesterDataService";
-import StudentInstrumentDataService from "../../services/StudentInstrumentDataService";
+import RepertoireDataService from "../../services/RepertoireDataService.js";
+import ComposerDataService from "../../services/ComposerDataService.js";
+import SongDataService from "../../services/SongDataService.js";
+import SemesterDataService from "../../services/SemesterDataService.js";
+import StudentInstrumentDataService from "../../services/StudentInstrumentDataService.js";
+import UserDataService from "../../services/UserDataService";
 export default {
   name: "studentRepertoireView",
   data: () => ({
@@ -204,17 +232,23 @@ export default {
     displayComposers: [],
     selectedComposer: null,
     composerSearch: null,
-    hasSearched: false,
+    hasSearchedComposer: false,
     songs: [],
     selectedSong: null,
     errorMessage: "",
     editedRepertoire: null,
     dialogDelete: false,
     isEdit: false,
+
+    students: [],
+    selectedStudent: null,
+    studentSearch: null,
+    displayStudents: [],
+    hasSearchedStudent: false,
   }),
   methods: {
-    async fillSemesters() {
-      RepertoireDataService.getSemesterByUser(this.user.userId)
+    async fillSemesters(studentId) {
+      RepertoireDataService.getSemesterByUser(studentId)
         .then((response) => {
           this.userSemesters = response.data;
           this.userSemesters.forEach((obj) => {
@@ -244,8 +278,8 @@ export default {
           console.log(e);
         });
     },
-    fillRepertoire() {
-      RepertoireDataService.getByUser(this.user.userId)
+    fillRepertoire(studentId) {
+      RepertoireDataService.getByUser(studentId)
         .then((response) => {
           this.repertoire = response.data;
         })
@@ -278,6 +312,28 @@ export default {
           });
       }
     },
+
+    async fillStudents() {
+      UserDataService.getAllStudents()
+        .then((response) => {
+          this.students = response.data;
+          this.students.forEach((student) => {
+            student.title = student.fName + " " + student.lName;
+          });
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+
+    async studentUpdated() {
+      if (this.selectedStudent != null) {
+        await this.fillSemesters(this.selectedStudent.id);
+        await this.fillRepertoire(this.selectedStudent.id);
+        await this.retrieveStudentInstruments(this.selectedStudent.id);
+      }
+    },
+
     displayDialog() {
       this.errorMessage = "";
       this.selectedStudentInstrument = null;
@@ -303,8 +359,8 @@ export default {
         console.log(e);
       });
 
-      this.fillSemesters();
-      this.fillRepertoire();
+      this.fillSemesters(this.selectedStudent.id);
+      this.fillRepertoire(this.selectedStudent.id);
       this.closeDialog();
     },
     closeDialog() {
@@ -365,9 +421,14 @@ export default {
       }
       return result;
     },
-    querySelections(value) {
+    queryComposerSelections(value) {
       this.displayComposers = this.composers.filter((composer) => {
         return composer.title.toLowerCase().indexOf(value.toLowerCase()) > -1;
+      });
+    },
+    queryStudentSelections(value) {
+      this.displayStudents = this.students.filter((student) => {
+        return student.title.toLowerCase().indexOf(value.toLowerCase()) > -1;
       });
     },
     async retrieveAllSemesters() {
@@ -382,8 +443,8 @@ export default {
           console.log(e);
         });
     },
-    async retrieveStudentInstruments() {
-      await StudentInstrumentDataService.getByUser(this.user.userId)
+    async retrieveStudentInstruments(studentId) {
+      await StudentInstrumentDataService.getByUser(studentId)
         .then((response) => {
           this.studentInstruments = response.data;
         })
@@ -406,8 +467,8 @@ export default {
           console.log(error);
         }
       );
-      this.fillSemesters();
-      this.fillRepertoire();
+      this.fillSemesters(this.selectedStudent.id);
+      this.fillRepertoire(this.selectedStudent.id);
 
       this.closeDelete();
     },
@@ -460,31 +521,38 @@ export default {
           this.selectedSemester == null ? null : this.selectedSemester.id,
       };
 
-      console.log(data);
-
       await RepertoireDataService.update(data).catch((e) => {
         console.log(e);
       });
 
-      this.fillSemesters();
-      this.fillRepertoire();
+      this.fillSemesters(this.selectedStudent.id);
+      this.fillRepertoire(this.selectedStudent.id);
       this.closeDialog();
     },
   },
   watch: {
     composerSearch(val) {
       if (val && val.length > 1) {
-        this.hasSearched = true;
-        this.querySelections(val);
+        this.hasSearchedComposer = true;
+        this.queryComposerSelections(val);
       } else {
-        this.hasSearched = false;
+        this.hasSearchedComposer = false;
         this.displayComposers = [];
+      }
+    },
+    studentSearch(val) {
+      if (val && val.length > 1) {
+        this.hasSearchedStudent = true;
+        this.queryStudentSelections(val);
+      } else {
+        this.hasSearchedStudent = false;
+        this.displayStudents = [];
       }
     },
   },
   computed: {
     noComposerDataText() {
-      if (this.hasSearched) {
+      if (this.hasSearchedComposer) {
         return "No composers found";
       } else {
         return "Start typing to search for composers";
@@ -497,14 +565,25 @@ export default {
         return "No composer selected";
       }
     },
+
+    noStudentDataText() {
+      if (this.hasSearchedStudent) {
+        return "No students found";
+      } else {
+        return "Start typing to search for students";
+      }
+    },
   },
   async mounted() {
     this.user = Utils.getStore("user");
-    await this.fillSemesters();
+
+    await this.fillStudents();
+
+    // await this.fillSemesters();
     this.fillComposers();
     this.retrieveAllSemesters();
-    this.retrieveStudentInstruments();
-    this.fillRepertoire();
+    // this.retrieveStudentInstruments();
+    // this.fillRepertoire();
   },
 };
 </script>

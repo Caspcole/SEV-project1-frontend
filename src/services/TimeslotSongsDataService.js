@@ -1,17 +1,13 @@
 import http from "./services.js";
 class StudentInstrumentDataService {
-  baseUrl = "/performance-t2/studentInstrument/";
+  baseUrl = "/performance-t2/timeslotSong/";
 
   getAll() {
     return http.get(this.baseUrl);
   }
 
   getByUser(userId) {
-    return http.get(this.baseUrl + "userId/" + userId);
-  }
-
-  getInstrumentAndInstructorAndAccompanistByUserId(userId) {
-    return http.get(this.baseUrl + "userId/allData/" + userId);
+    return http.get(this.baseUrl + userId);
   }
 
   create(data) {

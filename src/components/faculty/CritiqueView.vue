@@ -1,81 +1,90 @@
 <template>
-  <v-card>
-    <v-card-title> Event Critiques: </v-card-title>
-  </v-card>
+  <v-container>
+    <v-card>
+      <v-card-title class="d-flex justify-center">
+        Event Critiques
+      </v-card-title>
+    </v-card>
+  </v-container>
   <v-container>
     <v-row>
-      <v-col cols="3">
-        <v-select
-          v-model="selectedSemester"
-          label="Semester"
-          :items="semesters"
-          item-value="id"
-          item-title="title"
-          @update:modelValue="semesterSearchUpdate(selectedSemester)"
-        ></v-select>
+      <v-col cols="2">
+        <v-card>
+          <v-select
+            v-model="selectedSemester"
+            label="Semester"
+            :items="semesters"
+            item-value="id"
+            item-title="title"
+            @update:modelValue="semesterSearchUpdate(selectedSemester)"
+            style="background-color: whitesmoke"
+          ></v-select>
+        </v-card>
       </v-col>
     </v-row>
   </v-container>
   <v-container>
     <v-row>
       <v-col>
-        <v-data-table
-          :headers="headers"
-          :items="filteredCritiques"
-          class="elevation-1"
-        >
-          <template v-slot:top>
-            <v-toolbar flat>
-              <v-toolbar-title>FILTER BY</v-toolbar-title>
-              <v-select
-                clearable
-                v-model="studentFilter"
-                label="Student"
-                :items="studentFilterArray"
-                :style="{ width: '70px' }"
-                @update:modelValue="filterCritiques()"
-              ></v-select>
-              <v-divider class="mx-4" inset vertical></v-divider>
-              <v-select
-                clearable
-                v-model="typeFilter"
-                label="Event Type"
-                :items="typeFilterArray"
-                :style="{ width: '70px' }"
-                @update:modelValue="filterCritiques()"
-              ></v-select>
-              <v-divider class="mx-4" inset vertical></v-divider>
-              <v-select
-                clearable
-                v-model="monthFilter"
-                label="Month"
-                :items="monthFilterArray"
-                :style="{ width: '70px' }"
-                @update:modelValue="filterCritiques()"
-              ></v-select>
-            </v-toolbar>
-          </template>
-          <template #item="{ item }">
-            <tr>
-              <td v-for="(header, index) in headers" :key="index">
-                <div v-if="header.title == 'Event Date'">
-                  {{ this.formatDate(item.columns[header.key]) }}
-                </div>
-                <div v-else-if="header.title != ' '">
-                  {{ item.columns[header.key] }}
-                </div>
-                <div v-else>
-                  <v-btn
-                    small
-                    color="primary"
-                    @click="displayStudentCritiques(item.raw)"
-                    >View Critiques</v-btn
-                  >
-                </div>
-              </td>
-            </tr>
-          </template>
-        </v-data-table>
+        <v-card>
+          <v-data-table
+            :headers="headers"
+            :items="filteredCritiques"
+            class="elevation-1"
+          >
+            <template v-slot:top>
+              <v-toolbar flat>
+                <v-toolbar-title>FILTER BY</v-toolbar-title>
+                <v-select
+                  clearable
+                  v-model="studentFilter"
+                  label="Student"
+                  :items="studentFilterArray"
+                  :style="{ width: '70px' }"
+                  @update:modelValue="filterCritiques()"
+                ></v-select>
+                <v-divider class="mx-4" inset vertical></v-divider>
+                <v-select
+                  clearable
+                  v-model="typeFilter"
+                  label="Event Type"
+                  :items="typeFilterArray"
+                  :style="{ width: '70px' }"
+                  @update:modelValue="filterCritiques()"
+                ></v-select>
+                <v-divider class="mx-4" inset vertical></v-divider>
+                <v-select
+                  clearable
+                  v-model="monthFilter"
+                  label="Month"
+                  :items="monthFilterArray"
+                  :style="{ width: '70px' }"
+                  @update:modelValue="filterCritiques()"
+                ></v-select>
+              </v-toolbar>
+            </template>
+            <template #item="{ item }">
+              <tr>
+                <td v-for="(header, index) in headers" :key="index">
+                  <div v-if="header.title == 'Event Date'">
+                    {{ this.formatDate(item.columns[header.key]) }}
+                  </div>
+                  <div v-else-if="header.title != ' '">
+                    {{ item.columns[header.key] }}
+                  </div>
+                  <div v-else>
+                    <v-btn
+                      small
+                      color="primary"
+                      @click="displayStudentCritiques(item.raw)"
+                      >View Critiques</v-btn
+                    >
+                  </div>
+                </td>
+              </tr>
+            </template>
+          </v-data-table>
+        </v-card>
       </v-col>
     </v-row>
   </v-container>

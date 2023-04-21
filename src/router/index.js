@@ -44,6 +44,12 @@ const router = createRouter({
     {
       path: "/base",
       component: Base,
+      name: "studentEventFormSignUp",
+      alias: "/studentEventFormSignUp",
+    },
+    {
+      path: "/base",
+      component: Base,
       name: "studentCritiques",
       alias: "/studentCritiques",
     },
@@ -74,17 +80,29 @@ const router = createRouter({
       alias: "/createAvailability",
     },
     // Admin Routes
+    // {
+    //   path: "/base",
+    //   component: Base,
+    //   name: "adminCreateEvents",
+    //   alias: "/adminCreateEvents",
+    // },
     {
       path: "/base",
       component: Base,
-      name: "adminCreateEvents",
-      alias: "/adminCreateEvents",
+      name: "adminEventsCRUD",
+      alias: "/adminEventsCRUD",
     },
     {
       path: "/base",
       component: Base,
-      name: "adminViewEvents",
-      alias: "/adminViewEvents",
+      name: "facultyViewRepertoire",
+      alias: "/facultyViewRepertoire",
+    },
+    {
+      path: "/base",
+      component: Base,
+      name: "studentViewVocalLevelRequirements",
+      alias: "/studentViewVocalLevelRequirements",
     },
   ],
 });

@@ -55,7 +55,14 @@
       <v-col cols="2" class="bg-blue">
         <MainNav></MainNav>
       </v-col>
-      <v-col cols="10" class="bg-white">
+      <v-col
+        cols="10"
+        class="bg-image"
+        style="
+          background-image: url(../../public/choir-3.jpg);
+          background-repeat: repeat;
+        "
+      >
         <!-- Your components go here -->
         <div class="grid-container">
           <!-- Student Section -->
@@ -70,7 +77,13 @@
           ></CreateCritique>
           <StudentEventList
             v-if="this.$route.fullPath === '/studentEventSignUps'"
+            @SignUpForEventObject="changeToEventFormSignUp"
           ></StudentEventList>
+          <StudentEventSignUp
+            v-if="this.$route.fullPath === '/studentEventFormSignUp'"
+            :eventOb="eventOb"
+            @navToStudentViewEvents="changeToStudentHomePage"
+          ></StudentEventSignUp>
           <StudentViewCritique
             v-if="this.$route.fullPath === '/studentCritiques'"
           ></StudentViewCritique>
@@ -79,6 +92,8 @@
             v-if="this.$route.fullPath === '/facultyViewCritiques'"
           ></FacultyCritiqueView>
           <!-- Admin Section -->
+          <AdminEventsCRUD v-if="this.$route.fullPath === '/adminEventsCRUD'">
+          </AdminEventsCRUD>
           <!-- Availability -->
           <CreateAvailability
             v-if="this.$route.fullPath === '/createAvailability'"
@@ -87,6 +102,13 @@
           <StudentRepertoire
             v-if="this.$route.fullPath === '/studentRepertoire'"
           ></StudentRepertoire>
+          <FacultyViewRepertoire
+            v-if="this.$route.fullPath === '/facultyViewRepertoire'"
+          ></FacultyViewRepertoire>
+          <StudentVocalLevels
+            v-if="this.$route.fullPath === '/studentViewVocalLevelRequirements'"
+          >
+          </StudentVocalLevels>
         </div>
       </v-col>
     </v-row>
@@ -106,9 +128,14 @@ import StudentViewEvents from "../components/student/StudentViewEvents.vue";
 import CreateCritique from "../components/faculty/CreateCritique.vue";
 import StudentEventList from "../components/student/StudentEventList.vue";
 import StudentViewCritique from "../components/student/StudentViewCritique.vue";
+import StudentVocalLevels from "../components/student/StudentVocalLevels.vue";
+
+import StudentEventSignUp from "../components/student/StudentEventSignUp.vue";
 import FacultyCritiqueView from "../components/faculty/CritiqueView.vue";
 import CreateAvailability from "../components/faculty/CreateAvailability.vue";
 import StudentRepertoire from "../components/student/StudentRepertoire.vue";
+import AdminEventsCRUD from "../components/admin/AdminEventsCRUD.vue";
+import FacultyViewRepertoire from "../components/faculty/FacultyViewRepertoire.vue";
 export default {
   name: "Base",
   components: {
@@ -117,15 +144,19 @@ export default {
     //Student Component
     StudentSettings,
     StudentViewEvents, //Landing Page for the Students
-    StudentEventList,
+    StudentEventList, //Student page to select event and time to sign up
+    StudentEventSignUp,
+    StudentVocalLevels, // view the static vocal level requirements
     CreateCritique,
     StudentViewCritique,
     //Faculty Component
     FacultyCritiqueView,
+    FacultyViewRepertoire,
     //Accompanist Component
     //Admin Component
     CreateAvailability,
     StudentRepertoire,
+    AdminEventsCRUD,
   },
   data: () => ({
     user: {},
@@ -136,6 +167,7 @@ export default {
     group: null,
     role: "",
     route: "",
+    eventOb: {},
     myItems: [
       {
         prependIcon: "mdi-account",
@@ -189,9 +221,16 @@ export default {
           console.log("error", error);
         });
     },
+    changeToEventFormSignUp(eventOb) {
+      this.eventOb = eventOb;
+      this.$router.push({ path: "studentEventFormSignUp" });
+    },
     studentSettings(route) {
       this.$router.push({ path: route });
       location.reload();
+    },
+    changeToStudentHomePage() {
+      this.$router.push({ path: "studentViewEvents" });
     },
   },
   watch: {
