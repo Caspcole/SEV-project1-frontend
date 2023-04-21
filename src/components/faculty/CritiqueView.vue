@@ -67,7 +67,7 @@
               <tr>
                 <td v-for="(header, index) in headers" :key="index">
                   <div v-if="header.title == 'Event Date'">
-                    {{ this.formatDate(item.columns[header.key]) }}
+                    {{ formatDate(item.columns[header.key]) }}
                     <!-- issue HERE -->
                   </div>
                   <div v-else-if="header.title != ' '">
@@ -153,16 +153,16 @@ export default {
     showDialog: false,
     selectedStudent: null,
     headers: [
-      // { title: "Event Date", key: "eventTimeslot.event.date" },
-      // { title: "First Name", key: "studentInstrument.student.user.fName" },
-      // { title: "Last Name", key: "studentInstrument.student.user.lName" },
-      // { title: "Event Type", key: "eventTimeslot.event.type" },
-      // { title: " " },
-      { title: "Event Date", key: "eventDate" },
-      { title: "First Name", key: "fName" },
-      { title: "Last Name", key: "lName" },
-      { title: "Event Type", key: "type" },
+      { title: "Event Date", key: "eventTimeslot.event.date" },
+      { title: "First Name", key: "studentInstrument.student.user.fName" },
+      { title: "Last Name", key: "studentInstrument.student.user.lName" },
+      { title: "Event Type", key: "eventTimeslot.event.type" },
       { title: " " },
+      // { title: "Event Date", key: "eventDate" },
+      // { title: "First Name", key: "fName" },
+      // { title: "Last Name", key: "lName" },
+      // { title: "Event Type", key: "type" },
+      // { title: " " },
     ],
   }),
   methods: {
@@ -203,6 +203,8 @@ export default {
             ).toLocaleDateString("us-EN", { month: "long" });
           });
           this.filteredCritiques = this.semesterCritiques;
+          console.log(this.filteredCritiques);
+          console.log(this.semesterCritiques);
           this.fillFilters();
         })
         .catch((e) => {
