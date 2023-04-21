@@ -98,12 +98,6 @@ const router = createRouter({
       name: "facultyViewRepertoire",
       alias: "/facultyViewRepertoire",
     },
-    {
-      path: "/base",
-      component: Base,
-      name: "studentViewVocalLevelRequirements",
-      alias: "/studentViewVocalLevelRequirements",
-    },
   ],
 });
 

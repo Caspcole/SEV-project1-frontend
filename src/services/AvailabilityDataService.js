@@ -10,10 +10,6 @@ class AvailabilityDataService {
     return http.get(this.baseUrl + "userId/" + userId);
   }
 
-  getByUserAndDate(userId, date) {
-    return http.get(this.baseUrl + "userId/" + userId + "/date/" + date);
-  }
-
   remove(id) {
     return http.delete(this.baseUrl + id);
   }
