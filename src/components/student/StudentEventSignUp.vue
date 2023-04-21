@@ -235,36 +235,27 @@ export default {
     },
 
     displayedAccompanist() {
-      let returnString = "You have no accompanist.";
-
-      if (this.eventOb.hasOwnProperty("studentInstrument")) {
-        if (this.eventOb.studentInstrument.hasOwnProperty("accompanist")) {
-          if (this.eventOb.studentInstrument.accompanist) {
-            return (
-              this.eventOb.studentInstrument.accompanist.user.fName +
-              " " +
-              this.eventOb.studentInstrument.accompanist.user.lName
-            );
-          }
-        }
+      if (this.eventOb.hasOwnProperty("studentInstrument"))
+        return (
+          this.eventOb.studentInstrument.accompanist.user.fName +
+          " " +
+          this.eventOb.studentInstrument.accompanist.user.lName
+        );
+      else {
+        return "You have no accompanist.";
       }
-      return returnString;
     },
 
     displayedInstructor() {
-      let returnString = "You have no instructor.";
-      if (this.eventOb.hasOwnProperty("studentInstrument")) {
-        if (this.eventOb.studentInstrument.hasOwnProperty("instructor")) {
-          if (this.eventOb.studentInstrument.instructor) {
-            return (
-              this.eventOb.studentInstrument.instructor.user.fName +
-              " " +
-              this.eventOb.studentInstrument.instructor.user.lName
-            );
-          }
-        }
+      if (this.eventOb.hasOwnProperty("studentInstrument"))
+        return (
+          this.eventOb.studentInstrument.instructor.user.fName +
+          " " +
+          this.eventOb.studentInstrument.instructor.user.lName
+        );
+      else {
+        return "You have no accompanist.";
       }
-      return returnString;
     },
 
     displayedInstrument() {
