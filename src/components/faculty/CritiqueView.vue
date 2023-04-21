@@ -152,10 +152,15 @@ export default {
     showDialog: false,
     selectedStudent: null,
     headers: [
-      { title: "Event Date", key: "eventTimeslot.event.date" },
-      { title: "First Name", key: "studentInstrument.student.user.fName" },
-      { title: "Last Name", key: "studentInstrument.student.user.lName" },
-      { title: "Event Type", key: "eventTimeslot.event.type" },
+      // { title: "Event Date", key: "eventTimeslot.event.date" },
+      // { title: "First Name", key: "studentInstrument.student.user.fName" },
+      // { title: "Last Name", key: "studentInstrument.student.user.lName" },
+      // { title: "Event Type", key: "eventTimeslot.event.type" },
+      // { title: " " },
+      { title: "Event Date", key: "eventDate" },
+      { title: "First Name", key: "fName" },
+      { title: "Last Name", key: "lName" },
+      { title: "Event Type", key: "type" },
       { title: " " },
     ],
   }),
@@ -251,6 +256,13 @@ export default {
       }
     },
     formatDate(date) {
+      console.log(date);
+      console.log(
+        new Date(date).toLocaleDateString("us-EN", {
+          month: "long",
+          day: "numeric",
+        })
+      );
       return new Date(date).toLocaleDateString("us-EN", {
         month: "long",
         day: "numeric",
