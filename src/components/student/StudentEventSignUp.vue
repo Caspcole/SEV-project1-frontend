@@ -165,6 +165,8 @@ export default {
       studentSongs: [],
       composerSongs: [],
 
+      studentRepertoire: [],
+
       user: {},
       student: {
         instructor: "Tim Hunter",
@@ -415,18 +417,62 @@ export default {
     },
 
     async saveToRepertoire() {
-      this.studentSongs.forEach(async (piece) => {
-        const data = {
-          studentInstrumentId: this.eventOb.studentInstrument.id,
-          songId: piece.piece,
-          semesterId: this.currentSemesterId,
-        };
+      await getStudentRepertoire();
+      let isInRepertoire = false;
 
-        await RepertoireDataService.create(data).catch((e) => {
-          console.log(e);
-          this.errorMessage = "There was an error reserving your time slot.";
-        });
+      this.studentSongs.forEach(async (piece) => {
+        if (this.studentRepertoire.length > 0) {
+          for (
+            let i = 0;
+            i < this.studentRepertoire.length && !isInRepertoire;
+            i++
+          ) {
+            if (this.studentRepertoire[i].songId.indexOf(piece.piece)) {
+              console.log("is in repertoire");
+              isInRepertoire = true;
+            }
+          }
+          if (!isInRepertoire) {
+            console.log("not in repertoire");
+            const data = {
+              studentInstrumentId: this.eventOb.studentInstrument.id,
+              songId: piece.piece,
+              semesterId: this.currentSemesterId,
+            };
+
+            await RepertoireDataService.create(data).catch((e) => {
+              console.log(e);
+              this.errorMessage =
+                "There was an error reserving your time slot.";
+            });
+          }
+        } else {
+          console.log("repertoire empty");
+          const data = {
+            studentInstrumentId: this.eventOb.studentInstrument.id,
+            songId: piece.piece,
+            semesterId: this.currentSemesterId,
+          };
+
+          await RepertoireDataService.create(data).catch((e) => {
+            console.log(e);
+            this.errorMessage = "There was an error reserving your time slot.";
+          });
+        }
       });
+    },
+
+    async getStudentRepertoire() {
+      await RepertoireDataService.getByUser(this.user.userId)
+        .then((response) => {
+          this.studentRepertoire = response.data;
+        })
+        .catch((e) => {
+          this.message = e.response.data.message;
+          this.errorMessage =
+            "There was an error with reserving your time slot\n" +
+            `${this.message}`;
+        });
     },
 
     async networkSave() {
