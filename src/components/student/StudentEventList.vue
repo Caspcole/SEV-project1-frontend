@@ -29,7 +29,7 @@
               item-title="instrument.name"
               return-object
               :style="{ width: '250px' }"
-              @update:modelValue="updateReturningObject"
+              @update:modelValue="updateStudentInstrument"
             ></v-select>
           </v-col>
           <v-col>
@@ -45,13 +45,7 @@
             </p>
             <h4>Accompanist for selected instrument:</h4>
             <p>
-              {{
-                selectedStudentInstrument == null
-                  ? "No accompanist"
-                  : selectedStudentInstrument.accompanist.user.fName +
-                    " " +
-                    selectedStudentInstrument.accompanist.user.lName
-              }}
+              {{ selectedAccompanist() }}
             </p>
           </v-col>
         </v-row>
@@ -69,6 +63,7 @@
             <v-btn
               v-for="event in events"
               :key="event.id"
+              v-model="selectedEvent"
               v-on:click="changeCurrentEvent(event)"
               variant="tonal"
               v-bind:color="event.id === currentEvent.id ? 'blue' : 'black'"
@@ -126,7 +121,7 @@ export default {
     dialog: false,
     search: "",
     events: [],
-    selectedEvent: false,
+    selectedEvent: [],
     currentEvent: {},
     returningObject: {},
     currentEventTimes: [],
@@ -158,7 +153,26 @@ export default {
       this.currentEvent = event;
       await this.determineAvailabilities(event);
       this.determineEventTimes();
-      this.selectedEvent = true;
+      // this.selectedEvent = true;
+    },
+
+    selectedAccompanist() {
+      let returnString = "";
+
+      if (this.selectedStudentInstrument == null) {
+        returnString = "No accompanist";
+      } else if (
+        "accompanist" in this.selectedStudentInstrument &&
+        this.selectedStudentInstrument.accompanist
+      ) {
+        returnString =
+          this.selectedStudentInstrument.accompanist.user.fName +
+          "  " +
+          this.selectedStudentInstrument.accompanist.user.lName;
+      } else {
+        returnString = "No accompanist for this instrument.";
+      }
+      return returnString;
     },
 
     async determineAvailabilities(event) {
@@ -168,48 +182,70 @@ export default {
         this.selectedStudentInstrument.instructor.user.id,
         date
       );
-      if ("accompanist" in this.selectedStudentInstrument)
+      if (
+        "accompanist" in this.selectedStudentInstrument &&
+        this.selectedStudentInstrument.accompanist
+      ) {
         await this.retrieveAccompanistAvailability(
           this.selectedStudentInstrument.accompanist.user.id,
           date
         );
+      }
     },
 
     disableEventtimes(time) {
       let isDisabled = true;
 
-      if (
-        time.studentTimeslots.length == 0 &&
-        this.instructorAvailability &&
-        this.accompanistAvailability
-      ) {
-        if (
-          "id" in this.instructorAvailability &&
-          "id" in this.accompanistAvailability
-        ) {
+      if (time.studentTimeslots.length == 0) {
+        if (this.instructorAvailability && this.accompanistAvailability) {
           if (
-            time.startTime
-              .substring(0, 5)
-              .localeCompare(
-                this.instructorAvailability.startTime.substring(0, 5)
-              ) >= 0 &&
-            time.startTime
-              .substring(0, 5)
-              .localeCompare(
-                this.instructorAvailability.endTime.substring(0, 5)
-              ) <= 0 &&
-            time.startTime
-              .substring(0, 5)
-              .localeCompare(
-                this.accompanistAvailability.startTime.substring(0, 5)
-              ) >= 0 &&
-            time.startTime
-              .substring(0, 5)
-              .localeCompare(
-                this.accompanistAvailability.endTime.substring(0, 5)
-              ) <= 0
+            "id" in this.instructorAvailability &&
+            "id" in this.accompanistAvailability
           ) {
-            isDisabled = false;
+            if (
+              time.startTime
+                .substring(0, 5)
+                .localeCompare(
+                  this.instructorAvailability.startTime.substring(0, 5)
+                ) >= 0 &&
+              time.startTime
+                .substring(0, 5)
+                .localeCompare(
+                  this.instructorAvailability.endTime.substring(0, 5)
+                ) <= 0 &&
+              time.startTime
+                .substring(0, 5)
+                .localeCompare(
+                  this.accompanistAvailability.startTime.substring(0, 5)
+                ) >= 0 &&
+              time.startTime
+                .substring(0, 5)
+                .localeCompare(
+                  this.accompanistAvailability.endTime.substring(0, 5)
+                ) <= 0
+            ) {
+              isDisabled = false;
+            }
+          } else if (
+            "id" in this.instructorAvailability &&
+            !("id" in this.accompanistAvailability)
+          ) {
+            if ("id" in this.instructorAvailability) {
+              if (
+                time.startTime
+                  .substring(0, 5)
+                  .localeCompare(
+                    this.instructorAvailability.startTime.substring(0, 5)
+                  ) >= 0 &&
+                time.startTime
+                  .substring(0, 5)
+                  .localeCompare(
+                    this.instructorAvailability.endTime.substring(0, 5)
+                  ) <= 0
+              ) {
+                isDisabled = false;
+              }
+            }
           }
         }
       }
@@ -270,7 +306,14 @@ export default {
       this.displayError = false;
     },
 
-    async updateReturningObject() {
+    updateStudentInstrument() {
+      this.updateReturningObject();
+      this.currentEvent = {};
+      this.currentEventTimes = [];
+      console.log(this.selectedStudentInstrument);
+    },
+
+    updateReturningObject() {
       if (this.selectedStudentInstrument) {
         this.showEvents = true;
         this.returningObject.studentInstrument = this.selectedStudentInstrument;
