@@ -1,15 +1,84 @@
 <template>
-  <v-container>
+  <v-container v-if="selectingEventTitle">
     <v-card>
-      <v-card-title v-if="!showingCritiqueForm" class="d-flex justify-center">
+      <v-card-title class="d-flex justify-center"> Select Event </v-card-title>
+    </v-card>
+  </v-container>
+
+  <v-container v-if="selectingEventSemester">
+    <v-row>
+      <v-col cols="3">
+        <v-card>
+          <v-select
+            v-model="selectedSemester"
+            label="Semester"
+            :items="selectCurrentSemester"
+            item-value="id"
+            item-title="title"
+            @update:modelValue="semesterSearchUpdate(selectedSemester)"
+            style="background-color: whitesmoke"
+            disabled
+          ></v-select>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+
+  <v-container v-if="selectingEvent">
+    <v-row>
+      <v-col>
+        <v-card>
+          <v-data-table
+            :headers="selectingEventHeaders"
+            :items="filteredEvents"
+            class="elevation-1"
+          >
+            <template v-slot:top>
+              <v-toolbar flat>
+                <v-toolbar-title>EVENTS</v-toolbar-title>
+              </v-toolbar>
+            </template>
+            <template #item="{ item }">
+              <tr>
+                <td
+                  v-for="(header, index) in selectingEventHeaders"
+                  :key="index"
+                >
+                  <div
+                    v-if="
+                      header.title == 'Start Time' || header.title == 'End Time'
+                    "
+                  >
+                    {{ this.formatTime(item.columns[header.key]) }}
+                  </div>
+                  <div v-else-if="header.title != 'Select'">
+                    {{ item.columns[header.key] }}
+                  </div>
+                  <div v-else>
+                    <v-btn small color="primary" @click="selectClick(item.raw)"
+                      >Select</v-btn
+                    >
+                  </div>
+                </td>
+              </tr>
+            </template>
+          </v-data-table>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+
+  <v-container v-if="showStudentTimeslotsTitle">
+    <v-card>
+      <v-card-title class="d-flex justify-center">
         Student Timeslots
       </v-card-title>
     </v-card>
   </v-container>
-  <v-container v-if="!showingCritiqueForm">
+  <v-container v-if="showStudentTimeslots">
     <v-card>
       <v-card-title class="center">Select Timeslot for Critique</v-card-title>
-      <v-card-title class="center">{{ getCurrentDate() }}</v-card-title>
+      <v-card-title class="center">{{ formatDate(todaysDate) }}</v-card-title>
     </v-card>
     <v-data-table :headers="headers" :items="timeslots" class="elevation-8">
       <template v-slot:item.actions="{ item }">
@@ -18,10 +87,14 @@
         </v-icon>
       </template>
     </v-data-table>
+    <v-col></v-col>
+    <div class="d-flex justify-center">
+      <v-btn small color="primary" @click="backToEvents()">Back</v-btn>
+    </div>
   </v-container>
 
   <v-container
-    v-else-if="
+    v-if="
       showingCritiqueForm &&
       showingExpandedForm == true &&
       popupTrigger == false
@@ -189,18 +262,9 @@
           <v-btn
             variant="outlined"
             style="margin-left: 25%; margin-bottom: 20px"
-            @click="
-              saveExpandedCritique()
-              // isOpen = true;
-            "
+            @click="saveExpandedCritique()"
             >Save</v-btn
           >
-          <!-- <teleport to="body">
-        <div>
-          <h3>Critique creation successful!</h3>
-          <v-button @click="isOpen = false"></v-button>
-        </div>
-      </teleport> -->
           <v-btn
             variant="outlined"
             style="margin-left: 25%; margin-bottom: 20px"
@@ -332,18 +396,9 @@
           <v-btn
             variant="outlined"
             style="margin-left: 25%; margin-right: 25%; margin-bottom: 20px"
-            @click="
-              saveQuickCritique()
-              // isOpen = true;
-            "
+            @click="saveQuickCritique()"
             >Save</v-btn
           >
-          <!-- <teleport to="body">
-        <div>
-          <h3>Critique creation successful!</h3>
-          <v-button @click="isOpen = false"></v-button>
-        </div>
-      </teleport> -->
           <v-btn
             style="margin-bottom: 20px; margin-left: 12.5%"
             variant="outlined"
@@ -355,25 +410,15 @@
     </v-container>
   </v-container>
 
-  <v-container v-else-if="popupTrigger == true">
-    <div>
-      <h2 class="center" style="padding-top: 25%">
-        Critique created successfully!
-      </h2>
-      <div class="d-flex justify-center" style="padding-top: 10px">
-        <v-btn
-          class="popup-close"
-          variant="outlined"
-          @click="
-            popupTrigger = false;
-            this.showingCritiqueForm = false;
-          "
-        >
-          Close
-        </v-btn>
-      </div>
-    </div>
-  </v-container>
+  <v-dialog
+    v-model="popupTrigger"
+    :style="{ width: '400px' }"
+    @click:outside="createConfirmationClick()"
+  >
+    <v-card>
+      <v-card-text class="center"> Critique created successfully! </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
@@ -381,8 +426,9 @@ import EventDataService from "../../services/EventDataService";
 import CritiqueDataService from "../../services/CritiqueDataService";
 import UserRoleDataService from "../../services/UserRoleDataService";
 import JurorTimeslotDataService from "../../services/JurorTimeslotDataService";
+import SemesterDataService from "../../services/SemesterDataService";
 import Utils from "../../config/utils.js";
-import { ref } from "vue";
+import { ref, resolveTransitionHooks } from "vue";
 
 const isOpen = ref(false);
 export default {
@@ -390,6 +436,7 @@ export default {
   data: () => ({
     user: {},
     itemsPerPage: 10,
+    students: [],
     timeslots: [],
     selectedTimeslot: null,
     selectedCritique: null,
@@ -414,6 +461,27 @@ export default {
     overallPerformanceGrade: "",
     errorMessage: "",
 
+    selectingEventTitle: true,
+    selectingEvent: true,
+    selectingEventSemester: true,
+
+    filteredEvents: [],
+    semesters: [],
+    selectCurrentSemester: [],
+    selectedSemester: null,
+    showStudentTimeslots: false,
+    showStudentTimeslotsTitle: false,
+    selectDayEvent: null,
+    todaysDate: null,
+
+    selectingEventHeaders: [
+      { title: "Event Type", key: "type" },
+      { title: "Event Date", key: "date" },
+      { title: "Start Time", key: "startTime" },
+      { title: "End Time", key: "endTime" },
+      { title: "Select", key: "actions", sortable: false },
+    ],
+
     headers: [
       {
         title: "Event Type",
@@ -431,16 +499,16 @@ export default {
         title: "Instrument",
         align: "start",
         sortable: true,
-        key: "students[0].instrumentName",
+        key: "instrumentName",
       },
       {
         title: "Type",
         align: "start",
         sortable: true,
-        key: "students[0].instrumentType",
+        key: "instrumentType",
       },
       {
-        title: "Create",
+        title: "Select",
         key: "actions",
         sortable: false,
       },
@@ -450,12 +518,13 @@ export default {
     async retrieveTodaysTimeslots(date) {
       await EventDataService.getStudentTimeslotsForDate(date)
         .then((response) => {
-          console.log(response.data.raw);
           for (let i = 0; i < response.data.length; i++) {
             let event = response.data[i];
             for (let j = 0; j < event.timeslots.length; j++) {
               let timeslot = event.timeslots[j];
               timeslot.eventType = event.eventType;
+              timeslot.instrumentName = timeslot.students[j].instrumentName;
+              timeslot.instrumentType = timeslot.students[j].instrumentType;
               this.timeslots.push(timeslot);
             }
           }
@@ -473,10 +542,38 @@ export default {
       return `${month}/${day}/${year}`;
     },
 
+    formatDate(date) {
+      const formattedDate = new Date(date);
+      const day = String(formattedDate.getDate() + 1).padStart(2, "0");
+      const month = String(formattedDate.getMonth() + 1).padStart(2, "0");
+      const year = formattedDate.getFullYear();
+      return `${month}/${day}/${year}`;
+    },
+
     handleClick(item) {
       this.selectedTimeslot = item.raw;
-      console.log(this.selectedTimeslot);
       this.showingCritiqueForm = true;
+      this.showStudentTimeslots = false;
+      this.showStudentTimeslotsTitle = false;
+    },
+
+    selectClick(item) {
+      this.selectDayEvent = item;
+      this.showStudentTimeslots = true;
+      this.showStudentTimeslotsTitle = true;
+      this.selectingEvent = false;
+      this.selectingEventSemester = false;
+      this.selectingEventTitle = false;
+      this.todaysDate = item.date;
+      this.retrieveTodaysTimeslots(this.todaysDate);
+    },
+
+    backToEvents() {
+      this.showStudentTimeslots = false;
+      this.showStudentTimeslotsTitle = false;
+      this.selectingEvent = true;
+      this.selectingEventSemester = true;
+      this.selectingEventTitle = true;
     },
 
     clearFields() {
@@ -511,13 +608,67 @@ export default {
       //set all fields to blank state
       this.clearFields();
       //change form state and go back to the studentTimeslots
-      this.showingCritiqueForm = false;
+      window.location.reload();
+    },
+
+    createConfirmationClick() {
+      this.clearFields();
+      window.location.reload();
+    },
+
+    async getCurrentSemester() {
+      this.currentDate = new Date();
+      let dateString = this.currentDate.toISOString().substring(0, 10);
+      await SemesterDataService.getCurrent(dateString)
+        .then((response) => {
+          this.selectedSemester = this.semesters.find(
+            (obj) => obj.id == response.data[0].id
+          );
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+
+    formatTime(time) {
+      return new Date("January 1, 2000 " + time).toLocaleTimeString("us-EN", {
+        hour: "numeric",
+        minute: "numeric",
+      });
+    },
+
+    async semesterSearchUpdate(semester) {
+      await EventDataService.getSemesterEvents(semester)
+        .then((response) => {
+          this.filteredEvents = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+
+    async retrieveAllSemesters() {
+      await SemesterDataService.getAll()
+        .then((response) => {
+          this.semesters = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+
+    async retrieveEvents(date) {
+      await EventDataService.getAll(date)
+        .then((response) => {
+          this.filteredEvents = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
     },
 
     async saveQuickCritique() {
       var facultyId, jurorTimeslotId;
-      console.log(this.deportmentGrade);
-      console.log(this.selectedTimeslot);
       //individually sets each critique line variable JSON
 
       //if all req fields have data
@@ -682,7 +833,6 @@ export default {
 
       this.errorMessage = "";
       this.popupTrigger = true;
-      // this.showingCritiqueForm = false;
     },
 
     validateQuickForm() {
@@ -782,8 +932,6 @@ export default {
     },
     async saveExpandedCritique() {
       var facultyId, jurorTimeslotId;
-      console.log(this.deportmentGrade);
-      console.log(this.selectedTimeslot);
 
       if (!this.validateExpandedForm()) {
         return;
@@ -958,11 +1106,15 @@ export default {
     },
   },
   async mounted() {
-    // const currentDate = "2023-03-31";
-    const currentDate = this.getComparisonDate();
-    // await this.retrieveTodaysTimeslots("2023-03-31");
-    await this.retrieveTodaysTimeslots(this.getComparisonDate());
     this.user = Utils.getStore("user");
+    await this.retrieveAllSemesters();
+    this.semesters.forEach((obj) => (obj.title = obj.year + " - " + obj.code));
+
+    this.currentDate = new Date();
+
+    await this.getCurrentSemester();
+    this.selectCurrentSemester.push(this.selectedSemester);
+    await this.semesterSearchUpdate(this.selectedSemester.id);
     console.log(this.user);
   },
 };

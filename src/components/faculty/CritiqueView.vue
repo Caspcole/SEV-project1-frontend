@@ -67,7 +67,8 @@
               <tr>
                 <td v-for="(header, index) in headers" :key="index">
                   <div v-if="header.title == 'Event Date'">
-                    {{ this.formatDate(item.columns[header.key]) }}
+                    {{ formatDate(item.columns[header.key]) }}
+                    <!-- issue HERE -->
                   </div>
                   <div v-else-if="header.title != ' '">
                     {{ item.columns[header.key] }}
@@ -157,6 +158,11 @@ export default {
       { title: "Last Name", key: "studentInstrument.student.user.lName" },
       { title: "Event Type", key: "eventTimeslot.event.type" },
       { title: " " },
+      // { title: "Event Date", key: "eventDate" },
+      // { title: "First Name", key: "fName" },
+      // { title: "Last Name", key: "lName" },
+      // { title: "Event Type", key: "type" },
+      // { title: " " },
     ],
   }),
   methods: {
@@ -197,6 +203,8 @@ export default {
             ).toLocaleDateString("us-EN", { month: "long" });
           });
           this.filteredCritiques = this.semesterCritiques;
+          console.log(this.filteredCritiques);
+          console.log(this.semesterCritiques);
           this.fillFilters();
         })
         .catch((e) => {
@@ -251,6 +259,13 @@ export default {
       }
     },
     formatDate(date) {
+      console.log(date);
+      console.log(
+        new Date(date).toLocaleDateString("us-EN", {
+          month: "long",
+          day: "numeric",
+        })
+      );
       return new Date(date).toLocaleDateString("us-EN", {
         month: "long",
         day: "numeric",
