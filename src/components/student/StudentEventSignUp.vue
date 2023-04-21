@@ -47,11 +47,12 @@
               <v-autocomplete
                 clearable
                 v-model="selectedComposers[song.id]"
+                v-model:search="composerSearch"
                 label="Composer"
-                :items="composers"
+                :items="displayComposers"
                 item-value="id"
                 item-title="fullName"
-                autocomplete="off"
+                :no-data-text="noComposerDataText"
                 @update:modelValue="
                   updateAvailableSongs(song.id, selectedComposers[song.id])
                 "
@@ -164,6 +165,9 @@ export default {
 
       studentSongs: [],
       composerSongs: [],
+
+      displayComposers: [],
+      composerSearch: null,
 
       user: {},
       student: {
@@ -460,6 +464,34 @@ export default {
 
     closeDialog() {
       this.$emit("navToStudentViewEvents");
+    },
+
+    querySelections(value) {
+      this.displayComposers = this.composers.filter((composer) => {
+        return (
+          composer.fullName.toLowerCase().indexOf(value.toLowerCase()) > -1
+        );
+      });
+    },
+  },
+  computed: {
+    noComposerDataText() {
+      if (this.hasSearched) {
+        return "No composers found";
+      } else {
+        return "Start typing to search for composers";
+      }
+    },
+  },
+  watch: {
+    composerSearch(val) {
+      if (val && val.length > 1) {
+        this.hasSearched = true;
+        this.querySelections(val);
+      } else {
+        this.hasSearched = false;
+        this.displayComposers = [];
+      }
     },
   },
 };
