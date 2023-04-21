@@ -68,6 +68,7 @@
                 <td v-for="(header, index) in headers" :key="index">
                   <div v-if="header.title == 'Event Date'">
                     {{ this.formatDate(item.columns[header.key]) }}
+                    <!-- issue HERE -->
                   </div>
                   <div v-else-if="header.title != ' '">
                     {{ item.columns[header.key] }}
