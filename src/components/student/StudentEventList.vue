@@ -12,8 +12,8 @@
     <v-card>
       <v-card-title class="d-flex justify-center">Event Sign-Up</v-card-title>
       <v-card-text class="d-flex justify-center"
-        >Please select your instrument, then the event to sign-up for, then
-        select a time slot(s) for that event.
+        >Please select the event to sign-up for, then select a time slot(s) for
+        that event.
       </v-card-text>
     </v-card>
     <br />
@@ -29,7 +29,7 @@
               item-title="instrument.name"
               return-object
               :style="{ width: '250px' }"
-              @update:modelValue="updateStudentInstrument"
+              @update:modelValue="updateReturningObject"
             ></v-select>
           </v-col>
           <v-col>
@@ -45,13 +45,19 @@
             </p>
             <h4>Accompanist for selected instrument:</h4>
             <p>
-              {{ selectedAccompanist() }}
+              {{
+                selectedStudentInstrument == null
+                  ? "No accompanist"
+                  : selectedStudentInstrument.accompanist.user.fName +
+                    " " +
+                    selectedStudentInstrument.accompanist.user.lName
+              }}
             </p>
           </v-col>
         </v-row>
       </v-container>
     </v-card>
-    <v-container v-if="showEvents">
+    <v-container>
       <v-row>
         <v-col>
           <!-- Make it so only the events in the future are shown -->
@@ -63,7 +69,6 @@
             <v-btn
               v-for="event in events"
               :key="event.id"
-              v-model="selectedEvent"
               v-on:click="changeCurrentEvent(event)"
               variant="tonal"
               v-bind:color="event.id === currentEvent.id ? 'blue' : 'black'"
@@ -89,10 +94,13 @@
               :key="index"
               v-model="selectedEventTimes"
               v-on:change="updateSelectedEventTimes()"
-              :label="labelEventTimes(time)"
+              :label="
+                time.studentTimeslots.length > 0
+                  ? `${time.startTime.substring(0, 5)} Taken`
+                  : time.startTime.substring(0, 5)
+              "
               :value="time"
-              v-bind:disabled="disableEventtimes(time)"
-              v-bind:color="'green'"
+              v-bind:disabled="time.studentTimeslots.length > 0"
             >
             </v-checkbox>
           </v-card>
@@ -112,8 +120,6 @@ import Utils from "../../config/utils.js";
 import EventDataService from "../../services/EventDataService";
 import EventTimeDataService from "../../services/EventTimeDataService";
 import StudentInstrumentDataService from "../../services/StudentInstrumentDataService";
-import AvailabilityDataService from "../../services/AvailabilityDataService";
-import { setBlockTracking } from "vue";
 // change the name of EventTimeDataService to EventTimeslotDataService
 export default {
   name: "student-event-list",
@@ -121,7 +127,7 @@ export default {
     dialog: false,
     search: "",
     events: [],
-    selectedEvent: [],
+    selectedEvent: false,
     currentEvent: {},
     returningObject: {},
     currentEventTimes: [],
@@ -131,13 +137,9 @@ export default {
     user: {},
     errorMessage: "",
     displayError: false,
-    showEvents: false,
 
     studentInstruments: [],
     selectedStudentInstrument: null,
-
-    instructorAvailability: { temp: true },
-    accompanistAvailability: { temp: true },
   }),
   emits: ["SignUpForEventObject"],
   setup(props, { emit }) {
@@ -149,156 +151,10 @@ export default {
     };
   },
   methods: {
-    async changeCurrentEvent(event) {
+    changeCurrentEvent(event) {
       this.currentEvent = event;
-      await this.determineAvailabilities(event);
       this.determineEventTimes();
-      // this.selectedEvent = true;
-    },
-
-    selectedAccompanist() {
-      let returnString = "";
-
-      if (this.selectedStudentInstrument == null) {
-        returnString = "No accompanist";
-      } else if (
-        "accompanist" in this.selectedStudentInstrument &&
-        this.selectedStudentInstrument.accompanist
-      ) {
-        returnString =
-          this.selectedStudentInstrument.accompanist.user.fName +
-          "  " +
-          this.selectedStudentInstrument.accompanist.user.lName;
-      } else {
-        returnString = "No accompanist for this instrument.";
-      }
-      return returnString;
-    },
-
-    async determineAvailabilities(event) {
-      let date = event.date;
-      // grab accompanist and instructor availabilities
-      await this.retrieveInstructorAvailability(
-        this.selectedStudentInstrument.instructor.user.id,
-        date
-      );
-      if (
-        "accompanist" in this.selectedStudentInstrument &&
-        this.selectedStudentInstrument.accompanist
-      ) {
-        await this.retrieveAccompanistAvailability(
-          this.selectedStudentInstrument.accompanist.user.id,
-          date
-        );
-      }
-    },
-
-    disableEventtimes(time) {
-      let isDisabled = true;
-
-      if (time.studentTimeslots.length == 0) {
-        if (this.instructorAvailability && this.accompanistAvailability) {
-          if (
-            "id" in this.instructorAvailability &&
-            "id" in this.accompanistAvailability
-          ) {
-            if (
-              time.startTime
-                .substring(0, 5)
-                .localeCompare(
-                  this.instructorAvailability.startTime.substring(0, 5)
-                ) >= 0 &&
-              time.startTime
-                .substring(0, 5)
-                .localeCompare(
-                  this.instructorAvailability.endTime.substring(0, 5)
-                ) <= 0 &&
-              time.startTime
-                .substring(0, 5)
-                .localeCompare(
-                  this.accompanistAvailability.startTime.substring(0, 5)
-                ) >= 0 &&
-              time.startTime
-                .substring(0, 5)
-                .localeCompare(
-                  this.accompanistAvailability.endTime.substring(0, 5)
-                ) <= 0
-            ) {
-              isDisabled = false;
-            }
-          } else if (
-            "id" in this.instructorAvailability &&
-            !("id" in this.accompanistAvailability)
-          ) {
-            if ("id" in this.instructorAvailability) {
-              if (
-                time.startTime
-                  .substring(0, 5)
-                  .localeCompare(
-                    this.instructorAvailability.startTime.substring(0, 5)
-                  ) >= 0 &&
-                time.startTime
-                  .substring(0, 5)
-                  .localeCompare(
-                    this.instructorAvailability.endTime.substring(0, 5)
-                  ) <= 0
-              ) {
-                isDisabled = false;
-              }
-            }
-          }
-        }
-      }
-
-      return isDisabled;
-    },
-
-    labelEventTimes(time) {
-      let returnString = time.startTime.substring(0, 5);
-
-      if (time.studentTimeslots.length > 0) {
-        returnString = returnString + " Taken";
-      }
-
-      if (this.instructorAvailability) {
-        if ("id" in this.instructorAvailability) {
-          if (
-            time.startTime
-              .substring(0, 5)
-              .localeCompare(
-                this.instructorAvailability.startTime.substring(0, 5)
-              ) >= 0 &&
-            time.startTime
-              .substring(0, 5)
-              .localeCompare(
-                this.instructorAvailability.endTime.substring(0, 5)
-              ) <= 0
-          ) {
-            returnString = returnString + ", Instr. available";
-          }
-        }
-      }
-
-      if (this.accompanistAvailability) {
-        if ("id" in this.accompanistAvailability) {
-          if (
-            time.startTime
-              .substring(0, 5)
-              .localeCompare(
-                this.accompanistAvailability.startTime.substring(0, 5)
-              ) >= 0 &&
-            time.startTime
-              .substring(0, 5)
-              .localeCompare(
-                this.accompanistAvailability.endTime.substring(0, 5)
-              ) <= 0
-          ) {
-            returnString = returnString + ", Accomp. available";
-          }
-        }
-      }
-
-      return returnString;
+      this.selectedEvent = true;
     },
 
     closeDialog() {
@@ -306,41 +162,12 @@ export default {
       this.displayError = false;
     },
 
-    updateStudentInstrument() {
-      this.updateReturningObject();
-      this.currentEvent = {};
-      this.currentEventTimes = [];
-      console.log(this.selectedStudentInstrument);
-    },
-
     updateReturningObject() {
       if (this.selectedStudentInstrument) {
-        this.showEvents = true;
         this.returningObject.studentInstrument = this.selectedStudentInstrument;
       } else {
-        this.showEvents = false;
         delete this.returningObject.studentInstrument;
       }
-    },
-
-    async retrieveInstructorAvailability(userId, date) {
-      await AvailabilityDataService.getByUserAndDate(userId, date)
-        .then((response) => {
-          this.instructorAvailability = response.data[0];
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    },
-
-    async retrieveAccompanistAvailability(userId, date) {
-      await AvailabilityDataService.getByUserAndDate(userId, date)
-        .then((response) => {
-          this.accompanistAvailability = response.data[0];
-        })
-        .catch((e) => {
-          console.log(e);
-        });
     },
 
     async retrieveEventsDateAndAfter(date) {
